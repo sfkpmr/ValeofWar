@@ -90,7 +90,7 @@ public class Game {
 		int temp2 = 0;
 
 		if (temp instanceof Vault) {
-			temp2 = ((Vault) v.getBuilding("Vault")).getGoldCapacity();
+			temp2 = (((Vault) temp).getGoldCapacity());
 		}
 
 		System.out.println(temp2);
