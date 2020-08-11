@@ -204,9 +204,13 @@ public class Village {
 			if (!buildingList.containsKey("Market")) {
 				b = new Market();
 			}
-		} else if (s.equals("Warehouse")) {
+		} else if (s.equals("Warehouse")) { // TODO fix
 			if (!buildingList.containsKey("Warehouse")) {
-				b = new Market();
+				b = new Warehouse();
+			}
+		} else if (s.equals("Vault")) {
+			if (!buildingList.containsKey("Vault")) {
+				b = new Vault();
 			}
 		}
 
@@ -414,6 +418,13 @@ public class Village {
 
 		}
 
+		lumberCapacity = totalLumber;
+		stoneCapacity = totalStone;
+		grainCapacity = totalGrain;
+		ironCapacity = totalIron;
+		
+		
+		
 	}
 
 	public HashMap<Integer, Warehouse> getWarehouseList() {

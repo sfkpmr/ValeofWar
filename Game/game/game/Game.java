@@ -2,6 +2,9 @@ package game;
 
 import java.util.HashMap;
 
+import buildings.Building;
+import buildings.Vault;
+
 public class Game {
 
 	public static void main(String[] args) {
@@ -72,12 +75,26 @@ public class Game {
 		System.out.println(v.getFurnace().getLevel());
 		// v.getBarracks().train(v, "sgd", 5);
 
-		
 		players.get(0).getVillages("Rosdal").build("Market");
 		System.out.println(v.getBuilding("Market"));
-		
+
 		System.out.println(v.getBuilding("gdfas"));
-		
+		v.build("Vault");
+		System.out.println(v.getBuilding("Vault"));
+
+		System.out.println(v.getBuilding("Vault").getLevel());
+		v.getBuilding("Vault").upgrade(v);
+		System.out.println(v.getBuilding("Vault").getLevel());
+
+		Building temp = v.getBuilding("Vault");
+		int temp2 = 0;
+
+		if (temp instanceof Vault) {
+			temp2 = ((Vault) v.getBuilding("Vault")).getGoldCapacity();
+		}
+
+		System.out.println(temp2);
+
 	}
 
 }
