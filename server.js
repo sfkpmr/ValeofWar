@@ -26,6 +26,12 @@ app.get("/", (req, res) => {
 
 app.get("/profile", requiresAuth(), (req, res) => {
     res.send(JSON.stringify(req.oidc.user));
+
+    //Test user: test@test.com, iosudht0pi346h9-
+});
+
+app.get("/profile/:username", requiresAuth(), (req, res) => {
+    res.send(req.params.username);
 });
 
 app.get("/base", requiresAuth(), (req, res) => {
