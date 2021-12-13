@@ -10,7 +10,7 @@ app.set('view engine', 'ejs');
 const uri = "mongodb+srv://server:zjzJoTWpk322w2eJ@cluster0.rn9ur.mongodb.net/gamedb?retryWrites=true&w=majority"
 const client = new MongoClient(uri);
 
-main();
+main().catch(console.error);
 
 async function main() {
 
@@ -18,11 +18,7 @@ async function main() {
         await client.connect();
     } catch (e) {
         console.error(e);
-    } //finally {
-    //await client.close();
-    //}
-
-    //main().catch(console.error);
+    }
 }
 
 app.use(
