@@ -103,6 +103,25 @@ app.get("/barracks", requiresAuth(), async (req, res) => {
     res.render('pages/barracks');
 });
 
+app.get("/town", requiresAuth(), async (req, res) => {
+    const user = await getUser(client, req.oidc.user.nickname);
+
+    barracks = user.barracksLevel;
+
+    res.render('pages/town');
+});
+
+app.get("/land", requiresAuth(), async (req, res) => {
+    const user = await getUser(client, req.oidc.user.nickname);
+
+    farms = user.farms.length;
+
+    console.log(farm1 = user.farms[0]);
+    console.log(farm2 = user.farms[2]);
+
+    res.render('pages/land');
+});
+
 app.get("/train", requiresAuth(), async (req, res) => {
 
 
@@ -147,7 +166,7 @@ app.get("/train", requiresAuth(), async (req, res) => {
 
 app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
 
-    //TODO attack limiter //reset all at midnight?
+    //TODO attack limiter //reset all at midnight? //losses
 
     const attacker = await getUser(client, req.oidc.user.nickname);
     const defender = await getUser(client, req.params.username);
@@ -169,6 +188,41 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
     }
 
     res.redirect(`/profile/${defender.username}`);
+
+});
+
+app.get("/farm/:number", requiresAuth(), async (req, res) => {
+
+    const user = await getUser(client, req.oidc.user.nickname);
+
+
+    farmId = req.params.number;
+    farmLevel = user.farms[farmId];
+
+    res.render('pages/farm');
+
+});
+
+app.get("/farm/:number/upgrade", requiresAuth(), async (req, res) => {
+
+    const user = await getUser(client, req.oidc.user.nickname);
+
+    //console.log(user.farms[req.params.number - 1]);
+    farmId = req.params.number;
+
+    var updatedUser = user.farms;
+    console.log(updatedUser);
+
+    updatedUser[farmId]++;
+    console.log(updatedUser);
+
+    updatedUser = { farms: updatedUser }
+
+    const result = await client.db("gamedb").collection("players").updateOne({ username: user.username }, { $set: updatedUser });
+
+    res.render('pages/farm');
+
+
 
 });
 
