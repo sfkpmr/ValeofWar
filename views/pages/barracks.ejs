@@ -2,25 +2,29 @@
 <html>
 
 <head>
-    <title>Hej</title>
-
-    <script src="/socket.io/socket.io.js"></script>
+    <title>Barracks</title>
 </head>
 
 <body>
 
-    <!-- TODO check barrack exists and has levels-->
+    <!-- TODO server check barrack exists and has levels-->
 
-    Archers: <%= archers %> <br>
-        Spearmen: <%= spearmen %>
+    Gold: <%= gold %> <br>
+        Iron: <%= iron %> <br>
+            Lumber: <%= lumber %> <br>
+                Stone: <%= stone %> <br>
+                    Grain: <%= grain %> <br>
 
-            <form action="/train">
-                <label for="archers">Archers:</label><br>
-                <input type="text" id="archers" name="archers" value="0"><br>
-                <label for="spearmen">Spearmen:</label><br>
-                <input type="text" id="spearmen" name="spearmen" value="0"><br><br>
-                <input type="submit" value="Submit">
-            </form>
+                        Archers: <%= archers %> <br>
+                            Spearmen: <%= spearmen %>
+
+                                <form action="/train">
+                                    <label for="archers">Archers:</label><br>
+                                    <input type="text" id="archers" name="archers" value="0"><br>
+                                    <label for="spearmen">Spearmen:</label><br>
+                                    <input type="text" id="spearmen" name="spearmen" value="0"><br><br>
+                                    <input type="submit" value="Submit">
+                                </form>
 
 </body>
 

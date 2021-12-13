@@ -4,6 +4,7 @@ const { MongoClient } = require('mongodb');
 require("dotenv").config();
 const { auth, requiresAuth } = require('express-openid-connect');
 const ejs = require('ejs');
+const e = require("express");
 app.set('view engine', 'ejs');
 
 const uri = "mongodb+srv://server:zjzJoTWpk322w2eJ@cluster0.rn9ur.mongodb.net/gamedb?retryWrites=true&w=majority"
@@ -45,17 +46,32 @@ app.get("/", (req, res) => {
 
 app.get("/profile", requiresAuth(), (req, res) => {
 
-    res.send(JSON.stringify(req.oidc.user));
-    checkAll();
+    //res.send(JSON.stringify(req.oidc.user));
 
     //Test user: johanna@test.com, saodhgi-9486y-(WYTH
+
+    res.redirect(`/profile/${req.oidc.user.nickname}`)
 });
 
 app.get("/profile/:username", requiresAuth(), async (req, res) => {
 
-    const apa = await getUser(client, req.params.username);
+    const currentUser = req.oidc.user.nickname;
+    const profileUser = await getUser(client, req.params.username);
 
-    res.send(apa);
+    gold = profileUser.gold;
+    iron = profileUser.iron;
+    lumber = profileUser.lumber;
+    grain = profileUser.grain;
+    stone = profileUser.stone;
+
+    username = req.params.username;
+
+    if (currentUser === req.params.username) {
+        res.render('pages/myprofile');
+    } else {
+        res.render('pages/publicprofile');
+    }
+
 });
 
 app.get("/base", requiresAuth(), (req, res) => {
@@ -70,12 +86,18 @@ app.listen(port, () => {
 
 app.get("/barracks", requiresAuth(), async (req, res) => {
 
-    const apa = await getUser(client, req.oidc.user.nickname);
+    const user = await getUser(client, req.oidc.user.nickname);
 
     //res.send(req.oidc.user.nickname);
 
-    archers = apa.archers;
-    spearmen = apa.spearmen;
+    gold = user.gold;
+    iron = user.iron;
+    lumber = user.lumber;
+    grain = user.grain;
+    stone = user.stone;
+
+    archers = user.archers;
+    spearmen = user.spearmen;
 
     //res.send(apa);
     res.render('pages/barracks');
@@ -93,12 +115,60 @@ app.get("/train", requiresAuth(), async (req, res) => {
     //const apa = await getUser(client, req.params.username);
     await updateLastAction(req.oidc.user.nickname);
 
-    console.log(req.query.archers * 50);
-    console.log(req.query.spearmen * 20);
+    var goldCost = 0;
+    var grainCost = 0;
+    var lumberCost = 0;
+    var ironCost = 0;
 
-    await trainTroops(client, req.oidc.user.nickname, { archers: parseInt(req.query.archers), spearmen: parseInt(req.query.spearmen) });
+    goldCost += req.query.archers * 10;
 
-    res.send("apa");
+    grainCost += req.query.spearmen * 10;
+    grainCost += req.query.spearmen * 10;
+
+    lumberCost += req.query.spearmen * 10;
+    lumberCost += req.query.spearmen * 10;
+
+    //console.log(goldCost + " " + grainCost + " " + lumberCost);
+
+    if (await checkIfCanAfford(req.oidc.user.nickname, goldCost, lumberCost, 0, ironCost, grainCost)) {
+        await trainTroops(client, req.oidc.user.nickname, { archers: parseInt(req.query.archers), spearmen: parseInt(req.query.spearmen) });
+        await removeResources(req.oidc.user.nickname, goldCost, lumberCost, 0, ironCost, grainCost);
+    } else {
+        console.log("bbbb");
+    }
+
+
+    //error check?
+
+
+    res.redirect('/barracks');
+
+});
+
+app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
+
+    //TODO attack limiter //reset all at midnight?
+
+    const attacker = await getUser(client, req.oidc.user.nickname);
+    const defender = await getUser(client, req.params.username);
+
+    console.log(attacker.username + " tries to attack " + defender.username);
+
+    var defense = await calculateDefense(defender);
+    var attack = await calculateAttack(attacker);
+
+    console.log("Total defense: " + defense + " Total attack " + attack);
+
+    //res.send(req.oidc.user.nickname);
+
+    // console.log(req.originalUrl);
+
+    if (attack > defense) {
+        stealResources(attacker.username, defender.gold / 5, defender.lumber / 5, defender.stone / 5, defender.iron / 5, defender.grain / 5);
+        loseResources(defender.username, defender.gold / 5, defender.lumber / 5, defender.stone / 5, defender.iron / 5, defender.grain / 5);
+    }
+
+    res.redirect(`/profile/${defender.username}`);
 
 });
 
@@ -107,10 +177,10 @@ async function getUser(client, username) {
     const result = await client.db("gamedb").collection("players").findOne({ username: username });
 
     if (result) {
-        console.log(`Found a listing ${username}`);
+        // console.log(`Found a listing ${username}`);
         //console.log(result);
     } else {
-        console.log("No listing");
+        // console.log("No listing");
         return "None";
     }
 
@@ -119,13 +189,13 @@ async function getUser(client, username) {
 
 async function trainTroops(client, username, updatedUser) {
 
-    const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $inc: updatedUser }); //$set
+    const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $inc: updatedUser });
 
     //const result = await client.db("gamedb").collection("players").findOne({ username: username });
 
     console.log(result);
 
-    return result;
+    //return result;
 }
 
 async function updateLastAction(username) {
@@ -142,32 +212,153 @@ async function updateLastAction(username) {
 }
 
 async function checkAll() {
-    const result = await client.db("gamedb").collection("players").find().forEach(function (ban) {
+    const result = await client.db("gamedb").collection("players").find().forEach(function (user) {
 
-        var updatedSal = ban._id;
+        var updatedSal = user._id;
         console.log(updatedSal);
-        updateResources(ban.username);
+        addResources(user.username);
 
     });
 
     // console.log(result);
 }
 
-async function updateResources(username) {
+async function addResources(username, multiplier) {
 
     const user = await getUser(client, username);
 
-    const updatedUser = { grain: user.farmLevel * 10, lumber: user.lumbercampLevel * 10, stone: user.quarryLevel * 10, gold: user.goldMineLevel * 10, iron: user.ironMineLevel * 10 };
+    const lumberCamps = user.lumberCamps;
+    const goldMines = user.goldMines;
+    const farms = user.farms;
+    const ironMines = user.ironMines;
+    const quarries = user.quarries;
 
+    var lumberIncome = 0;
+    var goldIncome = 0;
+    var grainIncome = 0;
+    var ironIncome = 0;
+    var stoneIncome = 0;
+
+    lumberCamps.forEach(lumberCalc);
+    goldMines.forEach(goldCalc);
+    farms.forEach(grainCalc);
+    ironMines.forEach(ironCalc);
+    quarries.forEach(stoneCalc);
+
+    function lumberCalc(i) {
+        lumberIncome += i * 10;
+    };
+
+    function goldCalc(i) {
+        goldIncome += i * 2;
+    };
+
+    function grainCalc(i) {
+        grainIncome += i * 10;
+    };
+
+    function ironCalc(i) {
+        ironIncome += i * 5;
+    };
+
+    function stoneCalc(i) {
+        stoneIncome += i * 5;
+    };
+
+    console.log(`Giving ${grainIncome} grain, ${lumberIncome} lumber, ${goldIncome} gold, ${stoneIncome} stone and ${ironIncome} iron to ${username}.`);
+
+    const updatedUser = { grain: grainIncome, lumber: lumberIncome, stone: stoneIncome, gold: goldIncome, iron: ironIncome };
 
     const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $inc: updatedUser });
 
+}
+
+async function removeResources(username, gold, lumber, stone, iron, grain) {
+
+    const user = await getUser(client, username);
+
+    const newGold = user.gold - gold;
+    const newLumber = user.lumber - lumber;
+    const newStone = user.stone - stone;
+    const newIron = user.iron - iron;
+    const newGrain = user.grain - grain;
+
+    const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
+
+    const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
 
 }
 
-var minutes = 1, the_interval = minutes * 60 * 1000;
+async function checkIfCanAfford(username, goldCost, lumberCost, stoneCost, ironCost, grainCost) {
+
+    const user = await getUser(client, username);
+
+    //console.log("User has " + user.gold + " " + user.lumber + " " + user.stone + " " + user.iron + " " + user.grain);
+    //console.log("User wants use " + goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost + " " + grainCost);
+
+    if (user.gold >= goldCost && user.lumber >= lumberCost && user.stone >= stoneCost && user.iron >= ironCost && user.grain >= grainCost) {
+        //console.log("apapapapapap")
+        return true;
+    }
+    return false;
+
+}
+
+async function calculateDefense(defender) {
+
+    archerDamage = defender.archers * 10;
+    spearmenDamage = defender.spearmen * 10;
+
+    return archerDamage + spearmenDamage;
+
+}
+
+async function calculateAttack(attacker) {
+
+    archerDamage = attacker.archers * 10;
+    spearmenDamage = attacker.spearmen * 5;
+
+    return archerDamage + spearmenDamage;
+
+}
+
+async function stealResources(username, gold, lumber, stone, iron, grain) {
+
+    console.log(username + " is stealing resources");
+    const user = await getUser(client, username);
+
+    const newGold = user.gold + gold;
+    const newLumber = user.lumber + lumber;
+    const newStone = user.stone + stone;
+    const newIron = user.iron + iron;
+    const newGrain = user.grain + grain;
+
+    const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
+
+    const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
+
+}
+
+async function loseResources(username, gold, lumber, stone, iron, grain) {
+
+    console.log(username + " is losing resources");
+    const user = await getUser(client, username);
+
+    const newGold = user.gold - gold;
+    const newLumber = user.lumber - lumber;
+    const newStone = user.stone - stone;
+    const newIron = user.iron - iron;
+    const newGrain = user.grain - grain;
+
+    const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
+
+    const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
+
+}
+
+var minutes = 10, the_interval = minutes * 60 * 1000;
 setInterval(function () {
-    //console.log("I am doing my 1 minutes check");
+    console.log("I am doing my time check");
     // do your stuff here
-    //checkAll();
+    checkAll();
 }, the_interval);
