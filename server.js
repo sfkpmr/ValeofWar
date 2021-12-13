@@ -124,7 +124,6 @@ app.get("/land", requiresAuth(), async (req, res) => {
 
 app.get("/train", requiresAuth(), async (req, res) => {
 
-
     // if (typeof req.query.archers === 'string' || req.query.archers instanceof String) {
     //     console.log(req.query.archers)
     // } else {
@@ -147,8 +146,6 @@ app.get("/train", requiresAuth(), async (req, res) => {
     lumberCost += req.query.spearmen * 10;
     lumberCost += req.query.spearmen * 10;
 
-    //console.log(goldCost + " " + grainCost + " " + lumberCost);
-
     if (await checkIfCanAfford(req.oidc.user.nickname, goldCost, lumberCost, 0, ironCost, grainCost)) {
         await trainTroops(client, req.oidc.user.nickname, { archers: parseInt(req.query.archers), spearmen: parseInt(req.query.spearmen) });
         await removeResources(req.oidc.user.nickname, goldCost, lumberCost, 0, ironCost, grainCost);
@@ -156,9 +153,7 @@ app.get("/train", requiresAuth(), async (req, res) => {
         console.log("bbbb");
     }
 
-
     //error check?
-
 
     res.redirect('/barracks');
 
@@ -180,8 +175,6 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
 
     //res.send(req.oidc.user.nickname);
 
-    // console.log(req.originalUrl);
-
     if (attack > defense) {
         stealResources(attacker.username, defender.gold / 5, defender.lumber / 5, defender.stone / 5, defender.iron / 5, defender.grain / 5);
         loseResources(defender.username, defender.gold / 5, defender.lumber / 5, defender.stone / 5, defender.iron / 5, defender.grain / 5);
@@ -191,52 +184,52 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
 
 });
 
-app.get("/farm/:number", requiresAuth(), async (req, res) => {
+app.get("/:type/:number", requiresAuth(), async (req, res) => {
 
+    resourceId = req.params.number;
     const user = await getUser(client, req.oidc.user.nickname);
 
 
-    farmId = req.params.number;
-    farmLevel = user.farms[farmId];
+    if (req.params.type === "farm") {
+        title = "Farm";
+        resourceLevel = user.farms[resourceId];
 
-    res.render('pages/farm');
+    } else {
+        title = "none"
+        resourceLevel = 0;
+    }
+    res.render('pages/resourcefield');
 
 });
 
-app.get("/farm/:number/upgrade", requiresAuth(), async (req, res) => {
+app.get("/:type/:number/upgrade", requiresAuth(), async (req, res) => {
 
     const user = await getUser(client, req.oidc.user.nickname);
 
-    //console.log(user.farms[req.params.number - 1]);
-    farmId = req.params.number;
+    if (req.params.type === "farm") {
+        farmId = req.params.number;
 
-    var updatedUser = user.farms;
-    console.log(updatedUser);
+        var updatedUser = user.farms;
+        console.log(updatedUser);
 
-    updatedUser[farmId]++;
-    console.log(updatedUser);
+        updatedUser[farmId]++;
+        console.log(updatedUser);
 
-    updatedUser = { farms: updatedUser }
+        updatedUser = { farms: updatedUser }
 
-    const result = await client.db("gamedb").collection("players").updateOne({ username: user.username }, { $set: updatedUser });
+        if (await checkIfCanAfford(user.username, 1, 1, 2, 3, 4)) {
+            const result = await client.db("gamedb").collection("players").updateOne({ username: user.username }, { $set: updatedUser });
+        }
 
-    res.render('pages/farm');
+    }
 
-
+    res.redirect("/land");
 
 });
 
 async function getUser(client, username) {
     //TODO https://docs.mongodb.com/manual/reference/method/db.collection.findOne/#specify-the-fields-to-return
     const result = await client.db("gamedb").collection("players").findOne({ username: username });
-
-    if (result) {
-        // console.log(`Found a listing ${username}`);
-        //console.log(result);
-    } else {
-        // console.log("No listing");
-        return "None";
-    }
 
     return result;
 }
@@ -245,11 +238,8 @@ async function trainTroops(client, username, updatedUser) {
 
     const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $inc: updatedUser });
 
-    //const result = await client.db("gamedb").collection("players").findOne({ username: username });
-
     console.log(result);
 
-    //return result;
 }
 
 async function updateLastAction(username) {
@@ -259,8 +249,6 @@ async function updateLastAction(username) {
     console.log(updatedUser);
 
     const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
-
-    //console.log(result);
 
     return result;
 }
@@ -274,7 +262,6 @@ async function checkAll() {
 
     });
 
-    // console.log(result);
 }
 
 async function addResources(username, multiplier) {
@@ -347,8 +334,8 @@ async function checkIfCanAfford(username, goldCost, lumberCost, stoneCost, ironC
 
     const user = await getUser(client, username);
 
-    //console.log("User has " + user.gold + " " + user.lumber + " " + user.stone + " " + user.iron + " " + user.grain);
-    //console.log("User wants use " + goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost + " " + grainCost);
+    console.log("User has " + user.gold + " " + user.lumber + " " + user.stone + " " + user.iron + " " + user.grain);
+    console.log("User wants use " + goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost + " " + grainCost);
 
     if (user.gold >= goldCost && user.lumber >= lumberCost && user.stone >= stoneCost && user.iron >= ironCost && user.grain >= grainCost) {
         //console.log("apapapapapap")

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        <%= title %>
+    </title>
+</head>
+
+<body>
+
+    <%= title %> level: <%= resourceLevel %>
+
+            <form action="/<%= title.toLowerCase() %>/<%= resourceId %>/upgrade">
+                <input type="submit" value="Upgrade">
+            </form>
+
+</body>
+
+</html>
