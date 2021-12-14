@@ -32,11 +32,8 @@ app.use(
     })
 );
 
-var value = 0;
-
 app.get("/", (req, res) => {
     //res.send(req.oidc.isAuthenticated());
-    ejsvalue = value;
     res.render('pages/index')
 });
 
