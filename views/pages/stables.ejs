@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Stables</title>
+</head>
+
+<body>
+
+    <!-- TODO server check barrack exists and has levels-->
+
+    Gold: <%= gold %> Iron: <%= iron %> Lumber: <%= lumber %> Stone: <%= stone %> Grain: <%= grain %> <br>
+
+    Stables level: <%= stables %> <br>
+
+    Horsemen: <%= horsemen %> <br>
+    Knights: <%= knights %>
+
+    <form action="/town/stables/train" method="POST">
+        <label for="horsemen">Horsemen:</label><br>
+        <input type="number" id="horsemen" name="horsemen" value="0"><br>
+        <label for="knights">Knights:</label><br>
+        <input type="number" id="knights" name="knights" value="0"><br><br>
+        <input type="submit" value="Submit">
+    </form>
+
+    <a href="/town">Town</a> <a href="/land">Land</a>
+
+</body>
+
+</html>

@@ -12,6 +12,10 @@
     Gold: <%= gold %> Iron: <%= iron %> Lumber: <%= lumber %> Stone: <%= stone %> Grain: <%= grain %> <br>
     <br>
 
+    Blacksmith level : <%= blacksmith %> <br>
+
+    <br>
+
     Boots: <%= boots %> <br>
     Bracers: <%= bracers %><br>
     Helmets: <%= helmets %><br>
@@ -21,23 +25,23 @@
     Spears: <%= spears %><br>
     Swords: <%= swords %><br>
 <br>
-    <form action="/town/blacksmith/craft">
+    <form action="/town/blacksmith/craft" method="post">
         <label for="shield">Shield:</label><br>
-        <input type="text" id="shield" name="shield" value="0"><br>
+        <input type="number" id="shield" name="shield" value="0"><br>
         <label for="sword">Sword:</label><br>
-        <input type="text" id="sword" name="sword" value="0"><br>
+        <input type="number" id="sword" name="sword" value="0"><br>
         <label for="bracers">Bracers:</label><br>
-        <input type="text" id="bracers" name="bracers" value="0"><br>
+        <input type="number" id="bracers" name="bracers" value="0"><br>
         <label for="longbow">Longbow:</label><br>
-        <input type="text" id="longbow" name="longbow" value="0"><br>
+        <input type="number" id="longbow" name="longbow" value="0"><br>
         <label for="spear">Spear:</label><br>
-        <input type="text" id="spear" name="spear" value="0"><br>
+        <input type="number" id="spear" name="spear" value="0"><br>
         <label for="lance">Lance:</label><br>
-        <input type="text" id="lance" name="lance" value="0"><br>
+        <input type="number" id="lance" name="lance" value="0"><br>
         <label for="boots">Boots:</label><br>
-        <input type="text" id="boots" name="boots" value="0"><br>
+        <input type="number" id="boots" name="boots" value="0"><br>
         <label for="helmet">Helmet:</label><br>
-        <input type="text" id="helmet" name="helmet" value="0"><br><br>
+        <input type="number" id="helmet" name="helmet" value="0"><br><br>
         <input type="submit" value="Craft">
     </form>
 
