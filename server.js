@@ -5,6 +5,7 @@ require("dotenv").config();
 const { auth, requiresAuth } = require('express-openid-connect');
 const ejs = require('ejs');
 const e = require("express");
+const { send, render } = require("express/lib/response");
 app.set('view engine', 'ejs');
 
 const uri = "mongodb+srv://server:zjzJoTWpk322w2eJ@cluster0.rn9ur.mongodb.net/gamedb?retryWrites=true&w=majority"
@@ -93,6 +94,39 @@ app.get("/town", requiresAuth(), async (req, res) => {
     barracks = user.barracksLevel;
 
     res.render('pages/town');
+});
+
+app.get("/town/blacksmith/upgrade", requiresAuth(), async (req, res) => {
+    const user = await getUser(client, req.oidc.user.nickname);
+
+    blacksmith = 5;
+
+    for (let i = 1; i < blacksmith + 1; i++) {
+
+        if (i === 1) {
+            goldCost = 10;
+            lumberCost = 10;
+            stoneCost = 10;
+            ironCost = 10;
+            console.log(goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost);
+        } else {
+            goldCost += Math.round(goldCost * 1.2);
+            lumberCost += Math.round(lumberCost * 1.2);
+            stoneCost += Math.round(stoneCost * 1.2);
+            ironCost += Math.round(ironCost * 1.2);
+            console.log(goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost);
+        }
+    }
+
+    // console.log(goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost);
+
+    res.redirect('/town/blacksmith');
+
+
+});
+
+app.get("/town/barracks/upgrade", requiresAuth(), async (req, res) => {
+    const user = await getUser(client, req.oidc.user.nickname);
 });
 
 app.get("/town/barracks", requiresAuth(), async (req, res) => {
@@ -455,26 +489,15 @@ app.get("/:type/:number/establish", requiresAuth(), async (req, res) => {
 async function getUser(client, username) {
     //TODO https://docs.mongodb.com/manual/reference/method/db.collection.findOne/#specify-the-fields-to-return
     const result = await client.db("gamedb").collection("players").findOne({ username: username });
-
     return result;
 }
 
 async function trainTroops(client, username, updatedUser) {
-
     const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $inc: updatedUser });
-
-    // console.log(result);
-
 }
 
 async function craftArmor(client, username, updatedUser) {
-
-    //console.log(updatedUser);
-
     const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $inc: updatedUser });
-
-    //   console.log(result);
-
 }
 
 async function updateLastAction(username) {
@@ -499,7 +522,7 @@ async function checkAll() {
 
 }
 
-async function addResources(username, multiplier) {
+async function addResources(username) {
 
     const user = await getUser(client, username);
 
@@ -508,12 +531,9 @@ async function addResources(username, multiplier) {
     const farms = user.farms;
     const ironMines = user.ironMines;
     const quarries = user.quarries;
+    const trainingField = user.trainingField;
 
-    var lumberIncome = 0;
-    var goldIncome = 0;
-    var grainIncome = 0;
-    var ironIncome = 0;
-    var stoneIncome = 0;
+    var lumberIncome = 0; goldIncome = 0; grainIncome = 0; ironIncome = 0; stoneIncome = 0; recruitsIncome = trainingField * 10;
 
     lumberCamps.forEach(lumberCalc);
     goldMines.forEach(goldCalc);
@@ -541,15 +561,15 @@ async function addResources(username, multiplier) {
         stoneIncome += i * 5;
     };
 
-    console.log(`Giving ${grainIncome} grain, ${lumberIncome} lumber, ${goldIncome} gold, ${stoneIncome} stone and ${ironIncome} iron to ${username}.`);
+    console.log(`Giving ${grainIncome} grain, ${lumberIncome} lumber, ${goldIncome} gold, ${stoneIncome} stone, ${ironIncome} iron and ${recruitsIncome} recruits to ${username}.`);
 
-    const updatedUser = { grain: grainIncome, lumber: lumberIncome, stone: stoneIncome, gold: goldIncome, iron: ironIncome };
+    const updatedUser = { grain: grainIncome, lumber: lumberIncome, stone: stoneIncome, gold: goldIncome, iron: ironIncome, recruits: recruitsIncome };
 
     const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $inc: updatedUser });
 
 }
 
-async function removeResources(username, gold, lumber, stone, iron, grain) {
+async function removeResources(username, gold, lumber, stone, iron, grain, recruits) {
 
     const user = await getUser(client, username);
 
@@ -558,8 +578,9 @@ async function removeResources(username, gold, lumber, stone, iron, grain) {
     const newStone = user.stone - stone;
     const newIron = user.iron - iron;
     const newGrain = user.grain - grain;
+    const newRecruits = user.recruits - recruits;
 
-    const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
+    const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron, recruits: newRecruits };
 
     const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
 
@@ -611,7 +632,6 @@ async function stealResources(username, gold, lumber, stone, iron, grain) {
     const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
 
     const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
-
 }
 
 async function loseResources(username, gold, lumber, stone, iron, grain) {
