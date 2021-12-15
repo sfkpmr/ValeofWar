@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Blacksmith</title>
+</head>
+
+<body>
+
+    <!-- TODO server check barrack exists and has levels-->
+
+    Gold: <%= gold %> Iron: <%= iron %> Lumber: <%= lumber %> Stone: <%= stone %> Grain: <%= grain %> <br>
+    <br>
+
+    Boots: <%= boots %> <br>
+    Bracers: <%= bracers %><br>
+    Helmets: <%= helmets %><br>
+    Lances: <%= lances %><br>
+    Longbows: <%= longbows %><br>
+    Shields: <%= shields %><br>
+    Spears: <%= spears %><br>
+    Swords: <%= swords %><br>
+<br>
+    <form action="/town/blacksmith/craft">
+        <label for="shield">Shield:</label><br>
+        <input type="text" id="shield" name="shield" value="0"><br>
+        <label for="sword">Sword:</label><br>
+        <input type="text" id="sword" name="sword" value="0"><br>
+        <label for="bracers">Bracers:</label><br>
+        <input type="text" id="bracers" name="bracers" value="0"><br>
+        <label for="longbow">Longbow:</label><br>
+        <input type="text" id="longbow" name="longbow" value="0"><br>
+        <label for="spear">Spear:</label><br>
+        <input type="text" id="spear" name="spear" value="0"><br>
+        <label for="lance">Lance:</label><br>
+        <input type="text" id="lance" name="lance" value="0"><br>
+        <label for="boots">Boots:</label><br>
+        <input type="text" id="boots" name="boots" value="0"><br>
+        <label for="helmet">Helmet:</label><br>
+        <input type="text" id="helmet" name="helmet" value="0"><br><br>
+        <input type="submit" value="Submit">
+    </form>
+
+    <a href="/town">Town</a> <a href="/land">Land</a>
+
+</body>
+
+</html>

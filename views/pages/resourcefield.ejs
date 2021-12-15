@@ -11,9 +11,13 @@
 
     <%= title %> level: <%= resourceLevel %>
 
-            <form action="/<%= title.toLowerCase() %>/<%= resourceId %>/upgrade">
+            <form action="/<%= title.toLowerCase().replace(/ /g, '') %>/<%= resourceId %>/upgrade">
                 <input type="submit" value="Upgrade">
             </form>
+
+            <button type="button"><a href="/land">Back</button>
+
+                <a href="/town">Town</a> <a href="/land">Land</a>
 
 </body>
 
