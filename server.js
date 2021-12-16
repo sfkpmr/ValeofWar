@@ -5,11 +5,11 @@ require("dotenv").config();
 const { auth, requiresAuth } = require('express-openid-connect');
 const ejs = require('ejs');
 const e = require("express");
-// ???? const { send, render } = require("express/lib/response");
+const { send, render } = require("express/lib/response"); //???
 app.set('view engine', 'ejs');
 
-//const uri = "mongodb+srv://server:zjzJoTWpk322w2eJ@cluster0.rn9ur.mongodb.net/gamedb?retryWrites=true&w=majority"
-const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`
+const uri = "mongodb+srv://server:zjzJoTWpk322w2eJ@cluster0.rn9ur.mongodb.net/gamedb?retryWrites=true&w=majority"
+//const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`
 const client = new MongoClient(uri);
 
 const maxFarms = 6, maxGoldMines = 3, maxIronMines = 4, maxQuarries = 2, maxLumberCamps = 4;
@@ -33,7 +33,7 @@ app.use(
         issuerBaseURL: process.env.ISSUER_BASE_URL,
         baseURL: process.env.BASE_URL,
         clientID: process.env.CLIENT_ID,
-        secret: process.env.SECRET,
+        secret: process.env.SECRET
     })
 );
 
@@ -58,7 +58,11 @@ app.get("/profile", requiresAuth(), (req, res) => {
 app.get("/profile/:username", requiresAuth(), async (req, res) => {
 
     const currentUser = req.oidc.user.nickname;
+    //const currentUser = await req.oidc.fetchUserInfo();
     const profileUser = await getUser(client, req.params.username);
+
+    //console.log(currentUser.email + " " + profileUser.username + " " + req.params.username + " " + JSON.stringify(req.oidc.user));
+    console.log(req.oidc.user.email + " " + profileUser.email);
 
     gold = profileUser.gold;
     iron = profileUser.iron;
@@ -66,9 +70,15 @@ app.get("/profile/:username", requiresAuth(), async (req, res) => {
     grain = profileUser.grain;
     stone = profileUser.stone;
 
+    archers = profileUser.archers;
+    spearmen = profileUser.spearmen;
+    horsemen = profileUser.horsemen;
+    knights = profileUser.knights;
+
     username = req.params.username;
 
     if (currentUser === req.params.username) {
+        //todo add settings/delete
         res.render('pages/myprofile');
     } else {
         res.render('pages/publicprofile');
@@ -80,13 +90,21 @@ app.get("/base", requiresAuth(), (req, res) => {
     res.render('pages/index')
 });
 
-app.get("/start", requiresAuth(), (req, res) => {
-    res.render('pages/start')
+app.get("/mailbox", requiresAuth(), async (req, res) => {
+    //console.log(JSON.stringify(req.oidc.user));
+    //const apa = await req.oidc.fetchUserInfo();
+    //console.log(apa);
+    res.render('pages/mailbox')
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Listening on port ${port}`);
+app.post("/search", requiresAuth(), (req, res) => {
+    res.redirect(`/profile/${req.body.name}`)
+});
+
+app.get("/search/random", requiresAuth(), (req, res) => {
+    //todo
+    res.send("asf")
+    //res.redirect(`/profile/${req.body.name}`)
 });
 
 app.get("/town", requiresAuth(), async (req, res) => {
@@ -119,7 +137,7 @@ app.get("/town/blacksmith/upgrade", requiresAuth(), async (req, res) => {
         }
     }
 
-  
+
 
     if (await checkIfCanAfford(req.oidc.user.nickname, goldCost, lumberCost, stoneCost, ironCost, 0)) {
         //console.log("error2")
@@ -742,3 +760,8 @@ setInterval(function () {
     console.log("Adding resources for everyone!");
     checkAll();
 }, the_interval);
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Listening on port ${port}`);
+});
