@@ -9,12 +9,12 @@
 
     <!-- TODO server check barrack exists and has levels-->
 
-    Gold: <%= gold %> Iron: <%= iron %> Lumber: <%= lumber %> Stone: <%= stone %> Grain: <%= grain %> <br>
+    Gold: <%= user.gold %> Iron: <%= user.iron %> Lumber: <%= user.lumber %> Stone: <%= user.stone %> Grain: <%= user.grain %>  Recruits: <%= user.recruits %> Horses: <%= user.horses %> <br>
 
-    Barracks level: <%= barracks %> <br>
+    Barracks level: <%= user.barracksLevel %> <br>
 
-    Archers: <%= archers %> <br>
-    Spearmen: <%= spearmen %>
+    Archers: <%= user.archers %> <br>
+    Spearmen: <%= user.spearmen %>
 
     <form action="/town/barracks/train" method="POST">
         <label for="archers">Archers:</label><br>
@@ -24,7 +24,7 @@
         <input type="submit" value="Submit">
     </form>
 
-    <a href="/town">Town</a> <a href="/land">Land</a>
+    <a href="/town">Town</a> <a href="/land">Land</a> <a href="/logout">Log out</a>
 
 </body>
 
