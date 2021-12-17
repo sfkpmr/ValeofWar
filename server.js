@@ -7,6 +7,11 @@ const ejs = require('ejs');
 const e = require("express");
 const { send, render } = require("express/lib/response"); //???
 app.set('view engine', 'ejs');
+var compression = require('compression');
+// Use Gzip compression
+app.use(compression());
+// Remove x-powered-by Express
+app.disable('x-powered-by');
 
 const uri = "mongodb+srv://server:zjzJoTWpk322w2eJ@cluster0.rn9ur.mongodb.net/gamedb?retryWrites=true&w=majority"
 //const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`
@@ -96,6 +101,18 @@ app.get("/mailbox", requiresAuth(), async (req, res) => {
 });
 
 app.get("/mailbox/log", requiresAuth(), async (req, res) => {
+
+    const user = await getUserByEmail(req.oidc.user.email);
+    result = await getInvolvedAttackLogs(user.username)
+
+    gold = user.gold;
+    lumber = user.lumber;
+    grain = user.grain;
+    stone = user.stone;
+    iron = user.iron;
+    recruits = user.recruits;
+    horses = user.horses;
+
     res.render('pages/log')
 });
 
@@ -103,9 +120,10 @@ app.get("/mailbox/log/:id", requiresAuth(), async (req, res) => {
 
     //TODO check only show your logs
 
-    temp = await getAttackLog("61bad482a3c6aa506c3ae343")
-
-    console.log(temp)
+    //temp = await getAttackLog("61bad482a3c6aa506c3ae343")
+    //console.log(temp)
+    //error check if invalid format
+    log = await getAttackLog(req.params.id)
 
     res.render('pages/attack')
 });
@@ -116,18 +134,7 @@ app.post("/search", requiresAuth(), (req, res) => {
 
 app.get("/search/random", requiresAuth(), async (req, res) => {
 
-
-    //const result = await client.db("gamedb").collection("players").findOne({ "username": username });
-    // const result = await client.db("gamedb").collection("players").findOne({ "username": username });
-
     const result = await client.db("gamedb").collection("players").aggregate([{ $sample: { size: 1 } }]).toArray();
-
-
-
-
-    // res.redirect(`/profile/${user.username}`)
-
-    //console.log(result[0].username);
 
     res.redirect(`/profile/${result[0].username}`)
 
@@ -138,9 +145,6 @@ app.get("/town", requiresAuth(), async (req, res) => {
 
     res.render('pages/town');
 });
-
-// app.get("/town/blacksmith/upgrade", requiresAuth(), async (req, res) => {
-//     const user = await getUserByEmail(req.oidc.user.email);
 
 //     blacksmith = user.blacksmithLevel;
 
@@ -170,10 +174,6 @@ app.get("/town", requiresAuth(), async (req, res) => {
 
 //     res.redirect('/town/blacksmith');
 
-// });
-
-// app.get("/town/barracks/upgrade", requiresAuth(), async (req, res) => {
-//     const user = await getUserByEmail(req.oidc.user.email);
 // });
 
 app.get("/town/barracks", requiresAuth(), async (req, res) => {
@@ -341,7 +341,9 @@ app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
 });
 
 app.post("/town/blacksmith/craft", requiresAuth(), async (req, res) => {
-    await updateLastAction(req.oidc.user.nickname);
+    //await updateLastAction(req.oidc.user.nickname);
+
+    const user = await getUserByEmail(req.oidc.user.email);
 
     var goldCost = 0, lumberCost = 0, ironCost = 0;
 
@@ -390,10 +392,9 @@ app.post("/town/blacksmith/craft", requiresAuth(), async (req, res) => {
         "shields": shields, "swords": swords, "bracers": bracers, "longbows": longbows, "spears": spears, "lances": lances, "boots": boots, "helmets": helmets
     }
 
-    //todo fixa usernames
-    if (await checkIfCanAfford(req.oidc.user.nickname, goldCost, lumberCost, 0, ironCost, 0, 0, 0)) {
-        await craftArmor(req.oidc.user.nickname, updateUser);
-        await removeResources(req.oidc.user.nickname, goldCost, lumberCost, 0, ironCost, 0);
+    if (await checkIfCanAfford(user.username, goldCost, lumberCost, 0, ironCost, 0, 0, 0)) {
+        await craftArmor(user.username, updateUser);
+        await removeResources(user.username, goldCost, lumberCost, 0, ironCost, 0, 0, 0);
     } else {
         console.log("bbbb");
     }
@@ -538,7 +539,7 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
 
     createAttackLog(attacker.username, defender.username, attack, defense, 0, 0, goldLoot, grainLoot, lumberLoot, stoneLoot, ironLoot);
 
-    res.redirect(`/ profile / ${defender.username}`);
+    res.redirect(`/profile/${defender.username}`);
 
 });
 
@@ -831,6 +832,7 @@ async function removeResources(username, gold, lumber, stone, iron, grain, recru
 
 async function checkIfCanAfford(username, goldCost, lumberCost, stoneCost, ironCost, grainCost, recruitCost, horseCost) {
 
+    console.log(username)
     const user = await getUser(username);
 
     console.log("User has " + user.gold + " " + user.lumber + " " + user.stone + " " + user.iron + " " + user.grain + " " + user.recruits + " " + user.horses);
@@ -894,15 +896,15 @@ async function stealResources(username, gold, lumber, stone, iron, grain) {
     console.log(username + " is stealing resources");
     const user = await getUser(username);
 
-    const newGold = user.gold + gold;
-    const newLumber = user.lumber + lumber;
-    const newStone = user.stone + stone;
-    const newIron = user.iron + iron;
-    const newGrain = user.grain + grain;
+    const newGold = Math.round(user.gold + gold);
+    const newLumber = Math.round(user.lumber + lumber);
+    const newStone = Math.round(user.stone + stone);
+    const newIron = Math.round(user.iron + iron);
+    const newGrain = Math.round(user.grain + grain);
 
     const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
 
-    const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
+    const result = await client.db("gamedb").collection("players").updateOne({ "username": username }, { $set: updatedUser });
 }
 
 async function loseResources(username, gold, lumber, stone, iron, grain) {
@@ -936,8 +938,8 @@ async function createAttackLog(attacker, defender, attackDamage, defenseDamage, 
     date = new Date();
 
     const data = {
-        "time": date, "attacker": attacker, "defender": defender, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLooted": goldLooted,
-        "grainLooted": grainLooted, "lumberLooted": lumberLooted, "stoneLooted": stoneLooted, "ironLooted": ironLooted
+        "time": date, "attacker": attacker, "defender": defender, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLooted,
+        "grainLoot": grainLooted, "lumberLoot": lumberLooted, "stoneLoot": stoneLooted, "ironLoot": ironLooted
     };
 
     await client.db("gamedb").collection("attacks").insertOne(data);
@@ -947,6 +949,17 @@ async function createAttackLog(attacker, defender, attackDamage, defenseDamage, 
 async function getAttackLog(id) {
     //const result = await client.db("gamedb").collection("attacks").findOne({ "_id": id });
     const result = await client.db("gamedb").collection("attacks").findOne({ "_id": ObjectId(id) });
+    return result;
+}
+
+async function getInvolvedAttackLogs(username){
+    //const result = await client.db("gamedb").collection("attacks").find({ $or: [ { "attacker": username }, { "defender": username } ] }).toArray();
+    //const result = await client.db("gamedb").collection("attacks").find().toArray;
+
+    const cursor = client.db("gamedb").collection("attacks").find({ $or: [ { "attacker": username }, { "defender": username } ] })
+    
+    const result = await cursor.toArray();
+
     return result;
 }
 

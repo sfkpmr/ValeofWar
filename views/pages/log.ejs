@@ -7,7 +7,13 @@
 
 <body>
 
-
+    Gold: <%= gold %> Iron: <%= iron %> Lumber: <%= lumber %> Stone: <%= stone %> Grain: <%= grain %> Recruits: <%= recruits %> Horses: <%= horses %><br>
+<br>
+<% for (var i=0; i < result.length; i++ ) { %>
+    <a href="/mailbox/log/<%= result[i]._id %>"><%= result[i].attacker %> attacked <%= result[i].defender%></a> at <%= result[i].time %> <br>
+<% } %>
+<br>
+<a href="/town">Town</a> <a href="/land">Land</a> <a href="/logout">Log out</a>
 
 </body>
 

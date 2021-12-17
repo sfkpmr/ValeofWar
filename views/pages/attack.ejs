@@ -2,12 +2,23 @@
 <html>
 
 <head>
-    <title>Log</title>
+    <title>Battle log</title>
 </head>
 
 <body>
 
-    <%= temp.attacker%> attacked <%= temp.defender%>
+    On the faithful day of <%= log.time %>,<br>
+    <%= log.attacker%> attacked <%= log.defender%>!<br>
+    <br>
+    <%= log.attacker %> dealt damage <%= log.attackDamage %> versus <%= log.defender %>'s <%= log.defenseDamage %>!<br>
+    <br>
+    <%= log.attackerLosses %> of the attackers' men perished to the defenders' <%= log.defenderLosses %>!<br>
+    <br>
+    <br>
+    <br>
+    The attackers escaped with <%= log.goldLoot %> gold, <%= log.grainLoot %> grain, <%= log.lumberLoot %> lumber, <%= log.stoneLoot %> stone and <%= log.ironLoot %> iron!
+    <br>
+
 
 
 </body>
