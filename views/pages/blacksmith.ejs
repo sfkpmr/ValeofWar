@@ -9,7 +9,7 @@
 
     <!-- TODO server check barrack exists and has levels-->
 
-    Gold: <%= gold %> Iron: <%= iron %> Lumber: <%= lumber %> Stone: <%= stone %> Grain: <%= grain %> Recruits: <%= recruits %> <br>
+    Gold: <%= gold %> Iron: <%= iron %> Lumber: <%= lumber %> Stone: <%= stone %> Grain: <%= grain %> Recruits: <%= recruits %> Horses: <%= horses %> <br>
     <br>
 
     Blacksmith level: <%= blacksmith %> <br>
@@ -45,7 +45,7 @@
         <input type="submit" value="Craft">
     </form>
 
-    <form action="/town/blacksmith/upgrade">
+    <form action="/town/blacksmith/upgrade" method="POST">
         <input type="submit" value="Upgrade">
     </form>
 

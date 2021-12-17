@@ -10,18 +10,22 @@
     <!-- TODO server check barrack exists and has levels-->
 
     Gold: <%= gold %> Iron: <%= iron %> Lumber: <%= lumber %> Stone: <%= stone %> Grain: <%= grain %> Recruits: <%= recruits %> Horses: <%= horses %><br>
-
+    <br>
     Stables level: <%= stables %> <br>
-
+    <br>
     Horsemen: <%= horsemen %> <br>
-    Knights: <%= knights %>
-
+    Knights: <%= knights %> <br>
+    <br>
     <form action="/town/stables/train" method="POST">
         <label for="horsemen">Horsemen:</label><br>
         <input type="number" id="horsemen" name="horsemen" value="0"><br>
         <label for="knights">Knights:</label><br>
         <input type="number" id="knights" name="knights" value="0"><br><br>
         <input type="submit" value="Submit">
+    </form>
+    <br>
+    <form action="/town/stables/upgrade" method="POST">
+        <input type="submit" value="Upgrade">
     </form>
 
     <a href="/town">Town</a> <a href="/land">Land</a> <a href="/logout">Log out</a>

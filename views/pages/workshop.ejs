@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Workshop</title>
+</head>
+
+<body>
+
+    <!-- TODO server check barrack exists and has levels-->
+
+    Gold: <%= gold %> Iron: <%= iron %> Lumber: <%= lumber %> Stone: <%= stone %> Grain: <%= grain %> Recruits: <%= recruits %> Horses: <%= horses %><br>
+
+    Workshop level: <%= workshop %> <br>
+
+    <br>
+    <form action="/town/workshop/upgrade" method="POST">
+        <input type="submit" value="Upgrade">
+    </form>
+
+    <a href="/town">Town</a> <a href="/land">Land</a> <a href="/logout">Log out</a>
+
+</body>
+
+</html>

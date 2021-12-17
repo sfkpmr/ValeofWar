@@ -114,10 +114,23 @@ app.post("/search", requiresAuth(), (req, res) => {
     res.redirect(`/profile/${req.body.name}`)
 });
 
-app.get("/search/random", requiresAuth(), (req, res) => {
-    //todo
-    res.send("asf")
-    //res.redirect(`/profile/${req.body.name}`)
+app.get("/search/random", requiresAuth(), async (req, res) => {
+
+
+    //const result = await client.db("gamedb").collection("players").findOne({ "username": username });
+    // const result = await client.db("gamedb").collection("players").findOne({ "username": username });
+
+    const result = await client.db("gamedb").collection("players").aggregate([{ $sample: { size: 1 } }]).toArray();
+
+
+
+
+    // res.redirect(`/profile/${user.username}`)
+
+    //console.log(result[0].username);
+
+    res.redirect(`/profile/${result[0].username}`)
+
 });
 
 app.get("/town", requiresAuth(), async (req, res) => {
@@ -126,73 +139,164 @@ app.get("/town", requiresAuth(), async (req, res) => {
     res.render('pages/town');
 });
 
-app.get("/town/blacksmith/upgrade", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(req.oidc.user.email);
+// app.get("/town/blacksmith/upgrade", requiresAuth(), async (req, res) => {
+//     const user = await getUserByEmail(req.oidc.user.email);
 
-    blacksmith = user.blacksmithLevel;
+//     blacksmith = user.blacksmithLevel;
 
-    for (let i = 1; i < blacksmith + 1; i++) {
+//     for (let i = 1; i < blacksmith + 1; i++) {
 
-        if (i === 1) {
-            goldCost = 10;
-            lumberCost = 10;
-            stoneCost = 10;
-            ironCost = 10;
-            console.log(goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost);
-        } else {
-            goldCost += Math.round(goldCost * 1.2);
-            lumberCost += Math.round(lumberCost * 1.2);
-            stoneCost += Math.round(stoneCost * 1.2);
-            ironCost += Math.round(ironCost * 1.2);
-            console.log(goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost);
-        }
-    }
+//         if (i === 1) {
+//             goldCost = 10;
+//             lumberCost = 10;
+//             stoneCost = 10;
+//             ironCost = 10;
+//             console.log(goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost);
+//         } else {
+//             goldCost += Math.round(goldCost * 1.2);
+//             lumberCost += Math.round(lumberCost * 1.2);
+//             stoneCost += Math.round(stoneCost * 1.2);
+//             ironCost += Math.round(ironCost * 1.2);
+//             console.log(goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost);
+//         }
+//     }
 
+//     if (await checkIfCanAfford(req.oidc.user.nickname, goldCost, lumberCost, stoneCost, ironCost, 0)) {
+//         await upgradeBuilding(user.username, "blacksmithLevel");
+//         await removeResources(req.oidc.user.nickname, goldCost, lumberCost, stoneCost, ironCost, 0, 0);
+//     } else {
+//         console.log("bbbb");
+//     }
 
+//     res.redirect('/town/blacksmith');
 
-    if (await checkIfCanAfford(req.oidc.user.nickname, goldCost, lumberCost, stoneCost, ironCost, 0)) {
-        //console.log("error2")
-        await upgradeBuilding(user.username, "blacksmithLevel");
-        await removeResources(req.oidc.user.nickname, goldCost, lumberCost, stoneCost, ironCost, 0, 0);
-    } else {
-        console.log("bbbb");
-    }
+// });
 
-
-    res.redirect('/town/blacksmith');
-
-});
-
-app.get("/town/barracks/upgrade", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(req.oidc.user.email);
-});
+// app.get("/town/barracks/upgrade", requiresAuth(), async (req, res) => {
+//     const user = await getUserByEmail(req.oidc.user.email);
+// });
 
 app.get("/town/barracks", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(req.oidc.user.email);
 
-    //res.send(req.oidc.user.nickname);
+    barracks = user.barracksLevel;
 
-    //barracks = user.barracksLevel;
+    gold = user.gold;
+    iron = user.iron;
+    lumber = user.lumber;
+    grain = user.grain;
+    stone = user.stone;
+    recruits = user.recruits;
+    horses = user.horses;
 
-    //gold = user.gold;
-    //iron = user.iron;
-    // lumber = user.lumber;
-    // grain = user.grain;
-    // stone = user.stone;
-    // recruits = user.recruits;
-    // horses = user.horses;
+    archers = user.archers;
+    spearmen = user.spearmen;
 
-    // archers = user.archers;
-    // spearmen = user.spearmen;
+    res.render('pages/barracks');
+});
 
-    res.render('pages/barracks', {user: user});
+app.get("/town/wall", requiresAuth(), async (req, res) => {
+
+    const user = await getUserByEmail(req.oidc.user.email);
+
+    wall = user.wallLevel;
+
+    gold = user.gold;
+    iron = user.iron;
+    lumber = user.lumber;
+    grain = user.grain;
+    stone = user.stone;
+    recruits = user.recruits;
+    horses = user.horses;
+
+    res.render('pages/wall')
+
+});
+
+app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(req.oidc.user.email);
+
+    console.log("aaaaaaaaaaaaa")
+
+    var buildingName = "";
+
+    switch (req.params.building) {
+        case "wall":
+            buildingName = "wallLevel"
+            break;
+        case "blacksmith":
+            buildingName = "blacksmithLevel"
+            break;
+        case "barracks":
+            buildingName = "barracksLevel"
+            break;
+        case "trainingfield":
+            buildingName = "trainingfieldLevel"
+            break;
+        case "stables":
+            buildingName = "stablesLevel"
+            break;
+        case "workshop":
+            buildingName = "workshopLevel"
+            break;
+        default:
+            //catch
+            console.log("error");
+    }
+
+
+    if (await checkIfCanAfford(user.username, 0, 0, 0, 0, 0, 0, 0)) {
+        await upgradeBuilding(user.username, buildingName);
+        await removeResources(user.username, 0, 0, 0, 0, 0, 0, 0);
+    } else {
+        console.log("bbbb");
+    }
+
+
+
+
+    res.redirect(`/ town / ${req.params.building}`);
+});
+
+app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
+
+    const user = await getUserByEmail(req.oidc.user.email);
+
+    trainingField = user.trainingfieldLevel;
+
+    gold = user.gold;
+    iron = user.iron;
+    lumber = user.lumber;
+    grain = user.grain;
+    stone = user.stone;
+    recruits = user.recruits;
+    horses = user.horses;
+
+    res.render('pages/trainingField')
+});
+
+app.get("/town/workshop", requiresAuth(), async (req, res) => {
+
+    //todo method to get user and set variables
+    const user = await getUserByEmail(req.oidc.user.email);
+
+    workshop = user.workshopLevel;
+
+    gold = user.gold;
+    iron = user.iron;
+    lumber = user.lumber;
+    grain = user.grain;
+    stone = user.stone;
+    recruits = user.recruits;
+    horses = user.horses;
+
+    res.render('pages/workshop')
 });
 
 app.get("/town/stables", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(req.oidc.user.email);
-    console.log(user);
 
     stables = user.stablesLevel;
 
@@ -201,7 +305,6 @@ app.get("/town/stables", requiresAuth(), async (req, res) => {
     lumber = user.lumber;
     grain = user.grain;
     stone = user.stone;
-
     recruits = user.recruits;
     horses = user.horses;
 
@@ -215,8 +318,6 @@ app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(req.oidc.user.email);
 
-    //res.send(req.oidc.user.nickname);
-
     blacksmith = user.blacksmithLevel;
 
     gold = user.gold;
@@ -225,6 +326,7 @@ app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
     grain = user.grain;
     stone = user.stone;
     recruits = user.recruits;
+    horses = user.horses;
 
     boots = user.boots;
     bracers = user.bracers;
@@ -288,8 +390,9 @@ app.post("/town/blacksmith/craft", requiresAuth(), async (req, res) => {
         "shields": shields, "swords": swords, "bracers": bracers, "longbows": longbows, "spears": spears, "lances": lances, "boots": boots, "helmets": helmets
     }
 
+    //todo fixa usernames
     if (await checkIfCanAfford(req.oidc.user.nickname, goldCost, lumberCost, 0, ironCost, 0, 0, 0)) {
-        await craftArmor(client, req.oidc.user.nickname, updateUser);
+        await craftArmor(req.oidc.user.nickname, updateUser);
         await removeResources(req.oidc.user.nickname, goldCost, lumberCost, 0, ironCost, 0);
     } else {
         console.log("bbbb");
@@ -315,7 +418,8 @@ app.get("/land", requiresAuth(), async (req, res) => {
 
 app.post("/town/stables/train", requiresAuth(), async (req, res) => {
 
-    await updateLastAction(req.oidc.user.nickname);
+    const user = await getUserByEmail(req.oidc.user.email);
+    await updateLastAction(user.username);
 
     horsemen = parseInt(req.body.horsemen);
     knights = parseInt(req.body.knights);
@@ -331,10 +435,10 @@ app.post("/town/stables/train", requiresAuth(), async (req, res) => {
 
     horseAndRecruitCost = horsemen + knights;
 
-    if (await checkIfCanAfford(req.oidc.user.nickname, goldCost, lumberCost, 0, ironCost, grainCost)) {
-        await trainTroops(req.oidc.user.nickname, { "horsemen": horsemen, "knights": knights });
+    if (await checkIfCanAfford(user.username, goldCost, lumberCost, 0, ironCost, grainCost, horseAndRecruitCost, horseAndRecruitCost)) {
+        await trainTroops(user.username, { "horsemen": horsemen, "knights": knights });
         //TODO remove horses
-        await removeResources(req.oidc.user.nickname, goldCost, lumberCost, 0, ironCost, grainCost, horseAndRecruitCost, horseAndRecruitCost);
+        await removeResources(user.username, goldCost, lumberCost, 0, ironCost, grainCost, horseAndRecruitCost, horseAndRecruitCost);
     } else {
         console.log("bbbb");
     }
@@ -373,10 +477,11 @@ app.post("/town/barracks/train", requiresAuth(), async (req, res) => {
     lumberCost += spearmen * 10;
 
     updateInfo = { "archers": archers, "spearmen": spearmen };
+    recruitCost = archers + spearmen;
 
-    if (await checkIfCanAfford(req.oidc.user.nickname, goldCost, lumberCost, 0, ironCost, grainCost, (archers + spearmen))) {
+    if (await checkIfCanAfford(req.oidc.user.nickname, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0)) {
         await trainTroops(req.oidc.user.nickname, updateInfo);
-        await removeResources(req.oidc.user.nickname, goldCost, lumberCost, 0, ironCost, grainCost, (archers + spearmen));
+        await removeResources(req.oidc.user.nickname, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0);
     } else {
         console.log("bbbb");
     }
@@ -433,7 +538,7 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
 
     createAttackLog(attacker.username, defender.username, attack, defense, 0, 0, goldLoot, grainLoot, lumberLoot, stoneLoot, ironLoot);
 
-    res.redirect(`/profile/${defender.username}`);
+    res.redirect(`/ profile / ${defender.username}`);
 
 });
 
@@ -451,7 +556,6 @@ app.get("/:type/:number", requiresAuth(), async (req, res) => {
         } else {
             invalidId = true;
         }
-
     } else if (type === "goldMine") {
         if (resourceId >= 0 && resourceId <= maxGoldMines) {
             title = "Gold mine";
@@ -459,7 +563,6 @@ app.get("/:type/:number", requiresAuth(), async (req, res) => {
         } else {
             invalidId = true;
         }
-
     } else if (type === "ironMine") {
         console.log(user.ironMines);
         if (resourceId >= 0 && resourceId <= maxIronMines) {
@@ -500,7 +603,7 @@ app.get("/:type/:number", requiresAuth(), async (req, res) => {
 
 });
 
-app.get("/:type/:number/upgrade", requiresAuth(), async (req, res) => {
+app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
 
     type = req.params.type;
     resourceId = req.params.number;
@@ -562,7 +665,7 @@ app.get("/:type/:number/upgrade", requiresAuth(), async (req, res) => {
         }
     }
 
-    if (await checkIfCanAfford(user.username, 1, 1, 2, 3, 4)) {
+    if (await checkIfCanAfford(user.username, 1, 1, 2, 3, 4, 0, 0)) {
         const result = await client.db("gamedb").collection("players").updateOne({ username: user.username }, { $set: updatedUser });
     }
 
@@ -570,7 +673,7 @@ app.get("/:type/:number/upgrade", requiresAuth(), async (req, res) => {
 
 });
 
-app.get("/:type/:number/establish", requiresAuth(), async (req, res) => {
+app.get("/land/:type/:number/establish", requiresAuth(), async (req, res) => {
 
     //TODO error check
     type = req.params.type;
@@ -611,7 +714,7 @@ app.get("/:type/:number/establish", requiresAuth(), async (req, res) => {
 
     console.log(updatedUser);
 
-    if (await checkIfCanAfford(user.username, 1, 1, 2, 3, 4)) {
+    if (await checkIfCanAfford(user.username, 1, 1, 2, 3, 4, 0, 0)) {
         const result = await client.db("gamedb").collection("players").updateOne({ username: user.username }, { $set: updatedUser });
     }
 
@@ -818,6 +921,7 @@ async function loseResources(username, gold, lumber, stone, iron, grain) {
 }
 
 async function upgradeBuilding(username, building) {
+    console.log(username + " " + building)
     const updatedUser = { [building]: 1 };
     await incDatabaseValue(username, updatedUser);
 }
