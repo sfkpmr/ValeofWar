@@ -10,9 +10,18 @@
     <!-- TODO server check barrack exists and has levels-->
 
     Gold: <%= gold %> Iron: <%= iron %> Lumber: <%= lumber %> Stone: <%= stone %> Grain: <%= grain %> Recruits: <%= recruits %> Horses: <%= horses %><br>
-
+    <br>
     Workshop level: <%= workshop %> <br>
-
+    <br>
+    <form action="/town/workshop/train" method="POST">
+        <label for="batteringram">Battering ram:</label><br>
+        <input type="number" id="batteringram" name="batteringram" value="0"><br>
+        <label for="ladder">Ladders:</label><br>
+        <input type="number" id="ladder" name="ladder" value="0"><br>
+        <label for="siegetower">Siege tower:</label><br>
+        <input type="number" id="siegetower" name="siegetower" value="0"><br><br>
+        <input type="submit" value="Build">
+    </form>
     <br>
     <form action="/town/workshop/upgrade" method="POST">
         <input type="submit" value="Upgrade">

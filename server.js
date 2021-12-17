@@ -256,7 +256,7 @@ app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
 
 
 
-    res.redirect(`/ town / ${req.params.building}`);
+    res.redirect(`/town/${req.params.building}`);
 });
 
 app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
@@ -542,7 +542,7 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
 
 });
 
-app.get("/:type/:number", requiresAuth(), async (req, res) => {
+app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
 
     type = req.params.type;
     resourceId = req.params.number;

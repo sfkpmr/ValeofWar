@@ -8,6 +8,7 @@
 <body>
 
     <!-- TODO server check barrack exists and has levels-->
+    <!-- TODO Display max number of units/armor you can afford right now -->
 
     Gold: <%= gold %> Iron: <%= iron %> Lumber: <%= lumber %> Stone: <%= stone %> Grain: <%= grain %>  Recruits: <%= recruits %> Horses: <%= horses %> <br>
     <br>
@@ -21,7 +22,7 @@
         <input type="number" id="archers" name="archers" value="0"><br>
         <label for="spearmen">Spearmen:</label><br>
         <input type="number" id="spearmen" name="spearmen" value="0"><br><br>
-        <input type="submit" value="Submit">
+        <input type="submit" value="Train">
     </form>
     <br>
     <form action="/town/barracks/upgrade" method="POST">
