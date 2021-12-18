@@ -49,7 +49,8 @@ app.use('/static', express.static('static'));
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
-    //res.send(req.oidc.isAuthenticated());
+
+    authenticated = req.oidc.isAuthenticated();
 
     res.render('pages/index')
 });

@@ -9,8 +9,11 @@
 
 <body>
 
-
-    <a href="/login">Login</a>
+    <% if (authenticated) { %>
+        <a href="/logout">Log out</a>
+    <% } else { %>
+        <a href="/login">Login</a>
+    <% } %>
 
 </body>
 
