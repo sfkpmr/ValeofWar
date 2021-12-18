@@ -207,6 +207,7 @@ app.get("/town/barracks", requiresAuth(), async (req, res) => {
 
     archers = user.archers;
     spearmen = user.spearmen;
+    swordsmen = user.swordsmen;
 
     res.render('pages/barracks');
 });
@@ -506,8 +507,7 @@ app.post("/town/barracks/train", requiresAuth(), async (req, res) => {
 
     archers = parseInt(req.body.archers);
     spearmen = parseInt(req.body.spearmen);
-
-    console.log(archers + " " + spearmen)
+    swordsmen = parseInt(req.body.swordsmen);
 
     var goldCost = 0;
     var grainCost = 0;
@@ -521,8 +521,12 @@ app.post("/town/barracks/train", requiresAuth(), async (req, res) => {
     grainCost += spearmen * 10;
     lumberCost += spearmen * 10;
 
+    goldCost += swordsmen * 10;
+    grainCost += swordsmen * 10;
+    ironCost += swordsmen * 10;
+
     recruitCost = archers + spearmen;
-    data = { "archers": archers, "spearmen": spearmen };
+    data = { "archers": archers, "spearmen": spearmen, "swordsmen": swordsmen };
 
     if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0)) {
         await trainTroops(client, user.username, data);
@@ -573,7 +577,7 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
     }
 
     goldLoot = Math.round(defender.gold / divider);
-    lumberLoot = Math.round(defender.gold / divider);
+    lumberLoot = Math.round(defender.lumber / divider);
     stoneLoot = Math.round(defender.stone / divider);
     grainLoot = Math.round(defender.grain / divider);
     ironLoot = Math.round(defender.iron / divider);
@@ -719,6 +723,7 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
         }
     }
 
+    //TOOD real costs
     if (await checkIfCanAfford(client, user.username, 1, 1, 2, 3, 4, 0, 0)) {
         const result = await client.db("gamedb").collection("players").updateOne({ username: user.username }, { $set: updatedUser });
     }
@@ -768,6 +773,7 @@ app.get("/land/:type/:number/establish", requiresAuth(), async (req, res) => {
 
     console.log(updatedUser);
 
+    //TODO real cost
     if (await checkIfCanAfford(client, user.username, 1, 1, 2, 3, 4, 0, 0)) {
         const result = await client.db("gamedb").collection("players").updateOne({ username: user.username }, { $set: updatedUser });
     }
@@ -789,9 +795,6 @@ async function updateLastAction(username) {
 
 async function checkAll() {
     const result = await client.db("gamedb").collection("players").find().forEach(function (user) {
-
-        var updatedSal = user._id;
-        console.log(updatedSal);
         addResources(client, user.username);
     });
 }

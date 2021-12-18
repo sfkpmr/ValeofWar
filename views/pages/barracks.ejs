@@ -16,12 +16,15 @@
     <br>
     Archers: <%= archers %> <br>
     Spearmen: <%= spearmen %> <br>
+    Swordsmen: <%= swordsmen %> <br>
     <br>
     <form action="/town/barracks/train" method="POST">
         <label for="archers">Archers:</label><br>
         <input type="number" id="archers" name="archers" value="0"><br>
         <label for="spearmen">Spearmen:</label><br>
-        <input type="number" id="spearmen" name="spearmen" value="0"><br><br>
+        <input type="number" id="spearmen" name="spearmen" value="0"><br>
+        <label for="swordsmen">Swordsmen:</label><br>
+        <input type="number" id="swordsmen" name="swordsmen" value="0"><br><br>
         <input type="submit" value="Train">
     </form>
     <br>

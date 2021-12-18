@@ -1,4 +1,4 @@
-const { getUser } = require("../modules/database.js");
+const { getUser, incDatabaseValue } = require("../modules/database.js");
 
 module.exports = {
     addResources: async function (client, username) {
@@ -71,13 +71,12 @@ module.exports = {
         const user = await getUser(client, username);
 
         console.log("User has " + user.gold + " " + user.lumber + " " + user.stone + " " + user.iron + " " + user.grain + " " + user.recruits + " " + user.horses);
-        console.log("User wants use " + goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost + " " + grainCost + " " + recruitCost + " " + horseCost);
+        console.log("User wants to use " + goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost + " " + grainCost + " " + recruitCost + " " + horseCost);
 
         if (user.gold >= goldCost && user.lumber >= lumberCost && user.stone >= stoneCost && user.iron >= ironCost && user.grain >= grainCost && user.recruits >= recruitCost && user.horses >= horseCost) {
             return true;
         }
         return false;
-
     },
 
     stealResources: async function (client, username, gold, lumber, stone, iron, grain) {
