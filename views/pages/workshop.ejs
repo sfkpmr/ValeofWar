@@ -13,11 +13,12 @@
     <br>
     Workshop level: <%= workshop %> <br>
     <br>
+    Battering rams: <%= batteringrams %><br>
+    Siege towers: <%= siegetowers %><br>
+    <br>
     <form action="/town/workshop/train" method="POST">
         <label for="batteringram">Battering ram:</label><br>
         <input type="number" id="batteringram" name="batteringram" value="0"><br>
-        <label for="ladder">Ladders:</label><br>
-        <input type="number" id="ladder" name="ladder" value="0"><br>
         <label for="siegetower">Siege tower:</label><br>
         <input type="number" id="siegetower" name="siegetower" value="0"><br><br>
         <input type="submit" value="Build">

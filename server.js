@@ -49,7 +49,6 @@ app.use('/static', express.static('static'));
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
-
     authenticated = req.oidc.isAuthenticated();
 
     res.render('pages/index')
@@ -288,6 +287,9 @@ app.get("/town/workshop", requiresAuth(), async (req, res) => {
 
     workshop = user.workshopLevel;
 
+    batteringrams = user.batteringrams;
+    siegetowers = user.siegetowers;
+
     gold = user.gold;
     iron = user.iron;
     lumber = user.lumber;
@@ -298,6 +300,83 @@ app.get("/town/workshop", requiresAuth(), async (req, res) => {
 
     res.render('pages/workshop')
 });
+
+app.post("/town/workshop/train", requiresAuth(), async (req, res) => {
+
+    const user = await getUserByEmail(req.oidc.user.email);
+    batteringrams = parseInt(req.body.batteringram);
+    siegetowers = parseInt(req.body.siegetower);
+
+    goldCost = calcGoldTrainCost(0, 0, 0, 0, batteringrams, siegetowers);
+    grainCost = calcGrainTrainCost(0, 0, 0, 0, batteringrams, siegetowers);
+    lumberCost = calcLumberTrainCost(0, 0, 0, 0, batteringrams, siegetowers);
+    ironCost = calcIronTrainCost(0, 0, 0, 0, batteringrams, siegetowers);
+
+    recruitCost = (batteringrams + siegetowers) * 2;
+
+    data = { "batteringrams": batteringrams, "siegetowers": siegetowers };
+
+    if (await checkIfCanAfford(user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0)) {
+        await trainTroops(client, user.username, data);
+        await removeResources(user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0);
+    } else {
+        console.log("bbbb");
+    }
+
+    res.redirect('/town/workshop');
+});
+
+function calcGoldTrainCost(archers, spearmen, horsemen, knights, batteringrams, siegetowers) {
+    var cost = 0;
+
+    cost += archers * 10;
+    cost += spearmen * 10;
+    cost += horsemen * 10;
+    cost += knights * 10;
+    cost += batteringrams * 10;
+    cost += siegetowers * 10;
+
+    return cost;
+}
+
+function calcIronTrainCost(archers, spearmen, horsemen, knights, batteringrams, siegetowers) {
+    var cost = 0;
+
+    cost += archers * 10;
+    cost += spearmen * 10;
+    cost += horsemen * 10;
+    cost += knights * 10;
+    cost += batteringrams * 10;
+    cost += siegetowers * 10;
+
+    return cost;
+}
+
+function calcGrainTrainCost(archers, spearmen, horsemen, knights, batteringrams, siegetowers) {
+    var cost = 0;
+
+    cost += archers * 10;
+    cost += spearmen * 10;
+    cost += horsemen * 10;
+    cost += knights * 10;
+    cost += batteringrams * 10;
+    cost += siegetowers * 10;
+
+    return cost;
+}
+
+function calcLumberTrainCost(archers, spearmen, horsemen, knights, batteringrams, siegetowers) {
+    var cost = 0;
+
+    cost += archers * 10;
+    cost += spearmen * 10;
+    cost += horsemen * 10;
+    cost += knights * 10;
+    cost += batteringrams * 10;
+    cost += siegetowers * 10;
+
+    return cost;
+}
 
 app.get("/town/stables", requiresAuth(), async (req, res) => {
 
@@ -440,9 +519,10 @@ app.post("/town/stables/train", requiresAuth(), async (req, res) => {
     lumberCost += knights * 10;
 
     horseAndRecruitCost = horsemen + knights;
+    data = { "horsemen": horsemen, "knights": knights };
 
     if (await checkIfCanAfford(user.username, goldCost, lumberCost, 0, ironCost, grainCost, horseAndRecruitCost, horseAndRecruitCost)) {
-        await trainTroops(client, user.username, { "horsemen": horsemen, "knights": knights });
+        await trainTroops(client, user.username, data);
         //TODO remove horses
         await removeResources(user.username, goldCost, lumberCost, 0, ironCost, grainCost, horseAndRecruitCost, horseAndRecruitCost);
     } else {
@@ -485,8 +565,8 @@ app.post("/town/barracks/train", requiresAuth(), async (req, res) => {
     grainCost += spearmen * 10;
     lumberCost += spearmen * 10;
 
-    updateInfo = { "archers": archers, "spearmen": spearmen };
     recruitCost = archers + spearmen;
+    data = { "archers": archers, "spearmen": spearmen };
 
     if (await checkIfCanAfford(user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0)) {
         await trainTroops(client, user.username, updateInfo);
@@ -805,7 +885,7 @@ async function addResources(username) {
 
     const updatedUser = { "grain": grainIncome, "lumber": lumberIncome, "stone": stoneIncome, "gold": goldIncome, "iron": ironIncome, "recruits": recruitsIncome, "horses": horseIncome };
 
-    await incDatabaseValue(username, updatedUser);
+    await incDatabaseValue(client, username, updatedUser);
 
 }
 
@@ -880,7 +960,7 @@ async function upgradeBuilding(username, building) {
 }
 
 //måste köra för alla så folk kan anfalla folk som är afk
-var minutes = 10, the_interval = minutes * 60 * 1000;
+var minutes = 0.1, the_interval = minutes * 60 * 1000;
 setInterval(function () {
     console.log("Adding resources for everyone!");
     checkAll();
