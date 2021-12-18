@@ -1,3 +1,4 @@
+const e = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 
 module.exports = {
@@ -7,13 +8,12 @@ module.exports = {
         return result;
     },
 
-    createAttackLog: async function (client, attacker, defender, attackDamage, defenseDamage, attackerLosses, defenderLosses, grainLooted, goldLooted, lumberLooted, stoneLooted, ironLooted) {
-        date = new Date();
-        const data = {
-            "time": date, "attacker": attacker, "defender": defender, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLooted,
-            "grainLoot": grainLooted, "lumberLoot": lumberLooted, "stoneLoot": stoneLooted, "ironLoot": ironLooted
-        };
-        await client.db("gamedb").collection("attacks").insertOne(data);
+    createAttackLog: async function (client, data) {
+
+        result = await client.db("gamedb").collection("attacks").insertOne(data);
+
+        return result.insertedId;
+
     },
 
     getInvolvedAttackLogs: async function (client, username) {
@@ -33,6 +33,8 @@ module.exports = {
         spearmen = attacker.spearmen;
         horsemen = attacker.horsemen;
         knights = attacker.knights;
+        batteringrams = attacker.batteringrams;
+        siegetowers = attacker.siegetowers;
 
         var archerDamage = 0, spearmenDamage = 0, horsemenDamage = 0, knightsDamage = 0;
 
@@ -44,6 +46,13 @@ module.exports = {
             horsemenDamage = horsemen * 15;
         } if (knights !== undefined && knights !== null) {
             knightsDamage = knights * 20;
+        } if (batteringrams !== undefined && batteringrams !== null) {
+            archerDamage = archerDamage * batteringrams;
+            spearmenDamage = spearmenDamage * batteringrams;
+        } if (siegetowers !== undefined && siegetowers !== null) {
+            //fix does double calc with battering ram dmg
+            archerDamage = archerDamage * siegetowers * 5;
+            spearmenDamage = spearmenDamage * siegetowers * 5;
         }
 
         return archerDamage + spearmenDamage + horsemenDamage + knightsDamage;
@@ -55,6 +64,7 @@ module.exports = {
         spearmen = defender.spearmen;
         horsemen = defender.horsemen;
         knights = defender.knights;
+        walls = defender.wallLevel;
 
         var archerDamage = 0, spearmenDamage = 0, horsemenDamage = 0, knightsDamage = 0;
 
@@ -68,9 +78,7 @@ module.exports = {
             knightsDamage = knights * 20;
         }
 
-        return archerDamage + spearmenDamage + horsemenDamage + knightsDamage;
+        return (archerDamage + spearmenDamage + horsemenDamage + knightsDamage) * (1 + (walls / 10));
 
     }
 }
-//module.exports.getAttackLog = getAttackLog;
-//module.exports.createAttackLog = createAttackLog;

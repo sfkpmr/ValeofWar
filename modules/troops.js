@@ -2,11 +2,11 @@ const { incDatabaseValue } = require("../modules/database.js");
 
 module.exports = {
 
-    trainTroops: async function (client, username, updatedUser) {
-        await incDatabaseValue(client, username, updatedUser);
+    trainTroops: async function (client, username, data) {
+        await incDatabaseValue(client, username, data);
     },
 
-    craftArmor: async function (client, username, updatedUser) {
-        await incDatabaseValue(client, username, updatedUser);
+    craftArmor: async function (client, username, data) {
+        await incDatabaseValue(client, username, data);
     }
 }

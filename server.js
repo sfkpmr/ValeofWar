@@ -15,7 +15,10 @@ app.disable('x-powered-by');
 
 const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
-const { incDatabaseValue } = require("./modules/database.js");
+const { incDatabaseValue, getUser, getUserByEmail } = require("./modules/database.js");
+const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding } = require("./modules/buildings.js");
+const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources } = require("./modules/resources.js");
+const { json } = require("express/lib/response");
 
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
 const client = new MongoClient(uri);
@@ -51,7 +54,12 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", (req, res) => {
     authenticated = req.oidc.isAuthenticated();
 
-    res.render('pages/index')
+    if (authenticated) {
+        res.redirect("/town")
+    } else {
+        res.render('pages/index')
+    }
+
 });
 
 app.get("/profile", requiresAuth(), async (req, res) => {
@@ -60,7 +68,7 @@ app.get("/profile", requiresAuth(), async (req, res) => {
 
     //Test user: johanna@test.com, saodhgi-9486y-(WYTH
 
-    const user = await getUserByEmail(req.oidc.user.email)
+    const user = await getUserByEmail(client, req.oidc.user.email)
 
     res.redirect(`/profile/${user.username}`)
 });
@@ -68,7 +76,7 @@ app.get("/profile", requiresAuth(), async (req, res) => {
 app.get("/profile/:username", requiresAuth(), async (req, res) => {
 
     const currentUser = req.oidc.user.email;
-    const profileUser = await getUser(req.params.username);
+    const profileUser = await getUser(client, req.params.username);
 
     gold = profileUser.gold;
     iron = profileUser.iron;
@@ -105,7 +113,7 @@ app.get("/mailbox", requiresAuth(), async (req, res) => {
 
 app.get("/mailbox/log", requiresAuth(), async (req, res) => {
 
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
     result = await getInvolvedAttackLogs(client, user.username)
 
     gold = user.gold;
@@ -185,7 +193,7 @@ app.get("/town", requiresAuth(), async (req, res) => {
 
 app.get("/town/barracks", requiresAuth(), async (req, res) => {
 
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
 
     barracks = user.barracksLevel;
 
@@ -205,7 +213,7 @@ app.get("/town/barracks", requiresAuth(), async (req, res) => {
 
 app.get("/town/wall", requiresAuth(), async (req, res) => {
 
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
 
     wall = user.wallLevel;
 
@@ -222,7 +230,7 @@ app.get("/town/wall", requiresAuth(), async (req, res) => {
 });
 
 app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
 
     console.log("aaaaaaaaaaaaa")
 
@@ -253,9 +261,9 @@ app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
     }
 
 
-    if (await checkIfCanAfford(user.username, 0, 0, 0, 0, 0, 0, 0)) {
-        await upgradeBuilding(user.username, buildingName);
-        await removeResources(user.username, 0, 0, 0, 0, 0, 0, 0);
+    if (await checkIfCanAfford(client, user.username, 0, 0, 0, 0, 0, 0, 0)) {
+        await upgradeBuilding(client, user.username, buildingName);
+        await removeResources(client, user.username, 0, 0, 0, 0, 0, 0, 0);
     } else {
         console.log("bbbb");
     }
@@ -265,7 +273,7 @@ app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
 
 app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
 
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
 
     trainingField = user.trainingfieldLevel;
 
@@ -283,7 +291,7 @@ app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
 app.get("/town/workshop", requiresAuth(), async (req, res) => {
 
     //todo method to get user and set variables
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
 
     workshop = user.workshopLevel;
 
@@ -303,7 +311,7 @@ app.get("/town/workshop", requiresAuth(), async (req, res) => {
 
 app.post("/town/workshop/train", requiresAuth(), async (req, res) => {
 
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
     batteringrams = parseInt(req.body.batteringram);
     siegetowers = parseInt(req.body.siegetower);
 
@@ -316,9 +324,9 @@ app.post("/town/workshop/train", requiresAuth(), async (req, res) => {
 
     data = { "batteringrams": batteringrams, "siegetowers": siegetowers };
 
-    if (await checkIfCanAfford(user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0)) {
+    if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0)) {
         await trainTroops(client, user.username, data);
-        await removeResources(user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0);
+        await removeResources(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0);
     } else {
         console.log("bbbb");
     }
@@ -326,61 +334,9 @@ app.post("/town/workshop/train", requiresAuth(), async (req, res) => {
     res.redirect('/town/workshop');
 });
 
-function calcGoldTrainCost(archers, spearmen, horsemen, knights, batteringrams, siegetowers) {
-    var cost = 0;
-
-    cost += archers * 10;
-    cost += spearmen * 10;
-    cost += horsemen * 10;
-    cost += knights * 10;
-    cost += batteringrams * 10;
-    cost += siegetowers * 10;
-
-    return cost;
-}
-
-function calcIronTrainCost(archers, spearmen, horsemen, knights, batteringrams, siegetowers) {
-    var cost = 0;
-
-    cost += archers * 10;
-    cost += spearmen * 10;
-    cost += horsemen * 10;
-    cost += knights * 10;
-    cost += batteringrams * 10;
-    cost += siegetowers * 10;
-
-    return cost;
-}
-
-function calcGrainTrainCost(archers, spearmen, horsemen, knights, batteringrams, siegetowers) {
-    var cost = 0;
-
-    cost += archers * 10;
-    cost += spearmen * 10;
-    cost += horsemen * 10;
-    cost += knights * 10;
-    cost += batteringrams * 10;
-    cost += siegetowers * 10;
-
-    return cost;
-}
-
-function calcLumberTrainCost(archers, spearmen, horsemen, knights, batteringrams, siegetowers) {
-    var cost = 0;
-
-    cost += archers * 10;
-    cost += spearmen * 10;
-    cost += horsemen * 10;
-    cost += knights * 10;
-    cost += batteringrams * 10;
-    cost += siegetowers * 10;
-
-    return cost;
-}
-
 app.get("/town/stables", requiresAuth(), async (req, res) => {
 
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
 
     stables = user.stablesLevel;
 
@@ -400,7 +356,7 @@ app.get("/town/stables", requiresAuth(), async (req, res) => {
 
 app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
 
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
 
     blacksmith = user.blacksmithLevel;
 
@@ -427,7 +383,7 @@ app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
 app.post("/town/blacksmith/craft", requiresAuth(), async (req, res) => {
     //await updateLastAction(req.oidc.user.nickname);
 
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
 
     var goldCost = 0, lumberCost = 0, ironCost = 0;
 
@@ -476,9 +432,9 @@ app.post("/town/blacksmith/craft", requiresAuth(), async (req, res) => {
         "shields": shields, "swords": swords, "bracers": bracers, "longbows": longbows, "spears": spears, "lances": lances, "boots": boots, "helmets": helmets
     }
 
-    if (await checkIfCanAfford(user.username, goldCost, lumberCost, 0, ironCost, 0, 0, 0)) {
+    if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, 0, 0, 0)) {
         await craftArmor(client, user.username, updateUser);
-        await removeResources(user.username, goldCost, lumberCost, 0, ironCost, 0, 0, 0);
+        await removeResources(client, user.username, goldCost, lumberCost, 0, ironCost, 0, 0, 0);
     } else {
         console.log("bbbb");
     }
@@ -490,7 +446,7 @@ app.post("/town/blacksmith/craft", requiresAuth(), async (req, res) => {
 });
 
 app.get("/land", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
 
     farms = maxFarms;
     goldMines = maxGoldMines;
@@ -503,7 +459,7 @@ app.get("/land", requiresAuth(), async (req, res) => {
 
 app.post("/town/stables/train", requiresAuth(), async (req, res) => {
 
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
     //await updateLastAction(user.username);
 
     horsemen = parseInt(req.body.horsemen);
@@ -521,10 +477,10 @@ app.post("/town/stables/train", requiresAuth(), async (req, res) => {
     horseAndRecruitCost = horsemen + knights;
     data = { "horsemen": horsemen, "knights": knights };
 
-    if (await checkIfCanAfford(user.username, goldCost, lumberCost, 0, ironCost, grainCost, horseAndRecruitCost, horseAndRecruitCost)) {
+    if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, horseAndRecruitCost, horseAndRecruitCost)) {
         await trainTroops(client, user.username, data);
         //TODO remove horses
-        await removeResources(user.username, goldCost, lumberCost, 0, ironCost, grainCost, horseAndRecruitCost, horseAndRecruitCost);
+        await removeResources(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, horseAndRecruitCost, horseAndRecruitCost);
     } else {
         console.log("bbbb");
     }
@@ -546,7 +502,7 @@ app.post("/town/barracks/train", requiresAuth(), async (req, res) => {
     //update username
     //await updateLastAction(req.oidc.user.nickname);
 
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
 
     archers = parseInt(req.body.archers);
     spearmen = parseInt(req.body.spearmen);
@@ -568,9 +524,9 @@ app.post("/town/barracks/train", requiresAuth(), async (req, res) => {
     recruitCost = archers + spearmen;
     data = { "archers": archers, "spearmen": spearmen };
 
-    if (await checkIfCanAfford(user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0)) {
-        await trainTroops(client, user.username, updateInfo);
-        await removeResources(user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0);
+    if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0)) {
+        await trainTroops(client, user.username, data);
+        await removeResources(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0);
     } else {
         console.log("bbbb");
     }
@@ -586,17 +542,17 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
     //TODO attack limiter //reset all at midnight? //losses
     //TODO create attack database to pull data from for attack log
 
-    const attacker = await getUserByEmail(req.oidc.user.email);
-    const defender = await getUser(req.params.username);
+    const attacker = await getUserByEmail(client, req.oidc.user.email);
+    const defender = await getUser(client, req.params.username);
 
     console.log(attacker.username + " tries to attack " + defender.username);
 
-    var defense = await calculateDefense(defender);
-    var attack = await calculateAttack(attacker);
+    var attackDamage = await calculateAttack(attacker);
+    var defenseDamage = await calculateDefense(defender);
 
-    console.log("Total defense: " + defense + " Total attack: " + attack);
+    console.log("Total defense: " + defenseDamage + " Total attack: " + attackDamage);
 
-    const closeness = attack / (attack + defense);
+    const closeness = attackDamage / (attackDamage + defenseDamage);
     var divider;
     console.log("close: " + closeness);
 
@@ -622,12 +578,21 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
     grainLoot = Math.round(defender.grain / divider);
     ironLoot = Math.round(defender.iron / divider);
 
-    stealResources(attacker.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
-    loseResources(defender.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
+    stealResources(client, attacker.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
+    loseResources(client, defender.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
 
-    createAttackLog(client, attacker.username, defender.username, attack, defense, 0, 0, goldLoot, grainLoot, lumberLoot, stoneLoot, ironLoot);
+    attackerLosses = 0;
+    defenderLosses = 0;
 
-    res.redirect(`/profile/${defender.username}`);
+    date = new Date();
+    const data = {
+        "_id": new ObjectId(), "time": date, "attacker": attacker.username, "defender": defender.username, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLoot,
+        "grainLoot": grainLoot, "lumberLoot": lumberLoot, "stoneLoot": stoneLoot, "ironLoot": ironLoot
+    };
+
+    result = await createAttackLog(client, data);
+
+    res.redirect(`/mailbox/log/${result}`);
 
 });
 
@@ -635,7 +600,7 @@ app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
 
     type = req.params.type;
     resourceId = req.params.number;
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
     var invalidId;
 
     if (type === "farm") {
@@ -696,7 +661,7 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
 
     type = req.params.type;
     resourceId = req.params.number;
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
     var updatedUser;
 
     //todo use switch
@@ -754,7 +719,7 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
         }
     }
 
-    if (await checkIfCanAfford(user.username, 1, 1, 2, 3, 4, 0, 0)) {
+    if (await checkIfCanAfford(client, user.username, 1, 1, 2, 3, 4, 0, 0)) {
         const result = await client.db("gamedb").collection("players").updateOne({ username: user.username }, { $set: updatedUser });
     }
 
@@ -767,7 +732,7 @@ app.get("/land/:type/:number/establish", requiresAuth(), async (req, res) => {
     //TODO error check
     type = req.params.type;
     resourceId = req.params.number;
-    const user = await getUserByEmail(req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
     var updatedUser;
 
     if (type === "farm") {
@@ -803,24 +768,13 @@ app.get("/land/:type/:number/establish", requiresAuth(), async (req, res) => {
 
     console.log(updatedUser);
 
-    if (await checkIfCanAfford(user.username, 1, 1, 2, 3, 4, 0, 0)) {
+    if (await checkIfCanAfford(client, user.username, 1, 1, 2, 3, 4, 0, 0)) {
         const result = await client.db("gamedb").collection("players").updateOne({ username: user.username }, { $set: updatedUser });
     }
 
     res.redirect("/land");
 
 });
-
-async function getUser(username) {
-    const result = await client.db("gamedb").collection("players").findOne({ "username": username });
-    return result;
-}
-
-async function getUserByEmail(email) {
-    const result = await client.db("gamedb").collection("players").findOne({ "email": email });
-    return result;
-}
-
 
 async function updateLastAction(username) {
 
@@ -838,129 +792,12 @@ async function checkAll() {
 
         var updatedSal = user._id;
         console.log(updatedSal);
-        addResources(user.username);
+        addResources(client, user.username);
     });
 }
 
-async function addResources(username) {
-    const user = await getUser(username);
-
-    const lumberCamps = user.lumberCamps;
-    const goldMines = user.goldMines;
-    const farms = user.farms;
-    const ironMines = user.ironMines;
-    const quarries = user.quarries;
-    const trainingfield = user.trainingfieldLevel;
-    const stables = user.stablesLevel;
-
-    var lumberIncome = 0, goldIncome = 0, grainIncome = 0, ironIncome = 0, stoneIncome = 0, recruitsIncome = trainingfield * 10, horseIncome = stables * 10;
-
-    lumberCamps.forEach(lumberCalc);
-    goldMines.forEach(goldCalc);
-    farms.forEach(grainCalc);
-    ironMines.forEach(ironCalc);
-    quarries.forEach(stoneCalc);
-
-    function lumberCalc(i) {
-        lumberIncome += i * 10;
-    };
-
-    function goldCalc(i) {
-        goldIncome += i * 2;
-    };
-
-    function grainCalc(i) {
-        grainIncome += i * 10;
-    };
-
-    function ironCalc(i) {
-        ironIncome += i * 5;
-    };
-
-    function stoneCalc(i) {
-        stoneIncome += i * 5;
-    };
-
-    console.log(`Giving ${grainIncome} grain, ${lumberIncome} lumber, ${goldIncome} gold, ${stoneIncome} stone, ${ironIncome} iron, ${recruitsIncome} recruits and ${horseIncome} horses to ${username}.`);
-
-    const updatedUser = { "grain": grainIncome, "lumber": lumberIncome, "stone": stoneIncome, "gold": goldIncome, "iron": ironIncome, "recruits": recruitsIncome, "horses": horseIncome };
-
-    await incDatabaseValue(client, username, updatedUser);
-
-}
-
-async function removeResources(username, gold, lumber, stone, iron, grain, recruits, horses) {
-
-    const user = await getUser(username);
-
-    const newGold = user.gold - gold;
-    const newLumber = user.lumber - lumber;
-    const newStone = user.stone - stone;
-    const newIron = user.iron - iron;
-    const newGrain = user.grain - grain;
-    const newRecruits = user.recruits - recruits;
-    const newHorses = user.horses - horses;
-
-    const updatedUser = { "grain": newGrain, "lumber": newLumber, "stone": newStone, "gold": newGold, "iron": newIron, "recruits": newRecruits, "horses": newHorses };
-
-    const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
-
-}
-
-async function checkIfCanAfford(username, goldCost, lumberCost, stoneCost, ironCost, grainCost, recruitCost, horseCost) {
-
-    console.log(username)
-    const user = await getUser(username);
-
-    console.log("User has " + user.gold + " " + user.lumber + " " + user.stone + " " + user.iron + " " + user.grain + " " + user.recruits + " " + user.horses);
-    console.log("User wants use " + goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost + " " + grainCost + " " + recruitCost + " " + horseCost);
-
-    if (user.gold >= goldCost && user.lumber >= lumberCost && user.stone >= stoneCost && user.iron >= ironCost && user.grain >= grainCost && user.recruits >= recruitCost && user.horses >= horseCost) {
-        return true;
-    }
-    return false;
-
-}
-
-async function stealResources(username, gold, lumber, stone, iron, grain) {
-
-    console.log(username + " is stealing resources");
-    const user = await getUser(username);
-
-    const newGold = Math.round(user.gold + gold);
-    const newLumber = Math.round(user.lumber + lumber);
-    const newStone = Math.round(user.stone + stone);
-    const newIron = Math.round(user.iron + iron);
-    const newGrain = Math.round(user.grain + grain);
-
-    const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
-
-    const result = await client.db("gamedb").collection("players").updateOne({ "username": username }, { $set: updatedUser });
-}
-
-async function loseResources(username, gold, lumber, stone, iron, grain) {
-
-    console.log(username + " is losing resources");
-    const user = await getUser(username);
-
-    const newGold = user.gold - gold;
-    const newLumber = user.lumber - lumber;
-    const newStone = user.stone - stone;
-    const newIron = user.iron - iron;
-    const newGrain = user.grain - grain;
-
-    const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
-    const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
-}
-
-async function upgradeBuilding(username, building) {
-    console.log(username + " " + building)
-    const updatedUser = { [building]: 1 };
-    await incDatabaseValue(client, username, updatedUser);
-}
-
 //måste köra för alla så folk kan anfalla folk som är afk
-var minutes = 0.1, the_interval = minutes * 60 * 1000;
+var minutes = 10, the_interval = minutes * 60 * 1000;
 setInterval(function () {
     console.log("Adding resources for everyone!");
     checkAll();
