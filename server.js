@@ -5,7 +5,7 @@ require("dotenv").config();
 const { auth, requiresAuth } = require('express-openid-connect');
 const ejs = require('ejs');
 const e = require("express");
-const { send, render } = require("express/lib/response"); //???
+//const { send, render } = require("express/lib/response"); //???
 app.set('view engine', 'ejs');
 var compression = require('compression');
 // Use Gzip compression
@@ -13,16 +13,11 @@ app.use(compression());
 // Remove x-powered-by Express
 app.disable('x-powered-by');
 
-//const attack = require("./modules/attack.js");
-//const testGet = require("./modules/attack.js").getAttackLog;
-//const testCreate = require("./modules/attack.js").createAttackLog;
-
 const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
 const { incDatabaseValue } = require("./modules/database.js");
 
-const uri = "mongodb+srv://server:zjzJoTWpk322w2eJ@cluster0.rn9ur.mongodb.net/gamedb?retryWrites=true&w=majority"
-//const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`
+const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
 const client = new MongoClient(uri);
 
 const maxFarms = 6, maxGoldMines = 3, maxIronMines = 4, maxQuarries = 2, maxLumberCamps = 4;
@@ -880,7 +875,7 @@ async function loseResources(username, gold, lumber, stone, iron, grain) {
 async function upgradeBuilding(username, building) {
     console.log(username + " " + building)
     const updatedUser = { [building]: 1 };
-    await incDatabaseValue(username, updatedUser);
+    await incDatabaseValue(client, username, updatedUser);
 }
 
 //måste köra för alla så folk kan anfalla folk som är afk
