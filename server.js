@@ -271,9 +271,9 @@ app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
     }
 
 
-    if (await checkIfCanAfford(client, user.username, 0, 0, 0, 0, 0, 0, 0)) {
+    if (await checkIfCanAfford(client, user.username, 0, 20, 20, 20, 0, 0, 0)) {
         await upgradeBuilding(client, user.username, buildingName);
-        await removeResources(client, user.username, 0, 0, 0, 0, 0, 0, 0);
+        await removeResources(client, user.username, 0, 20, 20, 20, 0, 0, 0);
     } else {
         console.log("bbbb");
     }
