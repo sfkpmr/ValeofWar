@@ -28,7 +28,7 @@ ENV TZ="Europe/Stockholm"
 ENV NODE_ENV="production"
 
 # replace this with your application's default port
-EXPOSE 8080
+EXPOSE 3000
 
 # Run image with nobody instead of root 
 USER nobody

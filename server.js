@@ -1,5 +1,14 @@
 const express = require("express");
+const https = require('https');
+const fs = require('fs');
+var key = fs.readFileSync(__dirname + '/certs/selfsigned.key');
+var cert = fs.readFileSync(__dirname + '/certs/selfsigned.crt');
+var options = {
+    key: key,
+    cert: cert
+};
 const app = express();
+var server = https.createServer(options, app);
 const { MongoClient, ObjectId } = require('mongodb');
 require("dotenv").config();
 const { auth, requiresAuth } = require('express-openid-connect');
@@ -807,6 +816,6 @@ setInterval(function () {
 }, the_interval);
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
