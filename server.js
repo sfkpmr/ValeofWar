@@ -534,7 +534,7 @@ app.post("/town/barracks/train", requiresAuth(), async (req, res) => {
     grainCost += swordsmen * 10;
     ironCost += swordsmen * 10;
 
-    recruitCost = archers + spearmen;
+    recruitCost = archers + spearmen + swordsmen;
     data = { "archers": archers, "spearmen": spearmen, "swordsmen": swordsmen };
 
     if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0)) {
