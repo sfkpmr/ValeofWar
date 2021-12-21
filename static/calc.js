@@ -24,9 +24,10 @@ function barracksTrainCost(val) {
 
 function stablesTrainCost(val) {
 
-    grainCost = parseInt(document.getElementById('horsemen').value) * 10;
-    lumberCost = parseInt(document.getElementById('horsemen').value) * 10;
-    ironCost = 0, goldCost = 0;
+    grainCost = 0, lumberCost = 0, ironCost = 0, goldCost = 0;
+
+    grainCost += parseInt(document.getElementById('horsemen').value) * 10;
+    lumberCost += parseInt(document.getElementById('horsemen').value) * 10;
    
     goldCost += parseInt(document.getElementById('knights').value) * 25;
     grainCost += parseInt(document.getElementById('knights').value) * 30;
