@@ -3,6 +3,7 @@
 
 <head>
     <title>Barracks</title>
+    <script type="text/javascript" src="../static/calc.js"></script> 
 </head>
 
 <body>
@@ -10,9 +11,9 @@
     <!-- TODO server check barrack exists and has levels-->
     <!-- TODO Display max number of units/armor you can afford right now -->
 
-    Gold: <%= gold %> <img src="../static/iron-ingots.png" alt="Iron" style="width:25px;height:auto;vertical-align:middle;"> <%= iron %> <img src="../static/wood2.png" 
-    alt="Lumber" style="width:25px;height:auto;vertical-align:middle;"> <%= lumber %> <img src="../static/stone.png" alt="Stone" style="width:25px;height:auto;vertical-align:middle;"> 
-    <%= stone %> <img src="../static/grain.png" alt="Grain" style="width:25px;height:auto;vertical-align:middle;"> <%= grain %>  Recruits: <%= recruits %> Horses: <%= horses %> <br>
+    Gold: <%= gold %> <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron" style="width:25px;height:auto;vertical-align:middle;"> <%= iron %> <img src="../static/images/wood2.png" 
+    alt="Lumber" title="Lumber" style="width:25px;height:auto;vertical-align:middle;"> <%= lumber %> <img src="../static/images/stone.png" alt="Stone" title="Stone" style="width:25px;height:auto;vertical-align:middle;"> 
+    <%= stone %> <img src="../static/images/grain.png" alt="Grain" title="Grain" style="width:25px;height:auto;vertical-align:middle;"> <%= grain %>  Recruits: <%= recruits %> Horses: <%= horses %> <br>
     <br>
     Barracks level: <%= barracks %> <br>
     <br>
@@ -22,11 +23,11 @@
     <br>
     <form action="/town/barracks/train" method="POST">
         <label for="archers">Archers:</label>
-        <input type="number" id="archers" name="archers" value="0" oninput="calcFunc(this.value)" min=0 oninput="validity.valid||(value='');"><br>
+        <input type="number" id="archers" name="archers" value="0" oninput="barracksTrainCost(this.value)" min=0 oninput="validity.valid||(value='');"><br>
         <label for="spearmen">Spearmen:</label>
-        <input type="number" id="spearmen" name="spearmen" value="0" oninput="calcFunc(this.value)" min=0 oninput="validity.valid||(value='');"><br>
+        <input type="number" id="spearmen" name="spearmen" value="0" oninput="barracksTrainCost(this.value)" min=0 oninput="validity.valid||(value='');"><br>
         <label for="swordsmen">Swordsmen:</label>
-        <input type="number" id="swordsmen" name="swordsmen" value="0" oninput="calcFunc(this.value)" min=0 oninput="validity.valid||(value='');"><br><br>
+        <input type="number" id="swordsmen" name="swordsmen" value="0" oninput="barracksTrainCost(this.value)" min=0 oninput="validity.valid||(value='');"><br><br>
         Training cost: <output id="grain">0</output> grain, <output id="lumber">0</output> lumber, <output id="iron">0</output> iron, <output id="gold">0</output>
         gold and <output id="recruits">0</output> recuits. <br>
 
@@ -37,37 +38,6 @@
     <form action="/town/barracks/upgrade" method="POST">
         <input type="submit" value="Upgrade">
     </form>
-
- 
-    <script>
-        
-        function calcFunc(val) {
-
-            grainCost = parseInt(document.getElementById('archers').value) * 10;
-            lumberCost = parseInt(document.getElementById('archers').value) * 20;
-            goldCost = parseInt(document.getElementById('archers').value) * 10;
-            ironCost = 0;
-       
-            grainCost += parseInt(document.getElementById('spearmen').value) * 10;
-            lumberCost += parseInt(document.getElementById('spearmen').value) * 5;
-
-            grainCost += parseInt(document.getElementById('swordsmen').value) * 10;
-            ironCost += parseInt(document.getElementById('swordsmen').value) * 20;
-            goldCost += parseInt(document.getElementById('swordsmen').value) * 10;
-
-            document.getElementById("grain").innerHTML = grainCost; 
-            document.getElementById("lumber").innerHTML = lumberCost; 
-            document.getElementById("iron").innerHTML = ironCost; 
-            document.getElementById("gold").innerHTML = goldCost; 
-            document.getElementById("recruits").innerHTML = parseInt(document.getElementById('archers').value) + parseInt(document.getElementById('spearmen').value) 
-            + parseInt(document.getElementById('swordsmen').value); 
-
-        }
-
-    </script>
-        
-
-
 
     <a href="/town">Town</a> <a href="/land">Land</a> <a href="/logout">Log out</a>
 
