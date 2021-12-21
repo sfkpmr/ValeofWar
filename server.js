@@ -36,6 +36,24 @@ const client = new MongoClient(uri);
 const maxFarms = 8, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 7;
 //const farmBaseCost = {lumber: 100, gold: 100};
 
+const { Server } = require("socket.io");
+const io = new Server(server);
+
+io.on('connection', (socket) => {
+    console.log('a user connected ' + socket.id);
+
+    io.emit('chat message', "asffs");
+
+    socket.on('getUser', (msg) => {
+        //io.emit('chat message', msg);
+        console.log(msg)
+    });
+
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+    });
+});
+
 main().catch(console.error);
 
 async function main() {
@@ -60,7 +78,16 @@ app.use(
 
 app.use('/static', express.static('static'));
 app.use(express.urlencoded({ extended: true }));
+io.on('connection', (socket) => {
+    //users = ["aaaa", "bbbb"];
+    socket.on('setUserId', function (userId) {
+        users[userId] = socket;
+    });
 
+    socket.on('send notification', function (userId) {
+        users[userId].emit('notification', "important notification message");
+    });
+});
 app.get("/", (req, res) => {
     authenticated = req.oidc.isAuthenticated();
 
@@ -81,6 +108,18 @@ app.get("/profile", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email)
 
     res.redirect(`/profile/${user.username}`)
+});
+
+app.get("/test", requiresAuth(), async (req, res) => {
+
+    res.render('pages/test')
+});
+
+app.get("/getUser", requiresAuth(), async (req, res) => {
+
+    banan = { "username": req.oidc.user.email }
+    console.log("WWWWWWWWWWWWWWWWW")
+    res.send(banan)
 });
 
 app.get("/profile/:username", requiresAuth(), async (req, res) => {

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+
+  <ul id="messages"></ul>
+  <ul id="test"></ul>
+  <form id="form" action="">
+    <input id="input" autocomplete="off" /><button>Send</button>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+    socket.on('connection', async function (data) {
+      console.log("connect")
+      socket.emit('setUserId', "pelle");
+    });
+
+    socket.on('chat message', async function (msg) {
+      console.log(msg)
+      test = await fetchAsync('/getUser')
+      console.log("Test " + test)
+    });
+
+    //socket.emit('getUser', "odghipsuabgpisaudgpiusbdgpioubsdg");
+
+    async function fetchAsync(url) {
+      let response = await fetch(url);
+      let data = await response.json();
+      return data.username;
+    }
+
+    //test = fetchAsync('/getUser')
+    //console.log("Test " + test)
+
+  </script>
+
+
+
+</body>
+
+</html>
