@@ -96,6 +96,7 @@ app.get("/profile/:username", requiresAuth(), async (req, res) => {
 
     archers = profileUser.archers;
     spearmen = profileUser.spearmen;
+    swordsmen = profileUser.swordsmen;
     horsemen = profileUser.horsemen;
     knights = profileUser.knights;
 
@@ -816,6 +817,7 @@ async function checkAll() {
 }
 
 //måste köra för alla så folk kan anfalla folk som är afk
+//ev kör när någon interagerar med afk folk
 var minutes = 10, the_interval = minutes * 60 * 1000;
 setInterval(function () {
     console.log("Adding resources for everyone!");
@@ -824,5 +826,5 @@ setInterval(function () {
 
 const port = process.env.PORT || 3000;
 server.listen(port, () => {
-    console.log(`Listening on port ${port}`);
+    console.log(`Listening on https://localhost:${port}`);
 });
