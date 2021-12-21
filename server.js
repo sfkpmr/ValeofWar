@@ -32,7 +32,8 @@ const { json } = require("express/lib/response");
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
 const client = new MongoClient(uri);
 
-const maxFarms = 6, maxGoldMines = 3, maxIronMines = 4, maxQuarries = 2, maxLumberCamps = 4;
+//const maxFarms = 6, maxGoldMines = 3, maxIronMines = 4, maxQuarries = 2, maxLumberCamps = 4;
+const maxFarms = 8, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 7;
 //const farmBaseCost = {lumber: 100, gold: 100};
 
 main().catch(console.error);
@@ -463,6 +464,12 @@ app.get("/land", requiresAuth(), async (req, res) => {
     quarries = maxQuarries;
     lumberCamps = maxLumberCamps;
     ironMines = maxIronMines;
+
+    f = user.farms;
+    g = user.goldMines;
+    q = user.quarries;
+    l = user.lumberCamps;
+    i = user.ironMines;
 
     res.render('pages/land');
 });

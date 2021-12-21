@@ -18,15 +18,42 @@
     <br>
     <form action="/town/stables/train" method="POST">
         <label for="horsemen">Horsemen:</label><br>
-        <input type="number" id="horsemen" name="horsemen" value="0"><br>
+        <input type="number" id="horsemen" name="horsemen" value="0" oninput="calcFunc(this.value)" min=0 oninput="validity.valid||(value='');"><br>
         <label for="knights">Knights:</label><br>
-        <input type="number" id="knights" name="knights" value="0"><br><br>
+        <input type="number" id="knights" name="knights" value="0" oninput="calcFunc(this.value)" min=0 oninput="validity.valid||(value='');"><br><br>
+        Training cost: <output id="grain">0</output> grain, <output id="lumber">0</output> lumber, <output id="iron">0</output> iron, 
+        <output id="gold">0</output> gold, <output id="recruits">0</output> recuits and <output id="horses">0</output> horses.<br>
+
         <input type="submit" value="Train">
     </form>
+
+  
     <br>
     <form action="/town/stables/upgrade" method="POST">
         <input type="submit" value="Upgrade">
     </form>
+
+    <script>
+        
+        function calcFunc(val) {
+
+            grainCost = parseInt(document.getElementById('horsemen').value) * 10;
+            lumberCost = parseInt(document.getElementById('horsemen').value) * 10;
+            ironCost = 0, goldCost = 0;
+           
+            goldCost += parseInt(document.getElementById('knights').value) * 25;
+            grainCost += parseInt(document.getElementById('knights').value) * 30;
+            ironCost += parseInt(document.getElementById('knights').value) * 20;
+
+            document.getElementById("grain").innerHTML = grainCost; 
+            document.getElementById("lumber").innerHTML = lumberCost; 
+            document.getElementById("iron").innerHTML = ironCost; 
+            document.getElementById("gold").innerHTML = goldCost; 
+            document.getElementById("recruits").innerHTML = parseInt(document.getElementById('horsemen').value) + parseInt(document.getElementById('knights').value); 
+            document.getElementById("horses").innerHTML = parseInt(document.getElementById('horsemen').value) + parseInt(document.getElementById('knights').value); 
+        }
+
+    </script>
 
     <a href="/town">Town</a> <a href="/land">Land</a> <a href="/logout">Log out</a>
 
