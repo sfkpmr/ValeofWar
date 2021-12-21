@@ -39,6 +39,9 @@ const maxFarms = 8, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumb
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+//hashset instead? track all sockets for many windows?
+let map = {};
+
 io.on('connection', (socket) => {
     console.log('a user connected ' + socket.id);
 
@@ -50,7 +53,14 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log('user disconnected');
+        console.log('user disconnected ' + socket.id);
+
+        for (var i in map) {
+            if (map[i] === socket.id) {
+                delete map[i]
+            }
+        }
+        // map.delete(socket.io)
     });
 });
 
@@ -115,11 +125,26 @@ app.get("/test", requiresAuth(), async (req, res) => {
     res.render('pages/test')
 });
 
-app.get("/getUser", requiresAuth(), async (req, res) => {
+app.get("/getUser/:id", requiresAuth(), async (req, res) => {
 
     banan = { "username": req.oidc.user.email }
-    console.log("WWWWWWWWWWWWWWWWW")
+    console.log("WWWWWWWWWWWWWWWWW " + req.params.id + " " + req.oidc.user.email)
+    map[req.oidc.user.email] = req.params.id
+
     res.send(banan)
+});
+
+app.get("/test2", requiresAuth(), async (req, res) => {
+
+    console.log("------------")
+    var keys = Object.keys(map);
+    keys.forEach(key => {
+        console.log(key + '|' + map[key]);
+    });
+
+
+
+    res.send("test2")
 });
 
 app.get("/profile/:username", requiresAuth(), async (req, res) => {

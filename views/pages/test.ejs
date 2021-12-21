@@ -20,8 +20,8 @@
 
     socket.on('chat message', async function (msg) {
       console.log(msg)
-      test = await fetchAsync('/getUser')
-      console.log("Test " + test)
+      test = await fetchAsync(`/getUser/${socket.id}`)
+      console.log("Test " + test + " " + socket.id);
     });
 
     //socket.emit('getUser', "odghipsuabgpisaudgpiusbdgpioubsdg");
