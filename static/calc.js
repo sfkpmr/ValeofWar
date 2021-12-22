@@ -13,12 +13,12 @@ function barracksTrainCost(val) {
     ironCost += parseInt(document.getElementById('swordsmen').value) * 20;
     goldCost += parseInt(document.getElementById('swordsmen').value) * 10;
 
-    document.getElementById("grain").innerHTML = grainCost; 
-    document.getElementById("lumber").innerHTML = lumberCost; 
-    document.getElementById("iron").innerHTML = ironCost; 
-    document.getElementById("gold").innerHTML = goldCost; 
-    document.getElementById("recruits").innerHTML = parseInt(document.getElementById('archers').value) + parseInt(document.getElementById('spearmen').value) 
-    + parseInt(document.getElementById('swordsmen').value); 
+    document.getElementById("grain").innerHTML = grainCost;
+    document.getElementById("lumber").innerHTML = lumberCost;
+    document.getElementById("iron").innerHTML = ironCost;
+    document.getElementById("gold").innerHTML = goldCost;
+    document.getElementById("recruits").innerHTML = parseInt(document.getElementById('archers').value) + parseInt(document.getElementById('spearmen').value)
+        + parseInt(document.getElementById('swordsmen').value);
 
 }
 
@@ -28,17 +28,17 @@ function stablesTrainCost(val) {
 
     grainCost += parseInt(document.getElementById('horsemen').value) * 10;
     lumberCost += parseInt(document.getElementById('horsemen').value) * 10;
-   
+
     goldCost += parseInt(document.getElementById('knights').value) * 25;
     grainCost += parseInt(document.getElementById('knights').value) * 30;
     ironCost += parseInt(document.getElementById('knights').value) * 20;
 
-    document.getElementById("grain").innerHTML = grainCost; 
-    document.getElementById("lumber").innerHTML = lumberCost; 
-    document.getElementById("iron").innerHTML = ironCost; 
-    document.getElementById("gold").innerHTML = goldCost; 
-    document.getElementById("recruits").innerHTML = parseInt(document.getElementById('horsemen').value) + parseInt(document.getElementById('knights').value); 
-    document.getElementById("horses").innerHTML = parseInt(document.getElementById('horsemen').value) + parseInt(document.getElementById('knights').value); 
+    document.getElementById("grain").innerHTML = grainCost;
+    document.getElementById("lumber").innerHTML = lumberCost;
+    document.getElementById("iron").innerHTML = ironCost;
+    document.getElementById("gold").innerHTML = goldCost;
+    document.getElementById("recruits").innerHTML = parseInt(document.getElementById('horsemen').value) + parseInt(document.getElementById('knights').value);
+    document.getElementById("horses").innerHTML = parseInt(document.getElementById('horsemen').value) + parseInt(document.getElementById('knights').value);
 }
 
 function craftingCost(val) {
@@ -66,8 +66,8 @@ function craftingCost(val) {
     ironCost += parseInt(document.getElementById('sword').value) * 50;
     goldCost += parseInt(document.getElementById('sword').value) * 10;
 
-    document.getElementById("lumber").innerHTML = lumberCost; 
-    document.getElementById("iron").innerHTML = ironCost; 
-    document.getElementById("gold").innerHTML = goldCost; 
+    document.getElementById("lumber").innerHTML = lumberCost;
+    document.getElementById("iron").innerHTML = ironCost;
+    document.getElementById("gold").innerHTML = goldCost;
 
 }

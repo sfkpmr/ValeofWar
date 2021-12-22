@@ -36,14 +36,80 @@ const client = new MongoClient(uri);
 const maxFarms = 8, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 7;
 //const farmBaseCost = {lumber: 100, gold: 100};
 
+const { Server } = require("socket.io");
+const io = new Server(server);
+
+//hashset instead? track all sockets for many windows?
+let map = {};
+
+io.on('connection', (socket) => {
+    console.log('a user connected ' + socket.id);
+
+    //io.emit('chat message', "asffsX");
+    io.to(socket.id).emit("sync");
+
+    socket.on('getUser', (msg) => {
+        //io.emit('chat message', msg);
+        console.log(msg)
+    });
+
+    socket.on('disconnect', () => {
+        console.log('user disconnected ' + socket.id);
+
+        for (var i in map) {
+            if (map[i] === socket.id) {
+                delete map[i]
+            }
+        }
+
+    });
+});
+
 main().catch(console.error);
 
 async function main() {
 
     try {
         await client.connect();
+
+        await checkDb(client, 15000);
+
     } catch (e) {
         console.error(e);
+    }
+
+
+    async function checkDb(client, timeInMs = 60000, pipeline = []) {
+
+
+        const collection = client.db("gamedb").collection("players");
+        const changeStream = collection.watch(pipeline);
+
+        changeStream.on('change', (next) => {
+            console.log(next.documentKey._id);
+            //io.emit('chat message', "-----------");
+
+            for (var i in map) {
+                console.log("Check: " + i + " " + next.documentKey._id)
+                if (i === next.documentKey._id) {
+
+
+                    console.log('rätt ' + map[i] + " " + i)
+                    //io.emit('chat message', "-----------");
+                    //https://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
+                    //io.to(map[i]).emit("update", "xerxes")
+                    test = next.updateDescription;
+                    io.to(map[i]).emit("update", test.updatedFields)
+                    console.log(test.updatedFields)
+
+                } else {
+                    console.log('fel')
+                }
+            }
+
+
+
+        })
     }
 }
 
@@ -60,7 +126,16 @@ app.use(
 
 app.use('/static', express.static('static'));
 app.use(express.urlencoded({ extended: true }));
+// io.on('connection', (socket) => {
+//     //users = ["aaaa", "bbbb"];
+//     socket.on('setUserId', function (userId) {
+//         users[userId] = socket;
+//     });
 
+//     socket.on('send notification', function (userId) {
+//         users[userId].emit('notification', "important notification message");
+//     });
+// });
 app.get("/", (req, res) => {
     authenticated = req.oidc.isAuthenticated();
 
@@ -81,6 +156,34 @@ app.get("/profile", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email)
 
     res.redirect(`/profile/${user.username}`)
+});
+
+app.get("/test", requiresAuth(), async (req, res) => {
+
+    res.render('pages/test')
+});
+
+app.get("/getUser/:id", requiresAuth(), async (req, res) => {
+
+    banan = { "username": req.oidc.user.email }
+    user = await getUserByEmail(client, req.oidc.user.email);
+    //console.log("WWWWWWWWWWWWWWWWW " + req.params.id + " " + req.oidc.user.email + " bananana: " + user._id)
+    map[user._id] = req.params.id
+
+    res.send(banan)
+});
+
+app.get("/test2", requiresAuth(), async (req, res) => {
+
+    console.log("------------")
+    var keys = Object.keys(map);
+    keys.forEach(key => {
+        console.log(key + '|' + map[key]);
+    });
+
+
+
+    res.send("test2")
 });
 
 app.get("/profile/:username", requiresAuth(), async (req, res) => {

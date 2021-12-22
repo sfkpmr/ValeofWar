@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+
+  <ul id="messages"></ul>
+  <ul id="test"></ul>
+  <output id="grain">0</output> -- <output id="gold">0</output>
+  <form id="form" action="">
+    <input id="input" autocomplete="off" /><button>Send</button>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+
+    var test = document.getElementById('test');
+
+    socket.on('connection', async function (data) {
+      console.log("connect")
+      //socket.emit('setUserId', "pelle");
+    });
+
+    //fix
+    socket.on('sync', async function () {
+      console.log("connecting ")
+      await fetchAsync(`/getUser/${socket.id}`)
+    });
+
+    socket.on('update', async function (msg) {
+
+
+      if (msg.grain !== null && msg.grain !== undefined) {
+        document.getElementById("grain").innerHTML = msg.grain;
+      }
+      if (msg.gold !== null && msg.gold !== undefined) {
+        document.getElementById("gold").innerHTML = msg.gold;
+      }
+
+
+    });
+
+    socket.on('msg', async function (msg) {
+      console.log(msg)
+    });
+
+    //socket.emit('getUser', "odghipsuabgpisaudgpiusbdgpioubsdg");
+
+    async function fetchAsync(url) {
+      let response = await fetch(url);
+      let data = await response.json();
+      return data.username;
+    }
+
+    //test = fetchAsync('/getUser')
+    //console.log("Test " + test)
+
+  </script>
+
+
+
+</body>
+
+</html>
