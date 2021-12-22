@@ -37,6 +37,7 @@ const maxFarms = 8, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumb
 //const farmBaseCost = {lumber: 100, gold: 100};
 
 const { Server } = require("socket.io");
+const attack = require("./modules/attack.js");
 const io = new Server(server);
 
 //hashset instead? track all sockets for many windows?
@@ -115,6 +116,8 @@ async function main() {
                     batteringrams = JSON.stringify(user.batteringrams);
                     siegetowers = JSON.stringify(user.siegetowers);
 
+                    updateDamage = false;
+
                     if (grain !== null && grain !== undefined) {
                         io.to(map[i]).emit("updateGrain", grain);
                     };
@@ -157,6 +160,15 @@ async function main() {
                     if (siegetowers !== null && siegetowers !== undefined) {
                         io.to(map[i]).emit("updateSiegeTowers", siegetowers);
                     };
+
+                    // if (updateDamage) {
+                    //     attack = await calculateAttack(user);
+                    //     defense = await calculateDefense(user);
+                    //     io.to(map[i]).emit("updateAttackPower", attack);
+                    //     io.to(map[i]).emit("updateDefensePower", defense);
+                    // };
+
+
 
                     //console.log(test.updatedFields)
 

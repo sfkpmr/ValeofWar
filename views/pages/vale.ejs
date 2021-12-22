@@ -71,6 +71,11 @@
       /* Increased text to enable scrolling */
       padding: 0px 10px;
     }
+
+    /* Solid border */
+    hr.solid {
+      border-top: 3px solid white;
+    }
   </style>
 </head>
 
@@ -109,10 +114,10 @@
         style="width:25px;height:auto;vertical-align:middle;"> <output id="gold">
         <%= gold %>
       </output> </t><br>
-    <t>---- </t><br>
+    <hr class="solid">
     <t><output id="recruits">Recruits: <%= recruits %></output></t><br>
     <t><output id="horses">Horses: <%= horses %></output></t><br>
-    <t>---- </t><br>
+    <hr class="solid">
     <t>Archers: <output id="archers">
         <%= archers %>
       </output></t><br>
@@ -134,7 +139,7 @@
     <t>Siege towers: <output id="siegetowers">
         <%= siegetowers %>
       </output></t><br>
-    <t>----</t><br>
+    <hr class="solid">
     <t>Attack power: <output id="attack">
         <%= attack %>
       </output></t><br>
@@ -203,6 +208,12 @@
     });
     socket.on('updateSiegeTowers', async function (msg) {
       document.getElementById("siegetowers").innerHTML = msg;
+    });
+    socket.on('updateAttackPower', async function (msg) {
+      document.getElementById("attack").innerHTML = msg;
+    });
+    socket.on('updateDefensePower', async function (msg) {
+      document.getElementById("defense").innerHTML = msg;
     });
 
   // socket.on('msg', async function (msg) {
