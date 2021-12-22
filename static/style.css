@@ -5,6 +5,11 @@
   color: white;
 }
 
+.container img {
+  width: 75px;
+  height: auto;
+}
+
 /* Centered text */
 .centered {
   position: absolute;
