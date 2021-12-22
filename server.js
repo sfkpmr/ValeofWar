@@ -279,8 +279,8 @@ app.get("/vale", requiresAuth(), async (req, res) => {
     batteringrams = user.batteringrams;
     siegetowers = user.siegetowers;
 
-    attack = await calculateAttack(user);
-    defense = await calculateDefense(user);
+    attackValue = await calculateAttack(user);
+    defenseValue = await calculateDefense(user);
 
 
     res.render("pages/vale")
