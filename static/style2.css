@@ -72,7 +72,7 @@ body {
     padding: 0px 10px;
   }
 
-  .main src {
+  .main iframe {
     position: absolute; 
     width: 80%; 
     height: 80%; 
