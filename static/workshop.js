@@ -1,7 +1,5 @@
 function workshopBuildCost(val) {
 
-    console.log(parseInt(document.getElementById('batteringram').value))
-
     lumberCost = parseInt(document.getElementById('batteringram').value) * 100;
     ironCost = parseInt(document.getElementById('batteringram').value) * 25;
     goldCost = parseInt(document.getElementById('batteringram').value) * 25;
