@@ -72,6 +72,12 @@ body {
     padding: 0px 10px;
   }
 
+  .main src {
+    position: absolute; 
+    width: 80%; 
+    height: 80%; 
+  }
+
   /* Solid border */
   hr.solid {
     border-top: 3px solid white;
