@@ -6,7 +6,7 @@
 
   <ul id="messages"></ul>
   <ul id="test"></ul>
-  <output id="grain">0</output>
+  <output id="grain">0</output> -- <output id="gold">0</output>
   <form id="form" action="">
     <input id="input" autocomplete="off" /><button>Send</button>
   </form>
@@ -19,19 +19,26 @@
 
     socket.on('connection', async function (data) {
       console.log("connect")
-      socket.emit('setUserId', "pelle");
+      //socket.emit('setUserId', "pelle");
     });
 
     //fix
-    socket.on('chat message', async function (msg) {
-      console.log(msg)
-      test = await fetchAsync(`/getUser/${socket.id}`)
-      console.log("Test " + test + " " + socket.id);
+    socket.on('sync', async function () {
+      console.log("connecting ")
+      await fetchAsync(`/getUser/${socket.id}`)
     });
 
     socket.on('update', async function (msg) {
-      document.getElementById("grain").innerHTML = msg;
-      console.log(msg)
+
+
+      if (msg.grain !== null && msg.grain !== undefined) {
+        document.getElementById("grain").innerHTML = msg.grain;
+      }
+      if (msg.gold !== null && msg.gold !== undefined) {
+        document.getElementById("gold").innerHTML = msg.gold;
+      }
+
+
     });
 
     socket.on('msg', async function (msg) {

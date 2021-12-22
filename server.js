@@ -45,7 +45,8 @@ let map = {};
 io.on('connection', (socket) => {
     console.log('a user connected ' + socket.id);
 
-    io.emit('chat message', "asffsX");
+    //io.emit('chat message', "asffsX");
+    io.to(socket.id).emit("sync");
 
     socket.on('getUser', (msg) => {
         //io.emit('chat message', msg);
@@ -86,7 +87,7 @@ async function main() {
 
         changeStream.on('change', (next) => {
             console.log(next.documentKey._id);
-            io.emit('chat message', "-----------");
+            //io.emit('chat message', "-----------");
 
             for (var i in map) {
                 console.log("Check: " + i + " " + next.documentKey._id)
@@ -94,9 +95,13 @@ async function main() {
 
 
                     console.log('rätt ' + map[i] + " " + i)
-                    io.emit('chat message', "-----------");
+                    //io.emit('chat message', "-----------");
                     //https://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
-                    io.to(map[i]).emit("update", "xerxes")
+                    //io.to(map[i]).emit("update", "xerxes")
+                    test = next.updateDescription;
+                    io.to(map[i]).emit("update", test.updatedFields)
+                    console.log(test.updatedFields)
+
                 } else {
                     console.log('fel')
                 }
@@ -916,7 +921,7 @@ async function checkAll() {
 
 //måste köra för alla så folk kan anfalla folk som är afk
 //ev kör när någon interagerar med afk folk
-var minutes = 1, the_interval = minutes * 60 * 1000;
+var minutes = 10, the_interval = minutes * 60 * 1000;
 setInterval(function () {
     console.log("Adding resources for everyone!");
     checkAll();
