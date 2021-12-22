@@ -19,11 +19,9 @@
                 <br>
                 <form action="/town/workshop/train" method="POST">
                     <label for="batteringram">Battering ram:</label>
-                    <input type="number" id="batteringram" name="batteringram" value="0" oninput="calcFunc(this.value)"
-                        min=0 oninput="validity.valid||(value='');"><br>
+                    <input type="number" id="batteringram" name="batteringram" value="0" min=0><br>
                     <label for="siegetower">Siege tower:</label>
-                    <input type="number" id="siegetower" name="siegetower" value="0" oninput="calcFunc(this.value)"
-                        min=0 oninput="validity.valid||(value='');"><br><br>
+                    <input type="number" id="siegetower" name="siegetower" value="0" min=0><br><br>
                     Build cost: <output id="lumber">0</output> lumber, <output id="iron">0</output> iron and
                     <output id="gold">0</output> gold. <br>
                     <input type="submit" value="Build">
@@ -32,30 +30,7 @@
                 <form action="/town/workshop/upgrade" method="POST">
                     <input type="submit" value="Upgrade">
                 </form>
-
-                <script>
-
-                    function calcFunc(val) {
-
-                        console.log(parseInt(document.getElementById('batteringram').value))
-
-                        lumberCost = parseInt(document.getElementById('batteringram').value) * 100;
-                        ironCost = parseInt(document.getElementById('batteringram').value) * 25;
-                        goldCost = parseInt(document.getElementById('batteringram').value) * 25;
-
-                        lumberCost += parseInt(document.getElementById('siegetower').value) * 500;
-                        ironCost += parseInt(document.getElementById('siegetower').value) * 100;
-                        goldCost += parseInt(document.getElementById('siegetower').value) * 100;
-
-                        document.getElementById("lumber").innerHTML = lumberCost;
-                        document.getElementById("iron").innerHTML = ironCost;
-                        document.getElementById("gold").innerHTML = goldCost;
-
-                    }
-
-                </script>
-
-
+                <script type="text/javascript" src="../static/workshop.js"></script>
 </body>
 
 </html>

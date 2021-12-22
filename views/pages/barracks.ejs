@@ -3,7 +3,7 @@
 
 <head>
     <title>Barracks</title>
-    <script type="text/javascript" src="../static/calc.js"></script> 
+
 </head>
 
 <body>
@@ -17,13 +17,14 @@
     Spearmen: <%= spearmen %> <br>
     Swordsmen: <%= swordsmen %> <br>
     <br>
+    <!-- Old validation: oninput="validity.valid||(value='');" -->
     <form action="/town/barracks/train" method="POST">
         <label for="archers">Archers:</label>
-        <input type="number" id="archers" name="archers" value="0" oninput="barracksTrainCost(this.value)" min=0 oninput="validity.valid||(value='');"><br>
+        <input type="number" id="archers" name="archers" value="0" min=0 ><br>
         <label for="spearmen">Spearmen:</label>
-        <input type="number" id="spearmen" name="spearmen" value="0" oninput="barracksTrainCost(this.value)" min=0 oninput="validity.valid||(value='');"><br>
+        <input type="number" id="spearmen" name="spearmen" value="0"><br>
         <label for="swordsmen">Swordsmen:</label>
-        <input type="number" id="swordsmen" name="swordsmen" value="0" oninput="barracksTrainCost(this.value)" min=0 oninput="validity.valid||(value='');"><br><br>
+        <input type="number" id="swordsmen" name="swordsmen" value="0"><br><br>
         Training cost: <output id="grain">0</output> grain, <output id="lumber">0</output> lumber, <output id="iron">0</output> iron, <output id="gold">0</output>
         gold and <output id="recruits">0</output> recuits. <br>
 
@@ -34,7 +35,7 @@
     <form action="/town/barracks/upgrade" method="POST">
         <input type="submit" value="Upgrade">
     </form>
-
+    <script type="text/javascript" src="../static/barracks.js"></script> 
 </body>
 
 </html>
