@@ -282,7 +282,6 @@ app.get("/vale", requiresAuth(), async (req, res) => {
     attackValue = await calculateAttack(user);
     defenseValue = await calculateDefense(user);
 
-
     res.render("pages/vale")
 });
 
