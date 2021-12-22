@@ -364,7 +364,6 @@ module.exports = {
                 archerDamage += longbows * longbowDamage;
                 longbows = 0;
             }
-            console.log(archerDamage);
 
         } if (spearmen !== undefined && spearmen !== null) {
             spearmenDamage = spearmen * 10;
@@ -390,7 +389,6 @@ module.exports = {
                 spearmenDamage += spears * spearDamage;
                 spears = 0;
             }
-            console.log(spearmenDamage);
 
         } if (swordsmen !== undefined && swordsmen !== null) {
             swordsmenDamage = swordsmen * 20;
@@ -482,8 +480,8 @@ module.exports = {
 
 
 
-        console.log(("aaaaaaaaaaaaaaaa " + archerDamage + " " + spearmenDamage + " " + swordsmenDamage + " " + horsemenDamage + " " + knightsDamage + " " + walls))
-        console.log(boots + " " + bracers + " " + helmets + " " + longbows)
+       // console.log(("aaaaaaaaaaaaaaaa " + archerDamage + " " + spearmenDamage + " " + swordsmenDamage + " " + horsemenDamage + " " + knightsDamage + " " + walls))
+       // console.log(boots + " " + bracers + " " + helmets + " " + longbows)
 
         return Math.round((archerDamage + spearmenDamage + horsemenDamage + knightsDamage + swordsmenDamage) * (1 + (walls / 10)));
 

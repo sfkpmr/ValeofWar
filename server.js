@@ -198,7 +198,7 @@ app.get("/", (req, res) => {
     authenticated = req.oidc.isAuthenticated();
 
     if (authenticated) {
-        res.redirect("/town")
+        res.redirect("/vale")
     } else {
         res.render('pages/index')
     }
@@ -247,7 +247,7 @@ app.get("/test2", requiresAuth(), async (req, res) => {
     res.send("test2")
 });
 
-app.get("/sidebar", requiresAuth(), async (req, res) => {
+app.get("/vale", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
 
@@ -267,7 +267,11 @@ app.get("/sidebar", requiresAuth(), async (req, res) => {
     batteringrams = user.batteringrams;
     siegetowers = user.siegetowers;
 
-    res.render("pages/sidebar")
+    attack = await calculateAttack(user);
+    defense = await calculateDefense(user);
+
+
+    res.render("pages/vale")
 });
 
 app.get("/profile/:username", requiresAuth(), async (req, res) => {
@@ -310,14 +314,6 @@ app.get("/mailbox/log", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
     result = await getInvolvedAttackLogs(client, user.username)
-
-    gold = user.gold;
-    lumber = user.lumber;
-    grain = user.grain;
-    stone = user.stone;
-    iron = user.iron;
-    recruits = user.recruits;
-    horses = user.horses;
 
     res.render('pages/log')
 });
@@ -390,14 +386,6 @@ app.get("/town/barracks", requiresAuth(), async (req, res) => {
 
     barracks = user.barracksLevel;
 
-    gold = user.gold;
-    iron = user.iron;
-    lumber = user.lumber;
-    grain = user.grain;
-    stone = user.stone;
-    recruits = user.recruits;
-    horses = user.horses;
-
     archers = user.archers;
     spearmen = user.spearmen;
     swordsmen = user.swordsmen;
@@ -412,14 +400,6 @@ app.get("/town/wall", requiresAuth(), async (req, res) => {
     //TODO higher level decreases resource amount that can be stolen?
 
     wall = user.wallLevel;
-
-    gold = user.gold;
-    iron = user.iron;
-    lumber = user.lumber;
-    grain = user.grain;
-    stone = user.stone;
-    recruits = user.recruits;
-    horses = user.horses;
 
     res.render('pages/wall')
 
@@ -470,14 +450,6 @@ app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
 
     trainingField = user.trainingfieldLevel;
 
-    gold = user.gold;
-    iron = user.iron;
-    lumber = user.lumber;
-    grain = user.grain;
-    stone = user.stone;
-    recruits = user.recruits;
-    horses = user.horses;
-
     res.render('pages/trainingField')
 });
 
@@ -490,14 +462,6 @@ app.get("/town/workshop", requiresAuth(), async (req, res) => {
 
     batteringrams = user.batteringrams;
     siegetowers = user.siegetowers;
-
-    gold = user.gold;
-    iron = user.iron;
-    lumber = user.lumber;
-    grain = user.grain;
-    stone = user.stone;
-    recruits = user.recruits;
-    horses = user.horses;
 
     res.render('pages/workshop')
 });
@@ -533,14 +497,6 @@ app.get("/town/stables", requiresAuth(), async (req, res) => {
 
     stables = user.stablesLevel;
 
-    gold = user.gold;
-    iron = user.iron;
-    lumber = user.lumber;
-    grain = user.grain;
-    stone = user.stone;
-    recruits = user.recruits;
-    horses = user.horses;
-
     horsemen = user.horsemen;
     knights = user.knights;
 
@@ -552,14 +508,6 @@ app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
 
     blacksmith = user.blacksmithLevel;
-
-    gold = user.gold;
-    iron = user.iron;
-    lumber = user.lumber;
-    grain = user.grain;
-    stone = user.stone;
-    recruits = user.recruits;
-    horses = user.horses;
 
     boots = user.boots;
     bracers = user.bracers;
