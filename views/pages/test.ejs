@@ -6,6 +6,7 @@
 
   <ul id="messages"></ul>
   <ul id="test"></ul>
+  <output id="grain">0</output>
   <form id="form" action="">
     <input id="input" autocomplete="off" /><button>Send</button>
   </form>
@@ -13,15 +14,28 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
     var socket = io();
+
+    var test = document.getElementById('test');
+
     socket.on('connection', async function (data) {
       console.log("connect")
       socket.emit('setUserId', "pelle");
     });
 
+    //fix
     socket.on('chat message', async function (msg) {
       console.log(msg)
       test = await fetchAsync(`/getUser/${socket.id}`)
       console.log("Test " + test + " " + socket.id);
+    });
+
+    socket.on('update', async function (msg) {
+      document.getElementById("grain").innerHTML = msg;
+      console.log(msg)
+    });
+
+    socket.on('msg', async function (msg) {
+      console.log(msg)
     });
 
     //socket.emit('getUser', "odghipsuabgpisaudgpiusbdgpioubsdg");
