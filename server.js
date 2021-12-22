@@ -78,7 +78,6 @@ async function main() {
         console.error(e);
     }
 
-
     async function checkDb(client, timeInMs = 60000, pipeline = []) {
 
 
@@ -86,24 +85,83 @@ async function main() {
         const changeStream = collection.watch(pipeline);
 
         changeStream.on('change', (next) => {
-            console.log(next.documentKey._id);
+            //console.log(next.documentKey._id);
             //io.emit('chat message', "-----------");
 
             for (var i in map) {
-                console.log("Check: " + i + " " + next.documentKey._id)
+                //console.log("Check: " + i + " " + next.documentKey._id)
                 if (i === next.documentKey._id) {
 
 
-                    console.log('rätt ' + map[i] + " " + i)
+                    //console.log('rätt ' + map[i] + " " + i)
                     //io.emit('chat message', "-----------");
                     //https://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
                     //io.to(map[i]).emit("update", "xerxes")
-                    test = next.updateDescription;
-                    io.to(map[i]).emit("update", test.updatedFields)
-                    console.log(test.updatedFields)
+                    user = next.updateDescription.updatedFields;
+                    //io.to(map[i]).emit("update", 'XERXES');
+
+                    grain = JSON.stringify(user.grain);
+                    lumber = JSON.stringify(user.lumber);
+                    stone = JSON.stringify(user.stone);
+                    iron = JSON.stringify(user.iron);
+                    gold = JSON.stringify(user.gold);
+                    recruits = JSON.stringify(user.recruits);
+                    horses = JSON.stringify(user.horses);
+                    archers = JSON.stringify(user.archers);
+                    spearmen = JSON.stringify(user.spearmen);
+                    swordsmen = JSON.stringify(user.swordsmen);
+                    horsemen = JSON.stringify(user.horsemen);
+                    knights = JSON.stringify(user.knights);
+                    batteringrams = JSON.stringify(user.batteringrams);
+                    siegetowers = JSON.stringify(user.siegetowers);
+
+                    if (grain !== null && grain !== undefined) {
+                        io.to(map[i]).emit("updateGrain", grain);
+                    };
+                    if (lumber !== null && lumber !== undefined) {
+                        io.to(map[i]).emit("updateLumber", lumber);
+                    };
+                    if (stone !== null && stone !== undefined) {
+                        io.to(map[i]).emit("updateStone", stone);
+                    };
+                    if (iron !== null && iron !== undefined) {
+                        io.to(map[i]).emit("updateIron", iron);
+                    };
+                    if (gold !== null && gold !== undefined) {
+                        io.to(map[i]).emit("updateGold", gold);
+                    };
+                    if (recruits !== null && recruits !== undefined) {
+                        io.to(map[i]).emit("updateRecruits", recruits);
+                    };
+                    if (horses !== null && horses !== undefined) {
+                        io.to(map[i]).emit("updateHorses", horses);
+                    };
+                    if (archers !== null && archers !== undefined) {
+                        io.to(map[i]).emit("updateArchers", archers);
+                    };
+                    if (spearmen !== null && spearmen !== undefined) {
+                        io.to(map[i]).emit("updateSpearmen", spearmen);
+                    };
+                    if (swordsmen !== null && swordsmen !== undefined) {
+                        io.to(map[i]).emit("updateSwordsmen", swordsmen);
+                    };
+                    if (horsemen !== null && horsemen !== undefined) {
+                        io.to(map[i]).emit("updateHorsemen", horsemen);
+                    };
+                    if (knights !== null && knights !== undefined) {
+                        io.to(map[i]).emit("updateKnights", knights);
+                    };
+                    if (batteringrams !== null && batteringrams !== undefined) {
+                        io.to(map[i]).emit("updateBatteringRams", batteringrams);
+                    };
+                    if (siegetowers !== null && siegetowers !== undefined) {
+                        io.to(map[i]).emit("updateSiegeTowers", siegetowers);
+                    };
+
+                    //console.log(test.updatedFields)
 
                 } else {
-                    console.log('fel')
+                    //console.log('fel')
                 }
             }
 
@@ -163,14 +221,17 @@ app.get("/test", requiresAuth(), async (req, res) => {
     res.render('pages/test')
 });
 
+//make post?
 app.get("/getUser/:id", requiresAuth(), async (req, res) => {
 
-    banan = { "username": req.oidc.user.email }
+    //banan = { "username": req.oidc.user.email }
     user = await getUserByEmail(client, req.oidc.user.email);
     //console.log("WWWWWWWWWWWWWWWWW " + req.params.id + " " + req.oidc.user.email + " bananana: " + user._id)
     map[user._id] = req.params.id
 
-    res.send(banan)
+    //res.något annat?
+    //res.send({})
+    res.status(200).end();
 });
 
 app.get("/test2", requiresAuth(), async (req, res) => {
@@ -184,6 +245,29 @@ app.get("/test2", requiresAuth(), async (req, res) => {
 
 
     res.send("test2")
+});
+
+app.get("/sidebar", requiresAuth(), async (req, res) => {
+
+    const user = await getUserByEmail(client, req.oidc.user.email);
+
+    grain = user.grain;
+    lumber = user.lumber;
+    stone = user.stone;
+    iron = user.iron;
+    gold = user.gold;
+    recruits = user.recruits;
+    horses = user.horses;
+
+    archers = user.archers;
+    spearmen = user.spearmen;
+    swordsmen = user.swordsmen;
+    horsemen = user.horsemen;
+    knights = user.knights;
+    batteringrams = user.batteringrams;
+    siegetowers = user.siegetowers;
+
+    res.render("pages/sidebar")
 });
 
 app.get("/profile/:username", requiresAuth(), async (req, res) => {
@@ -219,9 +303,6 @@ app.get("/base", requiresAuth(), (req, res) => {
 });
 
 app.get("/mailbox", requiresAuth(), async (req, res) => {
-    //console.log(JSON.stringify(req.oidc.user));
-    //const apa = await req.oidc.fetchUserInfo();
-    //console.log(apa);
     res.render('pages/mailbox')
 });
 
@@ -284,13 +365,11 @@ app.get("/town", requiresAuth(), async (req, res) => {
 //             lumberCost = 10;
 //             stoneCost = 10;
 //             ironCost = 10;
-//             console.log(goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost);
 //         } else {
 //             goldCost += Math.round(goldCost * 1.2);
 //             lumberCost += Math.round(lumberCost * 1.2);
 //             stoneCost += Math.round(stoneCost * 1.2);
 //             ironCost += Math.round(ironCost * 1.2);
-//             console.log(goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost);
 //         }
 //     }
 
@@ -330,6 +409,8 @@ app.get("/town/wall", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
 
+    //TODO higher level decreases resource amount that can be stolen?
+
     wall = user.wallLevel;
 
     gold = user.gold;
@@ -346,8 +427,6 @@ app.get("/town/wall", requiresAuth(), async (req, res) => {
 
 app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
-
-    console.log("aaaaaaaaaaaaa")
 
     var buildingName = "";
 
@@ -374,7 +453,6 @@ app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
             //catch
             console.log("error");
     }
-
 
     if (await checkIfCanAfford(client, user.username, 0, 20, 20, 20, 0, 0, 0)) {
         await upgradeBuilding(client, user.username, buildingName);
@@ -708,9 +786,8 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
     attackerLosses = 0;
     defenderLosses = 0;
 
-    date = new Date();
     const data = {
-        "_id": new ObjectId(), "time": date, "attacker": attacker.username, "defender": defender.username, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLoot,
+        "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "defender": defender.username, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLoot,
         "grainLoot": grainLoot, "lumberLoot": lumberLoot, "stoneLoot": stoneLoot, "ironLoot": ironLoot
     };
 
@@ -742,7 +819,6 @@ app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
             invalidId = true;
         }
     } else if (type === "ironMine") {
-        console.log(user.ironMines);
         if (resourceId >= 0 && resourceId <= maxIronMines) {
             title = "Iron mine";
             resourceLevel = user.ironMines[resourceId];
@@ -794,16 +870,11 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
 
         if (resourceId >= 0 && resourceId <= maxFarms) {
             updatedUser = user.farms;
-            console.log(updatedUser);
-
             updatedUser[resourceId]++;
-            console.log(updatedUser);
-
             updatedUser = { farms: updatedUser }
         } else {
             res.redirect("/land");
         }
-
     } else if (type === "goldmine") {
         if (resourceId >= 0 && resourceId <= maxGoldMines) {
             updatedUser = user.goldMines;
@@ -862,36 +933,25 @@ app.get("/land/:type/:number/establish", requiresAuth(), async (req, res) => {
 
     if (type === "farm") {
         updatedUser = user.farms;
-        console.log(updatedUser);
         updatedUser.push(1);
         updatedUser = { farms: updatedUser }
-
     } else if (type === "goldmine") {
         updatedUser = user.goldMines;
-        console.log(updatedUser);
         updatedUser.push(1);
         updatedUser = { goldMines: updatedUser }
-
     } else if (type === "ironmine") {
         updatedUser = user.ironMines;
-        console.log(updatedUser);
         updatedUser.push(1);
         updatedUser = { ironMines: updatedUser }
-
     } else if (type === "lumbercamp") {
         updatedUser = user.lumberCamps;
-        console.log(updatedUser);
         updatedUser.push(1);
         updatedUser = { lumberCamps: updatedUser }
-
     } else if (type === "quarry") {
         updatedUser = user.quarries;
-        console.log(updatedUser);
         updatedUser.push(1);
         updatedUser = { quarries: updatedUser }
     }
-
-    console.log(updatedUser);
 
     //TODO real cost
     if (await checkIfCanAfford(client, user.username, 1, 1, 2, 3, 4, 0, 0)) {
@@ -901,17 +961,6 @@ app.get("/land/:type/:number/establish", requiresAuth(), async (req, res) => {
     res.redirect("/land");
 
 });
-
-async function updateLastAction(username) {
-
-    const date = new Date();
-    updatedUser = { lastAction: date.getTime() }
-    console.log(updatedUser);
-
-    const result = await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
-
-    return result;
-}
 
 async function checkAll() {
     const result = await client.db("gamedb").collection("players").find().forEach(function (user) {

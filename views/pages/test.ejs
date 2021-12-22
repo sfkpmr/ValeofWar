@@ -4,9 +4,8 @@
 <body>
 
 
-  <ul id="messages"></ul>
-  <ul id="test"></ul>
-  <output id="grain">0</output> -- <output id="gold">0</output>
+  <output id="grain">0</output> -- <output id="lumber">0</output> -- <output id="stone">0</output> -- <output
+    id="iron">0</output> -- <output id="gold">0</output>
   <form id="form" action="">
     <input id="input" autocomplete="off" /><button>Send</button>
   </form>
@@ -15,47 +14,37 @@
   <script>
     var socket = io();
 
-    var test = document.getElementById('test');
-
-    socket.on('connection', async function (data) {
-      console.log("connect")
-      //socket.emit('setUserId', "pelle");
-    });
-
     //fix
     socket.on('sync', async function () {
       console.log("connecting ")
       await fetchAsync(`/getUser/${socket.id}`)
     });
 
-    socket.on('update', async function (msg) {
-
-
-      if (msg.grain !== null && msg.grain !== undefined) {
-        document.getElementById("grain").innerHTML = msg.grain;
-      }
-      if (msg.gold !== null && msg.gold !== undefined) {
-        document.getElementById("gold").innerHTML = msg.gold;
-      }
-
-
+    socket.on('updateGrain', async function (msg) {
+      document.getElementById("grain").innerHTML = msg;
+    });
+    socket.on('updateLumber', async function (msg) {
+      document.getElementById("lumber").innerHTML = msg;
+    });
+    socket.on('updateStone', async function (msg) {
+      document.getElementById("stone").innerHTML = msg;
+    });
+    socket.on('updateIron', async function (msg) {
+      document.getElementById("iron").innerHTML = msg;
+    });
+    socket.on('updateGold', async function (msg) {
+      document.getElementById("gold").innerHTML = msg;
     });
 
     socket.on('msg', async function (msg) {
       console.log(msg)
     });
 
-    //socket.emit('getUser', "odghipsuabgpisaudgpiusbdgpioubsdg");
-
     async function fetchAsync(url) {
       let response = await fetch(url);
       let data = await response.json();
       return data.username;
     }
-
-    //test = fetchAsync('/getUser')
-    //console.log("Test " + test)
-
   </script>
 
 
