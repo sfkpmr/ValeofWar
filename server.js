@@ -326,7 +326,7 @@ app.get("/mailbox/log", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     result = await getInvolvedAttackLogs(client, user.username)
 
-    res.render('pages/log')
+    res.redirect('/mailbox/log/page/1')
 });
 
 app.get("/mailbox/log/:id", requiresAuth(), async (req, res) => {
@@ -343,6 +343,50 @@ app.get("/mailbox/log/:id", requiresAuth(), async (req, res) => {
     log = await getAttackLog(client, searchObject);
 
     res.render('pages/attack')
+});
+
+app.get("/mailbox/log/page/:nr", requiresAuth(), async (req, res) => {
+
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    result = await getInvolvedAttackLogs(client, user.username)
+
+    //if check size/nr/osv, nr can't be negative etc
+    //TODO error check alla URL inputs
+
+    currentPage = parseInt(req.params.nr);
+
+    var startPoint = 0;
+    if (currentPage == 1) {
+        startPoint = 0
+    } else {
+        //startPoint = (currentPage * 20) - 1;
+        startPoint = (currentPage - 1) * 20;
+    }
+
+    console.log("start point: " + startPoint)
+
+    const objectToArray = result => {
+        const keys = Object.keys(result);
+        const res = [];
+        for (let i = startPoint; i < startPoint + 20; i++) {
+            res.push(result[keys[i]]);
+            if (result[keys[i + 1]] === null || result[keys[i + 1]] === undefined) {
+                i = Number.MAX_SAFE_INTEGER;
+            }
+        };
+        return res;
+    };
+    filteredResult = objectToArray(result);
+    maxPages = Math.ceil(Object.keys(result).length / 20);
+    
+    console.log("Max pages: " + maxPages)
+
+    //console.log("filtered result: " + filteredResult)
+    console.log("filtered result length: " + filteredResult.length)
+    console.log("result size " + Object.keys(result).length)
+
+
+    res.render('pages/log')
 });
 
 app.post("/search", requiresAuth(), (req, res) => {
