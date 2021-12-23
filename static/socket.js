@@ -48,9 +48,21 @@ socket.on('updateBatteringRams', async function (msg) {
 socket.on('updateSiegeTowers', async function (msg) {
     document.getElementById("siegetowers").innerHTML = msg;
 });
-socket.on('updateAttackPower', async function (msg) {
-    document.getElementById("attack").innerHTML = msg;
-});
-socket.on('updateDefensePower', async function (msg) {
-    document.getElementById("defense").innerHTML = msg;
+socket.on('updatePower', async function () {
+    let attackResponse = await fetch("/api/getAttackPower");
+    let defenseResponse = await fetch("/api/getDefensePower");
+
+    if (attackResponse.ok) {
+        let json = await attackResponse.json();
+        document.getElementById("attack").innerHTML = json;
+    } else {
+        alert("HTTP-Error: " + attackResponse.status);
+    }
+
+    if (defenseResponse.ok) {
+        let json = await defenseResponse.json();
+        document.getElementById("defense").innerHTML = json;
+    } else {
+        alert("HTTP-Error: " + defenseResponse.status);
+    }
 });
