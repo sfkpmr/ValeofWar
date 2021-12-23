@@ -145,31 +145,32 @@ async function main() {
                     };
                     if (spearmen !== null && spearmen !== undefined) {
                         io.to(map[i]).emit("updateSpearmen", spearmen);
+                        updateDamage = true;
                     };
                     if (swordsmen !== null && swordsmen !== undefined) {
                         io.to(map[i]).emit("updateSwordsmen", swordsmen);
+                        updateDamage = true;
                     };
                     if (horsemen !== null && horsemen !== undefined) {
                         io.to(map[i]).emit("updateHorsemen", horsemen);
+                        updateDamage = true;
                     };
                     if (knights !== null && knights !== undefined) {
                         io.to(map[i]).emit("updateKnights", knights);
+                        updateDamage = true;
                     };
                     if (batteringrams !== null && batteringrams !== undefined) {
                         io.to(map[i]).emit("updateBatteringRams", batteringrams);
+                        updateDamage = true;
                     };
                     if (siegetowers !== null && siegetowers !== undefined) {
                         io.to(map[i]).emit("updateSiegeTowers", siegetowers);
+                        updateDamage = true;
                     };
 
                     if (updateDamage) {
                         io.to(map[i]).emit("updatePower");
-
                     };
-
-
-
-                    //console.log(test.updatedFields)
 
                 } else {
                     //console.log('fel')

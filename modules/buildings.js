@@ -54,6 +54,7 @@ module.exports = {
         return cost;
     },
     upgradeBuilding: async function (client, username, building) {
+        //socket update defense when upgrading wall
         const updatedUser = { [building]: 1 };
         await incDatabaseValue(client, username, updatedUser);
     }
