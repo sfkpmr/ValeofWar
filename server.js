@@ -141,6 +141,7 @@ async function main() {
                     };
                     if (archers !== null && archers !== undefined) {
                         io.to(map[i]).emit("updateArchers", archers);
+                        updateDamage = true;
                     };
                     if (spearmen !== null && spearmen !== undefined) {
                         io.to(map[i]).emit("updateSpearmen", spearmen);
@@ -161,12 +162,10 @@ async function main() {
                         io.to(map[i]).emit("updateSiegeTowers", siegetowers);
                     };
 
-                    // if (updateDamage) {
-                    //     attack = await calculateAttack(user);
-                    //     defense = await calculateDefense(user);
-                    //     io.to(map[i]).emit("updateAttackPower", attack);
-                    //     io.to(map[i]).emit("updateDefensePower", defense);
-                    // };
+                    if (updateDamage) {
+                        io.to(map[i]).emit("updatePower");
+
+                    };
 
 
 
@@ -215,6 +214,20 @@ app.get("/", (req, res) => {
         res.render('pages/index')
     }
 
+});
+
+app.get("/api/getAttackPower", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    result = await calculateAttack(user);
+
+    res.send(JSON.stringify(result))
+});
+
+app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    result = await calculateDefense(user);
+
+    res.send(JSON.stringify(result))
 });
 
 app.get("/profile", requiresAuth(), async (req, res) => {
@@ -378,7 +391,7 @@ app.get("/mailbox/log/page/:nr", requiresAuth(), async (req, res) => {
     };
     filteredResult = objectToArray(result);
     maxPages = Math.ceil(Object.keys(result).length / 20);
-    
+
     console.log("Max pages: " + maxPages)
 
     //console.log("filtered result: " + filteredResult)
