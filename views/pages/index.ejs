@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Index</title>
+    <title>Vale of War</title>
 
     <link rel="stylesheet" href="static/style.css">
 
@@ -11,7 +11,11 @@
 <body>
 
     <a href="/login">Login / Sign up</a>
- 
+
+    <p>&copy; <span id="copyright-year"></span> Vale of War. All Rights Reserved.</p>
+    <script>
+        document.getElementById("copyright-year").innerHTML = new Date().getFullYear();
+    </script>
 
 </body>
 

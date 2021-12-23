@@ -1,4 +1,3 @@
-
 var socket = io();
 
 //fix
@@ -55,13 +54,3 @@ socket.on('updateAttackPower', async function (msg) {
 socket.on('updateDefensePower', async function (msg) {
     document.getElementById("defense").innerHTML = msg;
 });
-
-// socket.on('msg', async function (msg) {
-//   console.log(msg)
-// });
-
-// async function fetchAsync(url) {
-//    await fetch(url);
-  //let data = await response.json();
- // return data.username;
-// }
