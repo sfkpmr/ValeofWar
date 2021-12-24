@@ -24,7 +24,7 @@ app.disable('x-powered-by');
 
 const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
-const { incDatabaseValue, getUser, getUserByEmail } = require("./modules/database.js");
+const { getUser, getUserByEmail } = require("./modules/database.js");
 const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources } = require("./modules/resources.js");
 const { json } = require("express/lib/response");
@@ -39,6 +39,7 @@ const maxFarms = 8, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumb
 
 const { Server } = require("socket.io");
 const attack = require("./modules/attack.js");
+const req = require("express/lib/request");
 const io = new Server(server);
 
 //hashset instead? track all sockets for many windows?

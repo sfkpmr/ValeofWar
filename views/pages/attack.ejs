@@ -7,7 +7,7 @@
 
 <body>
 
-    On the faithful day of <%= log.time %>,<br>
+    On the faithful day of <%= new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'long', day: '2-digit', hour: 'numeric', minute: 'numeric'}).format(log.time) %>,<br>
     <%= log.attacker%> attacked <%= log.defender%>!<br>
     <br>
     <%= log.attacker %> dealt <%= log.attackDamage %> damage versus <%= log.defender %>'s <%= log.defenseDamage %>!<br>
@@ -19,8 +19,6 @@
     The attackers got their hands on <%= log.goldLoot %> gold, <%= log.grainLoot %> grain, <%= log.lumberLoot %> lumber, <%= log.stoneLoot %> stone and <%= log.ironLoot %> 
     iron in the ensuing turmoil!
     <br>
-
-
 
 </body>
 
