@@ -9,7 +9,7 @@
 <body>
 
 
-
+    <% if (result.length > 0 ){ %>
     <% for (var i=0; i < filteredResult.length; i++ ) { %>
         <a href="/mailbox/log/<%= filteredResult[i]._id %>">
             <%= filteredResult[i].attacker %> attacked <%= filteredResult[i].defender%>
@@ -19,7 +19,7 @@
    
                 <div class="pagination">
 
-
+                   
                     <% if ( currentPage> 4){%>
                         <a href="/mailbox/log/page/<%= currentPage -4%>">&laquo;</a>
                         <%}%>
@@ -46,7 +46,9 @@
                                             <% if (currentPage+3<maxPages ) {%> 
                                             <a href="/mailbox/log/page/<%= currentPage +4%>">&raquo;</a>
                                             <%}%>
-        
+                                            <%} else {%>
+                                                No attacks made
+                                            <% } %>
 
                 </div>
                 <br>

@@ -480,8 +480,8 @@ module.exports = {
 
 
 
-       // console.log(("aaaaaaaaaaaaaaaa " + archerDamage + " " + spearmenDamage + " " + swordsmenDamage + " " + horsemenDamage + " " + knightsDamage + " " + walls))
-       // console.log(boots + " " + bracers + " " + helmets + " " + longbows)
+        // console.log(("aaaaaaaaaaaaaaaa " + archerDamage + " " + spearmenDamage + " " + swordsmenDamage + " " + horsemenDamage + " " + knightsDamage + " " + walls))
+        // console.log(boots + " " + bracers + " " + helmets + " " + longbows)
 
         return Math.round((archerDamage + spearmenDamage + horsemenDamage + knightsDamage + swordsmenDamage) * (1 + (walls / 10)));
 

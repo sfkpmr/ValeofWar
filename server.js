@@ -27,7 +27,7 @@ const { trainTroops, craftArmor } = require("./modules/troops.js");
 const { getUser, getUserByEmail } = require("./modules/database.js");
 const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources } = require("./modules/resources.js");
-const { json } = require("express/lib/response");
+const { json, render } = require("express/lib/response");
 
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
 const client = new MongoClient(uri);
@@ -40,6 +40,7 @@ const maxFarms = 8, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumb
 const { Server } = require("socket.io");
 const attack = require("./modules/attack.js");
 const req = require("express/lib/request");
+const { filter } = require("compression");
 const io = new Server(server);
 
 //hashset instead? track all sockets for many windows?
@@ -340,6 +341,8 @@ app.get("/mailbox", requiresAuth(), async (req, res) => {
 
 app.get("/mailbox/log", requiresAuth(), async (req, res) => {
 
+    //null check om inga attacker
+
     const user = await getUserByEmail(client, req.oidc.user.email);
     result = await getInvolvedAttackLogs(client, user.username)
 
@@ -369,6 +372,10 @@ app.get("/mailbox/log/page/:nr", requiresAuth(), async (req, res) => {
 
     //if check size/nr/osv, nr can't be negative etc
     //TODO error check alla URL inputs
+
+    if (result.length === 0) {
+        res.render('pages/log')
+    }
 
     currentPage = parseInt(req.params.nr);
 
@@ -401,6 +408,7 @@ app.get("/mailbox/log/page/:nr", requiresAuth(), async (req, res) => {
     //console.log("filtered result: " + filteredResult)
     console.log("filtered result length: " + filteredResult.length)
     console.log("result size " + Object.keys(result).length)
+    log = filteredResult
 
 
     res.render('pages/log')
