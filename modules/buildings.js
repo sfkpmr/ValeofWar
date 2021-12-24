@@ -1,4 +1,4 @@
-const { incDatabaseValue } = require("../modules/database.js");
+const { incDatabaseValue, setDatabaseValue } = require("../modules/database.js");
 
 const archer = { grain: 25, lumber: 50, gold: 10 };
 const spearman = { grain: 25, lumber: 50 };
@@ -23,6 +23,12 @@ const trainingFieldBaseCost = { lumber: 100, stone: 100, iron: 5, gold: 5 };
 const stablesBaseCost = { lumber: 500, stone: 100, iron: 50, gold: 50 };
 const wallBaseCost = { lumber: 250, stone: 500, iron: 100, gold: 10 };
 const workshopBaseCost = { lumber: 500, stone: 250, iron: 250, gold: 100 };
+
+const farmBaseCost = { lumber: 500, stone: 50, iron: 10, gold: 25 };
+const lumberCampBaseCost = { lumber: 500, stone: 100, iron: 5, gold: 5 };
+const quarryBaseCost = { lumber: 500, stone: 100, iron: 100, gold: 100 };
+const ironMineBaseCost = { lumber: 750, stone: 500, iron: 100, gold: 100 };
+const goldMineBaseCost = { lumber: 1000, stone: 250, iron: 250, gold: 100 };
 
 module.exports = {
 
@@ -104,10 +110,11 @@ module.exports = {
         return Math.round(cost);
     },
     upgradeBuilding: async function (client, username, building) {
-        //socket update defense when upgrading wall
-        // check cost
         const updatedUser = { [building]: 1 };
         await incDatabaseValue(client, username, updatedUser);
+    },
+    upgradeResource: async function (client, username, data) {
+        await setDatabaseValue(client, username, data);
     },
     calcBuildingLumberCost: async function (type, buildingLevel) {
 
@@ -132,10 +139,28 @@ module.exports = {
             case "workshop":
                 cost = workshopBaseCost.lumber;
                 break;
+            case "farm":
+                cost = farmBaseCost.lumber;
+                break;
+            case "lumbercamp":
+                cost = lumberCampBaseCost.lumber;
+                break;
+            case "quarry":
+                cost = quarryBaseCost.lumber;
+                break;
+            case "ironmine":
+                cost = ironMineBaseCost.lumber;
+                break;
+            case "goldmine":
+                cost = goldMineBaseCost.lumber;
+                break;
+            default:
+                console.log("ERROR " + type)
+
         }
 
         for (i = 0; i < buildingLevel; i++) {
-           if (i > 0) {
+            if (i > 0) {
                 cost = cost * 1.2;
             }
 
@@ -167,6 +192,23 @@ module.exports = {
             case "workshop":
                 cost = workshopBaseCost.stone;
                 break;
+            case "farm":
+                cost = farmBaseCost.stone;
+                break;
+            case "lumbercamp":
+                cost = lumberCampBaseCost.stone;
+                break;
+            case "quarry":
+                cost = quarryBaseCost.stone;
+                break;
+            case "ironmine":
+                cost = ironMineBaseCost.stone;
+                break;
+            case "goldmine":
+                cost = goldMineBaseCost.stone;
+                break;
+            default:
+                console.log("ERROR " + type)
         }
 
         for (i = 0; i < buildingLevel; i++) {
@@ -202,10 +244,27 @@ module.exports = {
             case "workshop":
                 cost = workshopBaseCost.iron;
                 break;
+            case "farm":
+                cost = farmBaseCost.iron;
+                break;
+            case "lumbercamp":
+                cost = lumberCampBaseCost.iron;
+                break;
+            case "quarry":
+                cost = quarryBaseCost.iron;
+                break;
+            case "ironmine":
+                cost = ironMineBaseCost.iron;
+                break;
+            case "goldmine":
+                cost = goldMineBaseCost.iron;
+                break;
+            default:
+                console.log("ERROR " + type)
         }
 
         for (i = 0; i < buildingLevel; i++) {
-             if (i > 0) {
+            if (i > 0) {
                 cost = cost * 1.2;
             }
 
@@ -237,10 +296,27 @@ module.exports = {
             case "workshop":
                 cost = workshopBaseCost.gold;
                 break;
+            case "farm":
+                cost = farmBaseCost.gold;
+                break;
+            case "lumbercamp":
+                cost = lumberCampBaseCost.gold;
+                break;
+            case "quarry":
+                cost = quarryBaseCost.gold;
+                break;
+            case "ironmine":
+                cost = ironMineBaseCost.gold;
+                break;
+            case "goldmine":
+                cost = goldMineBaseCost.gold;
+                break;
+            default:
+                console.log("ERROR " + type)
         }
 
         for (i = 0; i < buildingLevel; i++) {
-           if (i > 0) {
+            if (i > 0) {
                 cost = cost * 1.2;
             }
 

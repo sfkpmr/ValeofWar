@@ -25,7 +25,7 @@ app.disable('x-powered-by');
 const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
 const { incDatabaseValue, getUser, getUserByEmail } = require("./modules/database.js");
-const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost } = require("./modules/buildings.js");
+const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources } = require("./modules/resources.js");
 const { json } = require("express/lib/response");
 
@@ -428,7 +428,7 @@ app.get("/town/barracks", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const type = "barracks"
 
-     barracks = user.barracksLevel;
+    barracks = user.barracksLevel;
 
     lumberCost = await calcBuildingLumberCost(type, barracks + 1);
     stoneCost = await calcBuildingStoneCost(type, barracks + 1);
@@ -520,7 +520,7 @@ app.get("/town/workshop", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const type = "workshop"
 
-     workshop = user.workshopLevel;
+    workshop = user.workshopLevel;
 
     batteringrams = user.batteringrams;
     siegetowers = user.siegetowers;
@@ -840,22 +840,26 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
     type = req.params.type;
     resourceId = req.params.number;
     const user = await getUserByEmail(client, req.oidc.user.email);
-    var updatedUser;
-
-    //todo use switch
+    var updatedUser, resourceLevel, resource;
 
     if (type === "farm") {
 
         if (resourceId >= 0 && resourceId <= maxFarms) {
+            resource = "farms"
             updatedUser = user.farms;
+            console.log(updatedUser)
+            resourceLevel = updatedUser[resourceId]
             updatedUser[resourceId]++;
+            console.log(updatedUser)
             updatedUser = { farms: updatedUser }
         } else {
             res.redirect("/land");
         }
     } else if (type === "goldmine") {
         if (resourceId >= 0 && resourceId <= maxGoldMines) {
+            resource = "goldMines"
             updatedUser = user.goldMines;
+            resourceLevel = updatedUser[resourceId]
             updatedUser[resourceId]++;
 
             updatedUser = { goldMines: updatedUser }
@@ -864,7 +868,9 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
         }
     } else if (type === "ironmine") {
         if (resourceId >= 0 && resourceId <= maxIronMines) {
+            resource = "ironMines"
             updatedUser = user.ironMines;
+            resourceLevel = updatedUser[resourceId]
             updatedUser[resourceId]++;
 
             updatedUser = { ironMines: updatedUser }
@@ -874,7 +880,9 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
     }
     else if (type === "lumbercamp") {
         if (resourceId >= 0 && resourceId <= maxLumberCamps) {
+            resource = "lumberCamp"
             updatedUser = user.lumberCamps;
+            resourceLevel = updatedUser[resourceId]
             updatedUser[resourceId]++;
 
             updatedUser = { lumberCamps: updatedUser }
@@ -883,7 +891,9 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
         }
     } else if (type === "quarry") {
         if (resourceId >= 0 && resourceId <= maxQuarries) {
+            resource = "quarry"
             updatedUser = user.quarries;
+            resourceLevel = updatedUser[resourceId]
             updatedUser[resourceId]++;
 
             updatedUser = { quarries: updatedUser }
@@ -892,9 +902,16 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
         }
     }
 
-    //TOOD real costs
-    if (await checkIfCanAfford(client, user.username, 1, 1, 2, 3, 4, 0, 0)) {
-        const result = await client.db("gamedb").collection("players").updateOne({ username: user.username }, { $set: updatedUser });
+    const lumberCost = await calcBuildingLumberCost(type, resourceLevel + 1);
+    const stoneCost = await calcBuildingStoneCost(type, resourceLevel + 1);
+    const ironCost = await calcBuildingIronCost(type, resourceLevel + 1);
+    const goldCost = await calcBuildingGoldCost(type, resourceLevel + 1);
+
+    if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
+        await upgradeResource(client, user.username, updatedUser, resource);
+        await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
+    } else {
+        console.log("bbbb");
     }
 
     res.redirect("/land");
@@ -931,9 +948,14 @@ app.get("/land/:type/:number/establish", requiresAuth(), async (req, res) => {
         updatedUser = { quarries: updatedUser }
     }
 
-    //TODO real cost
-    if (await checkIfCanAfford(client, user.username, 1, 1, 2, 3, 4, 0, 0)) {
-        const result = await client.db("gamedb").collection("players").updateOne({ username: user.username }, { $set: updatedUser });
+    const lumberCost = await calcBuildingLumberCost(type, 1);
+    const stoneCost = await calcBuildingStoneCost(type, 1);
+    const ironCost = await calcBuildingIronCost(type, 1);
+    const goldCost = await calcBuildingGoldCost(type, 1);
+
+    if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
+        await upgradeResource(client, user.username, updatedUser, type);
+        await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
     }
 
     res.redirect("/land");
