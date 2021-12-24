@@ -410,15 +410,19 @@ app.post("/search", requiresAuth(), (req, res) => {
 });
 
 app.get("/search/random", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
 
     const result = await client.db("gamedb").collection("players").aggregate([{ $sample: { size: 1 } }]).toArray();
 
-    res.redirect(`/profile/${result[0].username}`)
+    if (user.username === result[0].username) {
+        res.redirect("/search/random")
+    } else {
+        res.redirect(`/profile/${result[0].username}`)
+    }
 
 });
 
 app.get("/town", requiresAuth(), async (req, res) => {
-    //const user = await getUserByEmail(req.oidc.user.email);
 
     res.render('pages/town');
 });
