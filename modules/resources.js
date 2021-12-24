@@ -1,44 +1,50 @@
 const { getUser, incDatabaseValue } = require("../modules/database.js");
 
-module.exports = {
+const baseGrainIncome = 10, baseLumberIncome = 10, baseStoneIncome = 5, baseIronIncome = 5, baseGoldIncome = 2;
+
+myObj = {
     addResources: async function (client, username) {
         const user = await getUser(client, username);
 
-        const lumberCamps = user.lumberCamps;
-        const goldMines = user.goldMines;
         const farms = user.farms;
-        const ironMines = user.ironMines;
+        const lumberCamps = user.lumberCamps;
         const quarries = user.quarries;
+        const ironMines = user.ironMines;
+        const goldMines = user.goldMines;
         const trainingfield = user.trainingfieldLevel;
         const stables = user.stablesLevel;
 
-        var lumberIncome = 0, goldIncome = 0, grainIncome = 0, ironIncome = 0, stoneIncome = 0, recruitsIncome = trainingfield * 10, horseIncome = stables * 10;
+        var recruitsIncome = trainingfield * 5, horseIncome = stables * 3;
 
-        lumberCamps.forEach(lumberCalc);
-        goldMines.forEach(goldCalc);
+        var farmLevels = 0, lumberLevels = 0, stoneLevels = 0, ironLevels = 0, goldLevels = 0;
+
         farms.forEach(grainCalc);
-        ironMines.forEach(ironCalc);
+        lumberCamps.forEach(lumberCalc);
         quarries.forEach(stoneCalc);
-
-        function lumberCalc(i) {
-            lumberIncome += i * 10;
-        };
-
-        function goldCalc(i) {
-            goldIncome += i * 2;
-        };
+        ironMines.forEach(ironCalc);
+        goldMines.forEach(goldCalc);
 
         function grainCalc(i) {
-            grainIncome += i * 10;
+            farmLevels += i;
         };
-
-        function ironCalc(i) {
-            ironIncome += i * 5;
+        function lumberCalc(i) {
+            lumberLevels += i;
         };
-
         function stoneCalc(i) {
-            stoneIncome += i * 5;
+            stoneLevels += i;
         };
+        function ironCalc(i) {
+            ironLevels += i;
+        };
+        function goldCalc(i) {
+            goldLevels += i;
+        };
+
+        const grainIncome = myObj.incomeCalc("grain", farmLevels);
+        const lumberIncome = myObj.incomeCalc("lumber", lumberLevels);
+        const stoneIncome = myObj.incomeCalc("stone", stoneLevels);
+        const ironIncome = myObj.incomeCalc("iron", ironLevels);
+        const goldIncome = myObj.incomeCalc("gold", goldLevels);
 
         console.log(`Giving ${grainIncome} grain, ${lumberIncome} lumber, ${goldIncome} gold, ${stoneIncome} stone, ${ironIncome} iron, ${recruitsIncome} recruits and ${horseIncome} horses to ${username}.`);
 
@@ -71,7 +77,7 @@ module.exports = {
         const user = await getUser(client, username);
 
         console.log("User has " + user.gold + " " + user.lumber + " " + user.stone + " " + user.iron + " " + user.grain + " " + user.recruits + " " + user.horses);
-        console.log("User wants to use " + goldCost + " " + lumberCost + " " + stoneCost + " " + ironCost + " " + grainCost + " " + recruitCost + " " + horseCost);
+        console.log("User wants to use " + goldCost + " gold, " + lumberCost + " lumber, " + stoneCost + " stone, " + ironCost + " iron, " + grainCost + " grain, " + recruitCost + " " + horseCost);
 
         if (user.gold >= goldCost && user.lumber >= lumberCost && user.stone >= stoneCost && user.iron >= ironCost && user.grain >= grainCost && user.recruits >= recruitCost && user.horses >= horseCost) {
             return true;
@@ -108,5 +114,25 @@ module.exports = {
 
         const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
         await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
+    },
+    incomeCalc: function (type, levels) {
+
+        var baseIncome = 10;
+
+        if (type === "grain") {
+            baseIncome = baseGrainIncome;
+        } else if (type === "lumber") {
+            baseIncome = baseLumberIncome;
+        } else if (type === "stone") {
+            baseIncome = baseStoneIncome;
+        } else if (type === "iron") {
+            baseIncome = baseIronIncome;
+        } else if (type === "gold") {
+            baseIncome = baseGoldIncome;
+        }
+
+        return income = levels * baseIncome;;
     }
-}
+};
+
+module.exports = myObj;

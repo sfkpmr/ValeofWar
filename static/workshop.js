@@ -1,12 +1,21 @@
-function workshopBuildCost(val) {
+const batteringRam = { lumber: 500, iron: 100, gold: 50 };
+const siegeTower = { lumber: 1000, iron: 100, gold: 100 };
 
-    lumberCost = parseInt(document.getElementById('batteringram').value) * 100;
-    ironCost = parseInt(document.getElementById('batteringram').value) * 25;
-    goldCost = parseInt(document.getElementById('batteringram').value) * 25;
+function workshopBuildCost() {
 
-    lumberCost += parseInt(document.getElementById('siegetower').value) * 500;
-    ironCost += parseInt(document.getElementById('siegetower').value) * 100;
-    goldCost += parseInt(document.getElementById('siegetower').value) * 100;
+    var lumberCost = 0, ironCost = 0, goldCost = 0;
+
+    batteringRams = parseInt(document.getElementById('batteringram').value);
+    siegeTowers = parseInt(document.getElementById('batteringram').value);
+
+    lumberCost += batteringRams * batteringRam.lumber;
+    lumberCost += siegeTowers * siegeTower.lumber;
+
+    ironCost += batteringRams * batteringRam.iron;
+    ironCost += siegeTowers * siegeTower.iron;
+
+    goldCost += batteringRams * batteringRam.gold;
+    goldCost += siegeTowers * siegeTower.gold;
 
     document.getElementById("lumber").innerHTML = lumberCost;
     document.getElementById("iron").innerHTML = ironCost;

@@ -25,16 +25,17 @@ app.disable('x-powered-by');
 const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
 const { incDatabaseValue, getUser, getUserByEmail } = require("./modules/database.js");
-const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding } = require("./modules/buildings.js");
+const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources } = require("./modules/resources.js");
 const { json } = require("express/lib/response");
 
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
 const client = new MongoClient(uri);
 
-//const maxFarms = 6, maxGoldMines = 3, maxIronMines = 4, maxQuarries = 2, maxLumberCamps = 4;
 const maxFarms = 8, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 7;
-//const farmBaseCost = {lumber: 100, gold: 100};
+// module.exports = {
+//     maxFarms: 5
+// }
 
 const { Server } = require("socket.io");
 const attack = require("./modules/attack.js");
@@ -248,8 +249,9 @@ app.get("/test", requiresAuth(), async (req, res) => {
 });
 
 //make post?
-app.get("/getUser/:id", requiresAuth(), async (req, res) => {
+app.get("/api/getUser/:id", requiresAuth(), async (req, res) => {
 
+    //catch om någon gör request på annat sätt än "rätt sätt", och inte har email
     //banan = { "username": req.oidc.user.email }
     user = await getUserByEmail(client, req.oidc.user.email);
     //console.log("WWWWWWWWWWWWWWWWW " + req.params.id + " " + req.oidc.user.email + " bananana: " + user._id)
@@ -421,39 +423,18 @@ app.get("/town", requiresAuth(), async (req, res) => {
     res.render('pages/town');
 });
 
-//     blacksmith = user.blacksmithLevel;
-
-//     for (let i = 1; i < blacksmith + 1; i++) {
-
-//         if (i === 1) {
-//             goldCost = 10;
-//             lumberCost = 10;
-//             stoneCost = 10;
-//             ironCost = 10;
-//         } else {
-//             goldCost += Math.round(goldCost * 1.2);
-//             lumberCost += Math.round(lumberCost * 1.2);
-//             stoneCost += Math.round(stoneCost * 1.2);
-//             ironCost += Math.round(ironCost * 1.2);
-//         }
-//     }
-
-//     if (await checkIfCanAfford(req.oidc.user.nickname, goldCost, lumberCost, stoneCost, ironCost, 0)) {
-//         await upgradeBuilding(user.username, "blacksmithLevel");
-//         await removeResources(req.oidc.user.nickname, goldCost, lumberCost, stoneCost, ironCost, 0, 0);
-//     } else {
-//         console.log("bbbb");
-//     }
-
-//     res.redirect('/town/blacksmith');
-
-// });
-
 app.get("/town/barracks", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
+    const type = "barracks"
 
-    barracks = user.barracksLevel;
+     barracks = user.barracksLevel;
+
+    lumberCost = await calcBuildingLumberCost(type, barracks + 1);
+    stoneCost = await calcBuildingStoneCost(type, barracks + 1);
+    ironCost = await calcBuildingIronCost(type, barracks + 1);
+    goldCost = await calcBuildingGoldCost(type, barracks + 1);
+
 
     archers = user.archers;
     spearmen = user.spearmen;
@@ -477,35 +458,46 @@ app.get("/town/wall", requiresAuth(), async (req, res) => {
 app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
 
-    var buildingName = "";
+    //TODO check :building variable
 
-    switch (req.params.building) {
-        case "wall":
-            buildingName = "wallLevel"
+    type = req.params.building;
+    var buildingName, level;
+
+    switch (type) {
+        case "barracks":
+            level = user.barracksLevel;
+            buildingName = "barracksLevel";
             break;
         case "blacksmith":
-            buildingName = "blacksmithLevel"
-            break;
-        case "barracks":
-            buildingName = "barracksLevel"
-            break;
-        case "trainingfield":
-            buildingName = "trainingfieldLevel"
+            level = user.blacksmithLevel;
+            buildingName = "blacksmithLevel";
             break;
         case "stables":
-            buildingName = "stablesLevel"
+            level = user.stablesLevel;
+            buildingName = "stablesLevel";
+            break;
+        case "trainingfield":
+            level = user.trainingfieldLevel;
+            buildingName = "trainingfieldLevel";
+            break;
+        case "wall":
+            level = user.wallLevel;
+            buildingName = "wallLevel";
             break;
         case "workshop":
-            buildingName = "workshopLevel"
+            level = user.workshopLevel;
+            buildingName = "workshopLevel";
             break;
-        default:
-            //catch
-            console.log("error");
     }
 
-    if (await checkIfCanAfford(client, user.username, 0, 20, 20, 20, 0, 0, 0)) {
+    const lumberCost = await calcBuildingLumberCost(type, level + 1);
+    const stoneCost = await calcBuildingStoneCost(type, level + 1);
+    const ironCost = await calcBuildingIronCost(type, level + 1);
+    const goldCost = await calcBuildingGoldCost(type, level + 1);
+
+    if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
         await upgradeBuilding(client, user.username, buildingName);
-        await removeResources(client, user.username, 0, 20, 20, 20, 0, 0, 0);
+        await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
     } else {
         console.log("bbbb");
     }
@@ -526,11 +518,17 @@ app.get("/town/workshop", requiresAuth(), async (req, res) => {
 
     //todo method to get user and set variables
     const user = await getUserByEmail(client, req.oidc.user.email);
+    const type = "workshop"
 
-    workshop = user.workshopLevel;
+     workshop = user.workshopLevel;
 
     batteringrams = user.batteringrams;
     siegetowers = user.siegetowers;
+
+    lumberCost = await calcBuildingLumberCost(type, workshop + 1);
+    stoneCost = await calcBuildingStoneCost(type, workshop + 1);
+    ironCost = await calcBuildingIronCost(type, workshop + 1);
+    goldCost = await calcBuildingGoldCost(type, workshop + 1);
 
     res.render('pages/workshop')
 });
@@ -538,17 +536,17 @@ app.get("/town/workshop", requiresAuth(), async (req, res) => {
 app.post("/town/workshop/train", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
-    batteringrams = parseInt(req.body.batteringram);
-    siegetowers = parseInt(req.body.siegetower);
+    const batteringrams = parseInt(req.body.batteringram);
+    const siegetowers = parseInt(req.body.siegetower);
 
-    goldCost = calcGoldTrainCost(0, 0, 0, 0, batteringrams, siegetowers);
-    grainCost = calcGrainTrainCost(0, 0, 0, 0, batteringrams, siegetowers);
-    lumberCost = calcLumberTrainCost(0, 0, 0, 0, batteringrams, siegetowers);
-    ironCost = calcIronTrainCost(0, 0, 0, 0, batteringrams, siegetowers);
+    const goldCost = calcGoldTrainCost(0, 0, 0, 0, 0, batteringrams, siegetowers);
+    const grainCost = calcGrainTrainCost(0, 0, 0, 0, 0, batteringrams, siegetowers);
+    const lumberCost = calcLumberTrainCost(0, 0, 0, 0, 0, batteringrams, siegetowers);
+    const ironCost = calcIronTrainCost(0, 0, 0, 0, 0, batteringrams, siegetowers);
 
-    recruitCost = (batteringrams + siegetowers) * 2;
+    const recruitCost = (batteringrams + siegetowers) * 2;
 
-    data = { "batteringrams": batteringrams, "siegetowers": siegetowers };
+    const data = { "batteringrams": batteringrams, "siegetowers": siegetowers };
 
     if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0)) {
         await trainTroops(client, user.username, data);
@@ -563,8 +561,15 @@ app.post("/town/workshop/train", requiresAuth(), async (req, res) => {
 app.get("/town/stables", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
+    const type = "stables"
 
     stables = user.stablesLevel;
+
+    lumberCost = await calcBuildingLumberCost(type, stables + 1);
+    stoneCost = await calcBuildingStoneCost(type, stables + 1);
+    ironCost = await calcBuildingIronCost(type, stables + 1);
+    goldCost = await calcBuildingGoldCost(type, stables + 1);
+
 
     horsemen = user.horsemen;
     knights = user.knights;
@@ -597,46 +602,18 @@ app.post("/town/blacksmith/craft", requiresAuth(), async (req, res) => {
 
     var goldCost = 0, lumberCost = 0, ironCost = 0;
 
-    shields = parseInt(req.body.shield);
-    swords = parseInt(req.body.sword);
-    bracers = parseInt(req.body.bracers);
-    longbows = parseInt(req.body.longbow);
-    spears = parseInt(req.body.spear);
-    lances = parseInt(req.body.lance);
     boots = parseInt(req.body.boots);
+    bracers = parseInt(req.body.bracers);
     helmets = parseInt(req.body.helmet);
+    lances = parseInt(req.body.lance);
+    longbows = parseInt(req.body.longbow);
+    shields = parseInt(req.body.shield);
+    spears = parseInt(req.body.spear);
+    swords = parseInt(req.body.sword);
 
-    goldCost += shields * 10;
-    lumberCost += shields * 10;
-    ironCost += shields * 10;
-
-    goldCost += swords * 10;
-    lumberCost += swords * 10;
-    ironCost += swords * 10;
-
-    goldCost += bracers * 10;
-    lumberCost += bracers * 10;
-    ironCost += bracers * 10;
-
-    goldCost += longbows * 10;
-    lumberCost += longbows * 10;
-    ironCost += longbows * 10;
-
-    goldCost += spears * 10;
-    lumberCost += spears * 10;
-    ironCost += spears * 10;
-
-    goldCost += lances * 10;
-    lumberCost += lances * 10;
-    ironCost += lances * 10;
-
-    goldCost += boots * 10;
-    lumberCost += boots * 10;
-    ironCost += boots * 10;
-
-    goldCost += helmets * 10;
-    lumberCost += helmets * 10;
-    ironCost += helmets * 10;
+    lumberCost = calcLumberCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
+    ironCost = calcIronCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
+    goldCost = calcGoldCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
 
     updateUser = {
         "shields": shields, "swords": swords, "bracers": bracers, "longbows": longbows, "spears": spears, "lances": lances, "boots": boots, "helmets": helmets
@@ -678,20 +655,16 @@ app.post("/town/stables/train", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     //await updateLastAction(user.username);
 
-    horsemen = parseInt(req.body.horsemen);
-    knights = parseInt(req.body.knights);
+    const horsemen = parseInt(req.body.horsemen);
+    const knights = parseInt(req.body.knights);
 
-    var goldCost = 0, grainCost = 0, lumberCost = 0, ironCost = 0;
+    const goldCost = calcGoldTrainCost(0, 0, 0, horsemen, knights, 0, 0);
+    const grainCost = calcGrainTrainCost(0, 0, 0, horsemen, knights, 0, 0);
+    const lumberCost = calcLumberTrainCost(0, 0, 0, horsemen, knights, 0, 0);
+    const ironCost = calcIronTrainCost(0, 0, 0, horsemen, knights, 0, 0);
 
-    goldCost += horsemen * 10;
-    grainCost += horsemen * 10;
-    lumberCost += horsemen * 10;
-
-    grainCost += knights * 10;
-    lumberCost += knights * 10;
-
-    horseAndRecruitCost = horsemen + knights;
-    data = { "horsemen": horsemen, "knights": knights };
+    const horseAndRecruitCost = horsemen + knights;
+    const data = { "horsemen": horsemen, "knights": knights };
 
     if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, horseAndRecruitCost, horseAndRecruitCost)) {
         await trainTroops(client, user.username, data);
@@ -719,29 +692,17 @@ app.post("/town/barracks/train", requiresAuth(), async (req, res) => {
     //await updateLastAction(req.oidc.user.nickname);
 
     const user = await getUserByEmail(client, req.oidc.user.email);
+    const archers = parseInt(req.body.archers);
+    const spearmen = parseInt(req.body.spearmen);
+    const swordsmen = parseInt(req.body.swordsmen);
 
-    archers = parseInt(req.body.archers);
-    spearmen = parseInt(req.body.spearmen);
-    swordsmen = parseInt(req.body.swordsmen);
+    const goldCost = calcGoldTrainCost(archers, spearmen, swordsmen, 0, 0, 0, 0);
+    const grainCost = calcGrainTrainCost(archers, spearmen, swordsmen, 0, 0, 0, 0);
+    const lumberCost = calcLumberTrainCost(archers, spearmen, swordsmen, 0, 0, 0, 0);
+    const ironCost = calcIronTrainCost(archers, spearmen, swordsmen, 0, 0, 0, 0);
 
-    var goldCost = 0;
-    var grainCost = 0;
-    var lumberCost = 0;
-    var ironCost = 0;
-
-    goldCost += archers * 10;
-    grainCost += archers * 10;
-    lumberCost += archers * 10;
-
-    grainCost += spearmen * 10;
-    lumberCost += spearmen * 10;
-
-    goldCost += swordsmen * 10;
-    grainCost += swordsmen * 10;
-    ironCost += swordsmen * 10;
-
-    recruitCost = archers + spearmen + swordsmen;
-    data = { "archers": archers, "spearmen": spearmen, "swordsmen": swordsmen };
+    const recruitCost = archers + spearmen + swordsmen;
+    const data = { "archers": archers, "spearmen": spearmen, "swordsmen": swordsmen };
 
     if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitCost, 0)) {
         await trainTroops(client, user.username, data);
@@ -987,7 +948,7 @@ async function checkAll() {
 
 //måste köra för alla så folk kan anfalla folk som är afk
 //ev kör när någon interagerar med afk folk
-var minutes = 10, the_interval = minutes * 60 * 1000;
+var minutes = 15, the_interval = minutes * 60 * 1000;
 setInterval(function () {
     console.log("Adding resources for everyone!");
     checkAll();

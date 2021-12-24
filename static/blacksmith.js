@@ -1,26 +1,40 @@
+const boot = { iron: 25 };
+const bracer = { iron: 25 };
+const helmet = { iron: 50 };
+const lance = { lumber: 100, iron: 50, gold: 10 };
+const longbow = { lumber: 50, iron: 10 };
+const shield = { lumber: 50, iron: 25 };
+const spear = { lumber: 100, iron: 5 };
+const sword = { iron: 50, gold: 15 };
+
 function craftingCost(val) {
     let lumberCost = 0, ironCost = 0, goldCost = 0;
 
-    ironCost += parseInt(document.getElementById('boots').value) * 10;
+    boots = parseInt(document.getElementById('boots').value);
+    bracers = parseInt(document.getElementById('bracers').value);
+    helmets = parseInt(document.getElementById('helmets').value);
+    lances = parseInt(document.getElementById('lances').value);
+    longbows = parseInt(document.getElementById('longbows').value);
+    shields = parseInt(document.getElementById('shields').value);
+    spears = parseInt(document.getElementById('spears').value);
+    swords = parseInt(document.getElementById('swords').value);
 
-    ironCost += parseInt(document.getElementById('bracers').value) * 10;
+    lumberCost += lances * lance.lumber;
+    lumberCost += longbows * longbow.lumber;
+    lumberCost += shields * shield.lumber;
+    lumberCost += spears * spear.lumber;
 
-    ironCost += parseInt(document.getElementById('helmet').value) * 20;
+    ironCost += boots * boot.iron;
+    ironCost += bracers * bracer.iron;
+    ironCost += helmets * helmet.iron;
+    ironCost += lances * lance.iron;
+    ironCost += longbows * longbow.iron;
+    ironCost += shields * shield.iron;
+    ironCost += spears * spear.iron;
+    ironCost += swords * sword.iron;
 
-    ironCost += parseInt(document.getElementById('lance').value) * 50;
-    goldCost += parseInt(document.getElementById('lance').value) * 10;
-
-    lumberCost += parseInt(document.getElementById('longbow').value) * 20;
-    goldCost += parseInt(document.getElementById('longbow').value) * 10;
-
-    lumberCost += parseInt(document.getElementById('shield').value) * 50;
-    ironCost += parseInt(document.getElementById('shield').value) * 10;
-
-    lumberCost += parseInt(document.getElementById('spear').value) * 50;
-    ironCost += parseInt(document.getElementById('spear').value) * 5;
-
-    ironCost += parseInt(document.getElementById('sword').value) * 50;
-    goldCost += parseInt(document.getElementById('sword').value) * 10;
+    goldCost += lances * lance.gold;
+    goldCost += swords * sword.gold;
 
     document.getElementById("lumber").innerHTML = lumberCost;
     document.getElementById("iron").innerHTML = ironCost;

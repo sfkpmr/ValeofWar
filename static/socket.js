@@ -1,52 +1,51 @@
 var socket = io();
 
-//fix
 socket.on('sync', async function () {
     console.log("Socket connected.")
-    await fetch(`/getUser/${socket.id}`)
+    await fetch(`/api/getUser/${socket.id}`)
 });
 
-socket.on('updateGrain', async function (msg) {
-    document.getElementById("grain").innerHTML = msg;
+socket.on('updateGrain', async function (data) {
+    document.getElementById("grain").innerHTML = data;
 });
-socket.on('updateLumber', async function (msg) {
-    document.getElementById("lumber").innerHTML = msg;
+socket.on('updateLumber', async function (data) {
+    document.getElementById("lumber").innerHTML = data;
 });
-socket.on('updateStone', async function (msg) {
-    document.getElementById("stone").innerHTML = msg;
+socket.on('updateStone', async function (data) {
+    document.getElementById("stone").innerHTML = data;
 });
-socket.on('updateIron', async function (msg) {
-    document.getElementById("iron").innerHTML = msg;
+socket.on('updateIron', async function (data) {
+    document.getElementById("iron").innerHTML = data;
 });
-socket.on('updateGold', async function (msg) {
-    document.getElementById("gold").innerHTML = msg;
+socket.on('updateGold', async function (data) {
+    document.getElementById("gold").innerHTML = data;
 });
-socket.on('updateRecruits', async function (msg) {
-    document.getElementById("recruits").innerHTML = msg;
+socket.on('updateRecruits', async function (data) {
+    document.getElementById("recruits").innerHTML = data;
 });
-socket.on('updateHorses', async function (msg) {
-    document.getElementById("horses").innerHTML = msg;
+socket.on('updateHorses', async function (data) {
+    document.getElementById("horses").innerHTML = data;
 });
-socket.on('updateArchers', async function (msg) {
-    document.getElementById("archers").innerHTML = msg;
+socket.on('updateArchers', async function (data) {
+    document.getElementById("archers").innerHTML = data;
 });
-socket.on('updateSpearmen', async function (msg) {
-    document.getElementById("spearmen").innerHTML = msg;
+socket.on('updateSpearmen', async function (data) {
+    document.getElementById("spearmen").innerHTML = data;
 });
-socket.on('updateSwordsmen', async function (msg) {
-    document.getElementById("swordsmen").innerHTML = msg;
+socket.on('updateSwordsmen', async function (data) {
+    document.getElementById("swordsmen").innerHTML = data;
 });
-socket.on('updateHorsemen', async function (msg) {
-    document.getElementById("horsemen").innerHTML = msg;
+socket.on('updateHorsemen', async function (data) {
+    document.getElementById("horsemen").innerHTML = data;
 });
-socket.on('updateKnights', async function (msg) {
-    document.getElementById("knights").innerHTML = msg;
+socket.on('updateKnights', async function (data) {
+    document.getElementById("knights").innerHTML = data;
 });
-socket.on('updateBatteringRams', async function (msg) {
-    document.getElementById("batteringrams").innerHTML = msg;
+socket.on('updateBatteringRams', async function (data) {
+    document.getElementById("batteringrams").innerHTML = data;
 });
-socket.on('updateSiegeTowers', async function (msg) {
-    document.getElementById("siegetowers").innerHTML = msg;
+socket.on('updateSiegeTowers', async function (data) {
+    document.getElementById("siegetowers").innerHTML = data;
 });
 socket.on('updatePower', async function () {
     let attackResponse = await fetch("/api/getAttackPower");

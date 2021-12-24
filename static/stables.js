@@ -1,15 +1,19 @@
+const horseman = { grain: 100, iron: 25 };
+const knight = { grain: 100, iron: 100, gold: 50 };
+
 function stablesTrainCost(val) {
     let grainCost = 0, lumberCost = 0, ironCost = 0, goldCost = 0;
 
-    horsemen = document.getElementById('horsemen').value
-    knights = document.getElementById('knights').value
+    horsemen = document.getElementById('horsemen').value;
+    knights = document.getElementById('knights').value;
 
-    grainCost += parseInt(horsemen) * 10;
-    lumberCost += parseInt(horsemen) * 10;
+    grainCost += horsemen * horseman.grain;
+    grainCost += knights * knight.grain;
 
-    goldCost += parseInt(knights) * 25;
-    grainCost += parseInt(knights) * 30;
-    ironCost += parseInt(knights) * 20;
+    ironCost += horsemen * horseman.iron;
+    ironCost += knights * knight.iron;
+
+    goldCost += knights * knight.gold;
 
     document.getElementById("grain").innerHTML = grainCost;
     document.getElementById("lumber").innerHTML = lumberCost;
