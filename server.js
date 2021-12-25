@@ -7,6 +7,7 @@ var options = {
     key: key,
     cert: cert
 };
+const path = require('path');
 const app = express();
 var server = https.createServer(options, app);
 const { MongoClient, ObjectId } = require('mongodb');
@@ -14,7 +15,6 @@ require("dotenv").config();
 const { auth, requiresAuth } = require('express-openid-connect');
 const ejs = require('ejs');
 const e = require("express");
-//const { send, render } = require("express/lib/response"); //???
 app.set('view engine', 'ejs');
 var compression = require('compression');
 // Use Gzip compression
@@ -27,15 +27,11 @@ const { trainTroops, craftArmor } = require("./modules/troops.js");
 const { getUser, getUserByEmail } = require("./modules/database.js");
 const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources } = require("./modules/resources.js");
-const { json, render } = require("express/lib/response");
 
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
 const client = new MongoClient(uri);
 
 const maxFarms = 8, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 7;
-// module.exports = {
-//     maxFarms: 5
-// }
 
 const { Server } = require("socket.io");
 const attack = require("./modules/attack.js");
@@ -47,18 +43,16 @@ const io = new Server(server);
 let map = {};
 
 io.on('connection', (socket) => {
-    console.log('a user connected ' + socket.id);
+    console.log(socket.id + " connected.");
 
-    //io.emit('chat message', "asffsX");
     io.to(socket.id).emit("sync");
 
     socket.on('getUser', (msg) => {
-        //io.emit('chat message', msg);
         console.log(msg)
     });
 
     socket.on('disconnect', () => {
-        console.log('user disconnected ' + socket.id);
+        console.log(socket.id + " disconnected.");
 
         for (var i in map) {
             if (map[i] === socket.id) {
@@ -89,20 +83,10 @@ async function main() {
         const changeStream = collection.watch(pipeline);
 
         changeStream.on('change', (next) => {
-            //console.log(next.documentKey._id);
-            //io.emit('chat message', "-----------");
-
             for (var i in map) {
-                //console.log("Check: " + i + " " + next.documentKey._id)
                 if (i === next.documentKey._id) {
-
-
-                    //console.log('rätt ' + map[i] + " " + i)
-                    //io.emit('chat message', "-----------");
                     //https://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
-                    //io.to(map[i]).emit("update", "xerxes")
                     user = next.updateDescription.updatedFields;
-                    //io.to(map[i]).emit("update", 'XERXES');
 
                     grain = JSON.stringify(user.grain);
                     lumber = JSON.stringify(user.lumber);
@@ -118,6 +102,8 @@ async function main() {
                     knights = JSON.stringify(user.knights);
                     batteringrams = JSON.stringify(user.batteringrams);
                     siegetowers = JSON.stringify(user.siegetowers);
+
+                    //TODO update damage when making armor
 
                     updateDamage = false;
 
@@ -199,16 +185,7 @@ app.use(
 
 app.use('/static', express.static('static'));
 app.use(express.urlencoded({ extended: true }));
-// io.on('connection', (socket) => {
-//     //users = ["aaaa", "bbbb"];
-//     socket.on('setUserId', function (userId) {
-//         users[userId] = socket;
-//     });
 
-//     socket.on('send notification', function (userId) {
-//         users[userId].emit('notification', "important notification message");
-//     });
-// });
 app.get("/", (req, res) => {
     authenticated = req.oidc.isAuthenticated();
 
@@ -237,7 +214,6 @@ app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
 app.get("/profile", requiresAuth(), async (req, res) => {
 
     //res.send(JSON.stringify(req.oidc.user));
-
     //Test user: johanna@test.com, saodhgi-9486y-(WYTH
 
     const user = await getUserByEmail(client, req.oidc.user.email)
@@ -259,8 +235,6 @@ app.get("/api/getUser/:id", requiresAuth(), async (req, res) => {
     //console.log("WWWWWWWWWWWWWWWWW " + req.params.id + " " + req.oidc.user.email + " bananana: " + user._id)
     map[user._id] = req.params.id
 
-    //res.något annat?
-    //res.send({})
     res.status(200).end();
 });
 
@@ -271,8 +245,6 @@ app.get("/test2", requiresAuth(), async (req, res) => {
     keys.forEach(key => {
         console.log(key + '|' + map[key]);
     });
-
-
 
     res.send("test2")
 });
@@ -370,48 +342,51 @@ app.get("/mailbox/log/page/:nr", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     result = await getInvolvedAttackLogs(client, user.username)
 
+    maxPages = Math.ceil(Object.keys(result).length / 20);
     //if check size/nr/osv, nr can't be negative etc
     //TODO error check alla URL inputs
 
-    if (result.length === 0) {
+    nr = parseInt(req.params.nr);
+
+    if (nr < 1 || nr > maxPages || isNaN(nr)) {
+        //todo detect % and #
+        res.redirect('/mailbox/log/page/1')
+    } else {
+
+
+
+        if (result.length === 0) {
+            res.render('pages/log')
+        }
+
+        currentPage = parseInt(req.params.nr);
+
+        var startPoint = 0;
+        if (currentPage == 1) {
+            startPoint = 0
+        } else {
+            startPoint = (currentPage - 1) * 20;
+        }
+
+        console.log("start point: " + startPoint)
+
+        const objectToArray = result => {
+            const keys = Object.keys(result);
+            const res = [];
+            for (let i = startPoint; i < startPoint + 20; i++) {
+                res.push(result[keys[i]]);
+                if (result[keys[i + 1]] === null || result[keys[i + 1]] === undefined) {
+                    i = Number.MAX_SAFE_INTEGER;
+                }
+            };
+            return res;
+        };
+        filteredResult = objectToArray(result);
+
+        log = filteredResult
+
         res.render('pages/log')
     }
-
-    currentPage = parseInt(req.params.nr);
-
-    var startPoint = 0;
-    if (currentPage == 1) {
-        startPoint = 0
-    } else {
-        //startPoint = (currentPage * 20) - 1;
-        startPoint = (currentPage - 1) * 20;
-    }
-
-    console.log("start point: " + startPoint)
-
-    const objectToArray = result => {
-        const keys = Object.keys(result);
-        const res = [];
-        for (let i = startPoint; i < startPoint + 20; i++) {
-            res.push(result[keys[i]]);
-            if (result[keys[i + 1]] === null || result[keys[i + 1]] === undefined) {
-                i = Number.MAX_SAFE_INTEGER;
-            }
-        };
-        return res;
-    };
-    filteredResult = objectToArray(result);
-    maxPages = Math.ceil(Object.keys(result).length / 20);
-
-    console.log("Max pages: " + maxPages)
-
-    //console.log("filtered result: " + filteredResult)
-    console.log("filtered result length: " + filteredResult.length)
-    console.log("result size " + Object.keys(result).length)
-    log = filteredResult
-
-
-    res.render('pages/log')
 });
 
 app.post("/search", requiresAuth(), (req, res) => {
@@ -699,10 +674,6 @@ app.post("/town/barracks/train", requiresAuth(), async (req, res) => {
     // } else {
     //     console.log("good")
     // }
-
-    //const apa = await getUser(client, req.params.username);
-    //update username
-    //await updateLastAction(req.oidc.user.nickname);
 
     const user = await getUserByEmail(client, req.oidc.user.email);
     const archers = parseInt(req.body.archers);
@@ -992,4 +963,17 @@ setInterval(function () {
 const port = process.env.PORT || 3000;
 server.listen(port, () => {
     console.log(`Listening on https://localhost:${port}`);
+});
+
+app.use(express.static(path.join(__dirname, 'pages')));
+// Handle 404
+app.use(function (req, res) {
+    res.status(404);
+    res.render('pages/404');
+});
+
+// Handle 500
+app.use(function (error, req, res, next) {
+    res.status(500);
+    res.render('pages/500');
 });
