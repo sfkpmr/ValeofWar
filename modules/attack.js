@@ -5,7 +5,11 @@ module.exports = {
 
     getAttackLog: async function (client, ObjectId) {
         const result = await client.db("gamedb").collection("attacks").findOne({ "_id": ObjectId });
-        return result;
+        if (result === null) {
+            return false;
+        } else {
+            return result;
+        }
     },
 
     createAttackLog: async function (client, data) {

@@ -280,27 +280,34 @@ app.get("/profile/:username", requiresAuth(), async (req, res) => {
     const currentUser = req.oidc.user.email;
     const profileUser = await getUser(client, req.params.username);
 
-    gold = profileUser.gold;
-    iron = profileUser.iron;
-    lumber = profileUser.lumber;
-    grain = profileUser.grain;
-    stone = profileUser.stone;
 
-    archers = profileUser.archers;
-    spearmen = profileUser.spearmen;
-    swordsmen = profileUser.swordsmen;
-    horsemen = profileUser.horsemen;
-    knights = profileUser.knights;
-
-    username = req.params.username;
-
-    if (currentUser === profileUser.email) {
-        //todo add settings/delete
-        res.render('pages/myprofile');
+    if (profileUser === false) {
+        console.log("!!!!!!!!!!!!!")
+        res.send("No such user");
     } else {
-        res.render('pages/publicprofile');
-    }
+        console.log("????????????????????????")
 
+        gold = profileUser.gold;
+        iron = profileUser.iron;
+        lumber = profileUser.lumber;
+        grain = profileUser.grain;
+        stone = profileUser.stone;
+
+        archers = profileUser.archers;
+        spearmen = profileUser.spearmen;
+        swordsmen = profileUser.swordsmen;
+        horsemen = profileUser.horsemen;
+        knights = profileUser.knights;
+
+        username = req.params.username;
+
+        if (currentUser === profileUser.email) {
+            //todo add settings/delete
+            res.render('pages/myprofile');
+        } else {
+            res.render('pages/publicprofile');
+        }
+    }
 });
 
 app.get("/base", requiresAuth(), (req, res) => {
@@ -326,15 +333,20 @@ app.get("/mailbox/log/:id", requiresAuth(), async (req, res) => {
     //TODO check only show your logs
     //error check if invalid format
 
-    //    myMod.func(client, req.params.id, ObjectId);
-    //myMod.func("a");
-
-    const searchObject = new ObjectId(req.params.id);
-
-    //log = await getAttackLog(req.params.id)
+    var searchObject;
+    try {
+        searchObject = new ObjectId(req.params.id);
+    }
+    catch (err) {
+        log = false;
+    }
     log = await getAttackLog(client, searchObject);
 
-    res.render('pages/attack')
+    if (log === false) {
+        res.send("No such log")
+    } else {
+        res.render('pages/attack')
+    }
 });
 
 app.get("/mailbox/log/page/:nr", requiresAuth(), async (req, res) => {
@@ -353,8 +365,6 @@ app.get("/mailbox/log/page/:nr", requiresAuth(), async (req, res) => {
         res.redirect('/mailbox/log/page/1')
     } else {
 
-
-
         if (result.length === 0) {
             res.render('pages/log')
         }
@@ -367,8 +377,6 @@ app.get("/mailbox/log/page/:nr", requiresAuth(), async (req, res) => {
         } else {
             startPoint = (currentPage - 1) * 20;
         }
-
-        console.log("start point: " + startPoint)
 
         const objectToArray = result => {
             const keys = Object.keys(result);
@@ -476,6 +484,8 @@ app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
             level = user.workshopLevel;
             buildingName = "workshopLevel";
             break;
+        default:
+            console.log("error")
     }
 
     const lumberCost = await calcBuildingLumberCost(type, level + 1);
@@ -705,57 +715,62 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
 
     //TODO attack limiter //reset all at midnight? //losses
     //TODO create attack database to pull data from for attack log
+    //TODO validate db input
 
     const attacker = await getUserByEmail(client, req.oidc.user.email);
     const defender = await getUser(client, req.params.username);
-
-    console.log(attacker.username + " tries to attack " + defender.username);
-
-    var attackDamage = await calculateAttack(attacker);
-    var defenseDamage = await calculateDefense(defender);
-
-    console.log("Total defense: " + defenseDamage + " Total attack: " + attackDamage);
-
-    const closeness = attackDamage / (attackDamage + defenseDamage);
-    var divider;
-    console.log("close: " + closeness);
-
-    if (closeness <= 0.1) {
-        divider = 100;
-    } else if (closeness <= 0.2) {
-        divider = 80;
-    } else if (closeness <= 0.4) {
-        divider = 60;
-    } else if (closeness <= 0.6) {
-        divider = 40;
-    } else if (closeness <= 0.8) {
-        divider = 20;
-    } else if (closeness <= 0.9) {
-        divider = 10;
+    if (defender === false) {
+        console.log("!!!!!!!!!!!!!")
+        res.send("No such user");
     } else {
-        divider = 5;
+
+        console.log(attacker.username + " tries to attack " + defender.username);
+
+        var attackDamage = await calculateAttack(attacker);
+        var defenseDamage = await calculateDefense(defender);
+
+        console.log("Total defense: " + defenseDamage + " Total attack: " + attackDamage);
+
+        const closeness = attackDamage / (attackDamage + defenseDamage);
+        var divider;
+
+        if (closeness <= 0.1) {
+            divider = 100;
+        } else if (closeness <= 0.2) {
+            divider = 80;
+        } else if (closeness <= 0.4) {
+            divider = 60;
+        } else if (closeness <= 0.6) {
+            divider = 40;
+        } else if (closeness <= 0.8) {
+            divider = 20;
+        } else if (closeness <= 0.9) {
+            divider = 10;
+        } else {
+            divider = 5;
+        }
+
+        goldLoot = Math.round(defender.gold / divider);
+        lumberLoot = Math.round(defender.lumber / divider);
+        stoneLoot = Math.round(defender.stone / divider);
+        grainLoot = Math.round(defender.grain / divider);
+        ironLoot = Math.round(defender.iron / divider);
+
+        stealResources(client, attacker.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
+        loseResources(client, defender.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
+
+        attackerLosses = 0;
+        defenderLosses = 0;
+
+        const data = {
+            "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "defender": defender.username, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLoot,
+            "grainLoot": grainLoot, "lumberLoot": lumberLoot, "stoneLoot": stoneLoot, "ironLoot": ironLoot
+        };
+
+        result = await createAttackLog(client, data);
+
+        res.redirect(`/mailbox/log/${result}`);
     }
-
-    goldLoot = Math.round(defender.gold / divider);
-    lumberLoot = Math.round(defender.lumber / divider);
-    stoneLoot = Math.round(defender.stone / divider);
-    grainLoot = Math.round(defender.grain / divider);
-    ironLoot = Math.round(defender.iron / divider);
-
-    stealResources(client, attacker.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
-    loseResources(client, defender.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
-
-    attackerLosses = 0;
-    defenderLosses = 0;
-
-    const data = {
-        "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "defender": defender.username, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLoot,
-        "grainLoot": grainLoot, "lumberLoot": lumberLoot, "stoneLoot": stoneLoot, "ironLoot": ironLoot
-    };
-
-    result = await createAttackLog(client, data);
-
-    res.redirect(`/mailbox/log/${result}`);
 
 });
 
@@ -962,7 +977,8 @@ setInterval(function () {
 
 const port = process.env.PORT || 3000;
 server.listen(port, () => {
-    console.log(`Listening on https://localhost:${port}`);
+    date = new Date();
+    console.log(date.toLocaleDateString(), date.toLocaleTimeString() + ` Listening on https://localhost:${port}`);
 });
 
 app.use(express.static(path.join(__dirname, 'pages')));
@@ -974,6 +990,7 @@ app.use(function (req, res) {
 
 // Handle 500
 app.use(function (error, req, res, next) {
+    console.log(new Date() + " " + error)
     res.status(500);
     res.render('pages/500');
 });
