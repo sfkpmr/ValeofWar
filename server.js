@@ -96,6 +96,7 @@ async function main() {
                     gold = JSON.stringify(user.gold);
                     recruits = JSON.stringify(user.recruits);
                     horses = JSON.stringify(user.horses);
+
                     archers = JSON.stringify(user.archers);
                     spearmen = JSON.stringify(user.spearmen);
                     swordsmen = JSON.stringify(user.swordsmen);
@@ -103,6 +104,7 @@ async function main() {
                     knights = JSON.stringify(user.knights);
                     batteringrams = JSON.stringify(user.batteringrams);
                     siegetowers = JSON.stringify(user.siegetowers);
+
                     farms = JSON.stringify(user.farms);
                     lumbercamps = JSON.stringify(user.lumberCamps);
                     quarries = JSON.stringify(user.quarries);
@@ -110,6 +112,15 @@ async function main() {
                     goldmines = JSON.stringify(user.goldMines);
                     trainingfield = JSON.stringify(user.trainingfieldLevel);
                     stables = JSON.stringify(user.stablesLevel);
+
+                    boots = JSON.stringify(user.boots);
+                    bracers = JSON.stringify(user.bracers);
+                    helmets = JSON.stringify(user.helmets);
+                    lances = JSON.stringify(user.lances);
+                    longbows = JSON.stringify(user.longbows);
+                    shields = JSON.stringify(user.shields);
+                    spears = JSON.stringify(user.spears);
+                    swords = JSON.stringify(user.swords);
 
                     //TODO update damage when making armor
 
@@ -184,6 +195,30 @@ async function main() {
                     };
                     if (stables !== null && stables !== undefined) {
                         io.to(userMap[i]).emit("getHorseIncome");
+                    };
+                    if (boots !== null && boots !== undefined) {
+                        updateDamage = true;
+                    };
+                    if (bracers !== null && bracers !== undefined) {
+                        updateDamage = true;
+                    };
+                    if (helmets !== null && helmets !== undefined) {
+                        updateDamage = true;
+                    };
+                    if (lances !== null && lances !== undefined) {
+                        updateDamage = true;
+                    };
+                    if (longbows !== null && longbows !== undefined) {
+                        updateDamage = true;
+                    };
+                    if (shields !== null && shields !== undefined) {
+                        updateDamage = true;
+                    };
+                    if (spears !== null && spears !== undefined) {
+                        updateDamage = true;
+                    };
+                    if (swords !== null && swords !== undefined) {
+                        updateDamage = true;
                     };
 
                     if (updateDamage) {
@@ -541,6 +576,12 @@ app.get("/town/barracks", requiresAuth(), async (req, res) => {
 app.get("/town/wall", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     wall = user.wallLevel;
+    type = "wall"
+    defenseBonus = wall * 10;
+    lumberCost = await calcBuildingLumberCost(type, wall + 1);
+    stoneCost = await calcBuildingStoneCost(type, wall + 1);
+    ironCost = await calcBuildingIronCost(type, wall + 1);
+    goldCost = await calcBuildingGoldCost(type, wall + 1);
     res.render('pages/wall')
 });
 

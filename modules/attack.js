@@ -1,6 +1,14 @@
 const e = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 
+archer = { attackDamage: 10, defenseDamage: 10 };
+spearman = { attackDamage: 10, defenseDamage: 10 };
+swordsman = { attackDamage: 20, defenseDamage: 20 };
+horseman = { attackDamage: 5, defenseDamage: 5 };
+knight = { attackDamage: 20, defenseDamage: 20 };
+batteringram = { attackDamage: 25 };
+siegetower = { attackDamage: 50 };
+
 boot = { attackDamage: 10, defenseDamage: 10 };
 bracer = { attackDamage: 5, defenseDamage: 10 };
 helmet = { attackDamage: 15, defenseDamage: 15 };
@@ -9,8 +17,6 @@ lance = { attackDamage: 25, defenseDamage: 10 };
 shield = { attackDamage: 10, defenseDamage: 20 };
 spear = { attackDamage: 10, defenseDamage: 25 };
 sword = { attackDamage: 10, defenseDamage: 10 };
-batteringram = { attackDamage: 25 };
-siegetower = { attackDamage: 50 };
 
 module.exports = {
 
@@ -45,8 +51,6 @@ module.exports = {
         const horsemen = attacker.horsemen;
         const knights = attacker.knights;
         const swordsmen = attacker.swordsmen;
-        //batteringrams = attacker.batteringrams;
-        //siegetowers = attacker.siegetowers;
         var boots = attacker.boots;
         var bracers = attacker.bracers;
         var helmets = attacker.helmets;
@@ -54,9 +58,9 @@ module.exports = {
         var longbows = attacker.longbows;
         var shields = attacker.shields;
         var spears = attacker.spears;
-        var swords = attacker.spears;
+        var swords = attacker.swords;
         var batteringrams = attacker.batteringrams * 10;
-        var siegetowers = attacker.siegetowers * 10;
+        var siegetowers = attacker.siegetowers * 25;
 
         if (boots == undefined || boots == null) {
             boots = 0;
@@ -90,9 +94,9 @@ module.exports = {
         }
 
         var archerDamage = 0, spearmenDamage = 0, swordsmenDamage = 0, horsemenDamage = 0, knightsDamage = 0;
-        const bootsDamage = boot.attackDamage, bracersDamage = bracer.attackDamage, helmetDamage = helmet.attackDamage, longbowDamage = longbow.attackDamage, lanceDamage = lance.attackDamage, shieldDamage = shield.attackDamage, spearDamage = spear.attackDamage, swordDamage = sword.attackDamage, batteringramDamage = batteringram.attackDamage, siegetowerDamage = siegetower.attackDamage;
+        const bootsDamage = boot.attackDamage, bracersDamage = bracer.attackDamage, helmetDamage = helmet.attackDamage, longbowDamage = longbow.attackDamage, lanceDamage = lance.attackDamage, shieldDamage = shield.attackDamage, spearDamage = spear.attackDamage, swordDamage = sword.attackDamage;
         if (archers !== undefined && archers !== null) {
-            archerDamage = archers * 10;
+            archerDamage = archers * archer.attackDamage;
             if (boots >= archers) {
                 archerDamage += archers * bootsDamage;
                 boots = boots - archers;
@@ -100,7 +104,6 @@ module.exports = {
                 archerDamage += boots * bootsDamage;
                 boots = 0;
             }
-
             if (bracers >= archers) {
                 archerDamage += archers * bracersDamage;
                 bracers = bracers - archers;
@@ -108,7 +111,6 @@ module.exports = {
                 archerDamage += bracers * bracersDamage;
                 bracers = 0;
             }
-
             if (helmets >= archers) {
                 archerDamage += archers * helmetDamage;
                 helmets = helmets - archers;
@@ -124,17 +126,8 @@ module.exports = {
                 archerDamage += longbows * longbowDamage;
                 longbows = 0;
             }
-
-            if (siegetowers >= archers) {
-                archerDamage += archers * siegetowerDamage;
-                siegetowers = siegetowers - archers;
-            } else {
-                archerDamage += siegetowers * siegetowerDamage;
-                siegetowers = 0;
-            }
-
         } if (spearmen !== undefined && spearmen !== null) {
-            spearmenDamage = spearmen * 10;
+            spearmenDamage = spearmen * spearman.attackDamage;
             if (boots >= spearmen) {
                 spearmenDamage += spearmen * bootsDamage;
                 boots = boots - spearmen;
@@ -149,7 +142,6 @@ module.exports = {
                 spearmenDamage += helmets * helmetDamage;
                 helmets = 0;
             }
-
             if (spears >= spearmen) {
                 spearmenDamage += spearmen * spearDamage;
                 spears = spears - spearmen;
@@ -157,17 +149,8 @@ module.exports = {
                 spearmenDamage += spears * spearDamage;
                 spears = 0;
             }
-
-            if (batteringrams >= spearmen) {
-                spearmenDamage += spearmen * batteringramDamage;
-                batteringrams = batteringrams - spearmen;
-            } else {
-                spearmenDamage += batteringrams * batteringramDamage;
-                batteringrams = 0;
-            }
-
         } if (swordsmen !== undefined && swordsmen !== null) {
-            swordsmenDamage = swordsmen * 20;
+            swordsmenDamage = swordsmen * swordsman.attackDamage;
             if (boots >= swordsmen) {
                 swordsmenDamage += swordsmen * bootsDamage;
                 boots = boots - swordsmen;
@@ -196,23 +179,8 @@ module.exports = {
                 swordsmenDamage += shields * shieldDamage;
                 shields = 0;
             }
-            if (batteringrams >= swordsmen) {
-                swordsmenDamage += swordsmen * batteringramDamage;
-                batteringrams = batteringrams - swordsmen;
-            } else {
-                swordsmenDamage += batteringrams * batteringramDamage;
-                batteringrams = 0;
-            }
-            if (siegetowers >= swordsmen) {
-                swordsmenDamage += swordsmen * siegetowerDamage;
-                siegetowers = siegetowers - swordsmen;
-            } else {
-                swordsmenDamage += siegetowers * siegetowerDamage;
-                siegetowers = 0;
-            }
-
         } if (horsemen !== undefined && horsemen !== null) {
-            horsemenDamage = horsemen * 5;
+            horsemenDamage = horsemen * horseman.attackDamage;
             if (boots >= horsemen) {
                 horsemenDamage += horsemen * bootsDamage;
                 boots = boots - horsemen;
@@ -236,7 +204,7 @@ module.exports = {
             }
 
         } if (knights !== undefined && knights !== null) {
-            knightsDamage = knights * 20;
+            knightsDamage = knights * knight.attackDamage;
             if (boots >= knights) {
                 knightsDamage += knights * bootsDamage;
                 boots = boots - knights;
@@ -265,9 +233,21 @@ module.exports = {
                 knightsDamage += shields * shieldDamage;
                 shields = 0;
             }
+        } if (batteringrams !== undefined && batteringrams !== null) {
+            if ((spearmen + swordsmen) >= batteringrams) {
+                batteringramDamage = batteringrams * batteringram.attackDamage;
+            } else {
+                batteringramDamage = (spearmen + swordsmen) * batteringram.attackDamage;
+            }
+        } if (siegetowers !== undefined && siegetowers !== null) {
+            if ((archers + swordsmen) >= siegetowers) {
+                siegetowerDamage = siegetowers * siegetower.attackDamage;
+            } else {
+                siegetowerDamage = (archers + swordsmen) * siegetower.attackDamage;
+            }
         }
 
-        return archerDamage + spearmenDamage + horsemenDamage + knightsDamage + swordsmenDamage;
+        return archerDamage + spearmenDamage + horsemenDamage + knightsDamage + swordsmenDamage + batteringramDamage + siegetowerDamage;
     },
 
     calculateDefense: async function (defender) {
@@ -286,7 +266,7 @@ module.exports = {
         var longbows = defender.longbows;
         var shields = defender.shields;
         var spears = defender.spears;
-        var swords = defender.spears;
+        var swords = defender.swords;
 
         //todo account for nr of weapons, check nulls
 
@@ -317,10 +297,10 @@ module.exports = {
             swords = 0;
         }
 
-        var archerDamage = 0, spearmenDamage = 0, horsemenDamage = 0, knightsDamage = 0;
+        var archerDamage = 0, spearmenDamage = 0, swordsmenDamage = 0, horsemenDamage = 0, knightsDamage = 0;
         const bootsDamage = boot.defenseDamage, bracersDamage = bracer.defenseDamage, helmetDamage = helmet.defenseDamage, longbowDamage = longbow.defenseDamage, lanceDamage = lance.defenseDamage, shieldDamage = shield.defenseDamage, spearDamage = spear.defenseDamage, swordDamage = sword.defenseDamage;
         if (archers !== undefined && archers !== null) {
-            archerDamage = archers * 10;
+            archerDamage = archers * archer.defenseDamage;
             if (boots >= archers) {
                 archerDamage += archers * bootsDamage;
                 boots = boots - archers;
@@ -354,7 +334,7 @@ module.exports = {
             }
 
         } if (spearmen !== undefined && spearmen !== null) {
-            spearmenDamage = spearmen * 10;
+            spearmenDamage = spearmen * spearman.defenseDamage;
             if (boots >= spearmen) {
                 spearmenDamage += spearmen * bootsDamage;
                 boots = boots - spearmen;
@@ -379,7 +359,7 @@ module.exports = {
             }
 
         } if (swordsmen !== undefined && swordsmen !== null) {
-            swordsmenDamage = swordsmen * 20;
+            swordsmenDamage = swordsmen * swordsman.defenseDamage;
             if (boots >= swordsmen) {
                 swordsmenDamage += swordsmen * bootsDamage;
                 boots = boots - swordsmen;
@@ -408,9 +388,8 @@ module.exports = {
                 swordsmenDamage += shields * shieldDamage;
                 shields = 0;
             }
-
         } if (horsemen !== undefined && horsemen !== null) {
-            horsemenDamage = horsemen * 5;
+            horsemenDamage = horsemen * horseman.defenseDamage;
             if (boots >= horsemen) {
                 horsemenDamage += horsemen * bootsDamage;
                 boots = boots - horsemen;
@@ -434,7 +413,7 @@ module.exports = {
             }
 
         } if (knights !== undefined && knights !== null) {
-            knightsDamage = knights * 20;
+            knightsDamage = knights * knight.defenseDamage;
             if (boots >= knights) {
                 knightsDamage += knights * bootsDamage;
                 boots = boots - knights;
