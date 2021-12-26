@@ -1,6 +1,6 @@
 const { getUser, incDatabaseValue } = require("../modules/database.js");
 
-const baseGrainIncome = 10, baseLumberIncome = 10, baseStoneIncome = 5, baseIronIncome = 5, baseGoldIncome = 2;
+const baseGrainIncome = 7, baseLumberIncome = 6, baseStoneIncome = 3, baseIronIncome = 2, baseGoldIncome = 1;
 
 myObj = {
     addResources: async function (client, username) {
@@ -117,7 +117,7 @@ myObj = {
     },
     incomeCalc: function (type, levels) {
 
-        var baseIncome = 10;
+        var baseIncome = 0;
 
         if (type === "grain") {
             baseIncome = baseGrainIncome;
@@ -131,7 +131,7 @@ myObj = {
             baseIncome = baseGoldIncome;
         }
 
-        return income = levels * baseIncome;;
+        return income = levels * baseIncome;
     }
 };
 
