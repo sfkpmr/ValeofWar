@@ -955,28 +955,27 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
 });
 
 app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
-
     type = req.params.type;
     resourceId = parseInt(req.params.number);
     const user = await getUserByEmail(client, req.oidc.user.email);
     var invalidId;
 
     if (type === "farm") {
-        if (resourceId >= 0 && resourceId <= maxFarms) {
+        if (resourceId >= 0 && resourceId <= maxFarms - 1) {
             title = "Farm";
             resourceLevel = user.farms[resourceId];
         } else {
             invalidId = true;
         }
     } else if (type === "goldMine") {
-        if (resourceId >= 0 && resourceId <= maxGoldMines) {
+        if (resourceId >= 0 && resourceId <= maxGoldMines - 1) {
             title = "Gold mine";
             resourceLevel = user.goldMines[resourceId];
         } else {
             invalidId = true;
         }
     } else if (type === "ironMine") {
-        if (resourceId >= 0 && resourceId <= maxIronMines) {
+        if (resourceId >= 0 && resourceId <= maxIronMines - 1) {
             title = "Iron mine";
             resourceLevel = user.ironMines[resourceId];
         } else {
@@ -984,7 +983,7 @@ app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
         }
     }
     else if (type === "lumbercamp") {
-        if (resourceId >= 0 && resourceId <= maxLumberCamps) {
+        if (resourceId >= 0 && resourceId <= maxLumberCamps - 1) {
             title = "Lumber camp";
             resourceLevel = user.lumberCamps[resourceId];
         } else {
@@ -992,7 +991,7 @@ app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
         }
     }
     else if (type === "quarry") {
-        if (resourceId >= 0 && resourceId <= maxQuarries) {
+        if (resourceId >= 0 && resourceId <= maxQuarries - 1) {
             title = "Quarry";
             resourceLevel = user.quarries[resourceId];
         } else {
@@ -1003,7 +1002,6 @@ app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
     //  title = "none"
     //  resourceLevel = 0;
     //}
-
     lumberCost = await calcBuildingLumberCost(type, resourceLevel + 1);
     stoneCost = await calcBuildingStoneCost(type, resourceLevel + 1);
     ironCost = await calcBuildingIronCost(type, resourceLevel + 1);

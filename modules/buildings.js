@@ -148,10 +148,10 @@ module.exports = {
             case "quarry":
                 cost = quarryBaseCost.lumber;
                 break;
-            case "ironmine":
+            case "ironMine":
                 cost = ironMineBaseCost.lumber;
                 break;
-            case "goldmine":
+            case "goldMine":
                 cost = goldMineBaseCost.lumber;
                 break;
             default:
@@ -201,10 +201,10 @@ module.exports = {
             case "quarry":
                 cost = quarryBaseCost.stone;
                 break;
-            case "ironmine":
+            case "ironMine":
                 cost = ironMineBaseCost.stone;
                 break;
-            case "goldmine":
+            case "goldMine":
                 cost = goldMineBaseCost.stone;
                 break;
             default:
@@ -253,10 +253,10 @@ module.exports = {
             case "quarry":
                 cost = quarryBaseCost.iron;
                 break;
-            case "ironmine":
+            case "ironMine":
                 cost = ironMineBaseCost.iron;
                 break;
-            case "goldmine":
+            case "goldMine":
                 cost = goldMineBaseCost.iron;
                 break;
             default:
@@ -305,10 +305,10 @@ module.exports = {
             case "quarry":
                 cost = quarryBaseCost.gold;
                 break;
-            case "ironmine":
+            case "ironMine":
                 cost = ironMineBaseCost.gold;
                 break;
-            case "goldmine":
+            case "goldMine":
                 cost = goldMineBaseCost.gold;
                 break;
             default:
