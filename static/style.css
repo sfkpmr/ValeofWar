@@ -50,6 +50,10 @@ iframe {
   vertical-align: middle;
 }
 
+.training img {
+  vertical-align: middle;
+}
+
 .side t {
   margin-left: 10px;
 }
@@ -79,7 +83,6 @@ hr.solid {
   float: left;
   padding: 8px 16px;
   text-decoration: none;
-
 
 }
 

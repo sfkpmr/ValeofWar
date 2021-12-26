@@ -3,6 +3,7 @@
 
 <head>
     <title>Stables</title>
+    <link rel="stylesheet" type="text/css" href="../static/style.css" />
 </head>
 
 <body>
@@ -24,38 +25,43 @@
                         <% } else { %>
 
                             Stables level: <%= stables %> <br>
+
                                 <br>
-                                Horsemen: <%= horsemen %> <br>
-                                    Knights: <%= knights %> <br>
+                                <div class="training">
+                                    <form action="/town/stables/train" method="POST">
+                                        <label for="horsemen"><img src="../static/images/horseman.png" height="35px"
+                                                title="Horseman"> Current: <%= horsemen %>
+                                                Train:</label>
+                                        <input type="number" id="horsemen" name="horsemen" value="0" min=0><br>
+                                        <label for="knights"><img src="../static/images/knight.png" height="35px"
+                                                title="Knight"> Current: <%= knights %>
+                                                Train:</label>
+                                        <input type="number" id="knights" name="knights" value="0" min=0><br><br>
+                                        Training cost: <output id="grain">0</output> grain, <output
+                                            id="lumber">0</output> lumber, <output id="iron">0</output> iron,
+                                        <output id="gold">0</output> gold, <output id="recruits">0</output>
+                                        recuits
+                                        and <output id="horses">0</output> horses.<br><br>
+
+                                        <input type="submit" value="Train">
                                         <br>
-                                        <form action="/town/stables/train" method="POST">
-                                            <label for="horsemen"><img src="../static/images/horseman.png" height="35px"
-                                                    title="Horseman"> Current: <%= horsemen %> Train:</label>
-                                            <input type="number" id="horsemen" name="horsemen" value="0" min=0><br>
-                                            <label for="knights"><img src="../static/images/knight.png" height="35px"
-                                                    title="Knight"> Current: <%= knights %> Train:</label>
-                                            <input type="number" id="knights" name="knights" value="0" min=0><br><br>
-                                            Training cost: <output id="grain">0</output> grain, <output
-                                                id="lumber">0</output> lumber, <output id="iron">0</output> iron,
-                                            <output id="gold">0</output> gold, <output id="recruits">0</output> recuits
-                                            and <output id="horses">0</output> horses.<br>
+                                        <br>
+                                    </form>
+                                </div>
 
-                                            <input type="submit" value="Train">
-                                        </form>
-
-                                        <% if (stables <=19){ %>
-                                            Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost
-                                                        %> iron and <%= goldCost %> gold.
-                                                            <br>
-                                                            <form action="/town/stables/upgrade" method="POST">
-                                                                <input type="submit" value="Upgrade">
-                                                            </form>
-                                                            <% } else { %>
-                                                                The stables are already at max level!
-                                                                <% } %>
-                                                                    <script type="text/javascript"
-                                                                        src="../static/stables.js"></script>
-                                                                    <% } %>
+                                <% if (stables <=19){ %>
+                                    Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron
+                                                and <%= goldCost %> gold.
+                                                    <br>
+                                                    <form action="/town/stables/upgrade" method="POST">
+                                                        <input type="submit" value="Upgrade">
+                                                    </form>
+                                                    <% } else { %>
+                                                        The stables are already at max level!
+                                                        <% } %>
+                                                            <script type="text/javascript"
+                                                                src="../static/stables.js"></script>
+                                                            <% } %>
 </body>
 
 </html>
