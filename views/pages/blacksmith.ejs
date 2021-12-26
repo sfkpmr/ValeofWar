@@ -3,7 +3,6 @@
 
 <head>
     <title>Blacksmith</title>
-    <script type="text/javascript" src="../static/calc.js"></script> 
 
 </head>
 
@@ -14,43 +13,51 @@
 
     Blacksmith level: <%= blacksmith %> <br>
 
-    <br>
 
-    Boots: <%= boots %> <br>
-    Bracers: <%= bracers %><br>
-    Helmets: <%= helmets %><br>
-    Lances: <%= lances %><br>
-    Longbows: <%= longbows %><br>
-    Shields: <%= shields %><br>
-    Spears: <%= spears %><br>
-    Swords: <%= swords %><br>
-<br>
-    <form action="/town/blacksmith/craft" method="POST">
-        <label for="boots">Boots:</label>
-        <input type="number" id="boots" name="boots" value="0" min=0><br>
-        <label for="bracers">Bracers:</label>
-        <input type="number" id="bracers" name="bracers" value="0" min=0><br>
-        <label for="helmet">Helmet:</label>
-        <input type="number" id="helmet" name="helmet" value="0" min=0><br>
-        <label for="lance">Lance:</label>
-        <input type="number" id="lance" name="lance" value="0" min=0><br>
-        <label for="longbow">Longbow:</label>
-        <input type="number" id="longbow" name="longbow" value="0" min=0><br>
-        <label for="shield">Shield:</label>
-        <input type="number" id="shield" name="shield" value="0" min=0><br>
-        <label for="spear">Spear:</label>
-        <input type="number" id="spear" name="spear" value="0" min=0><br>
-        <label for="sword">Sword:</label>
-        <input type="number" id="sword" name="sword" value="0" min=0><br><br>
-        Crafting cost: <output id="lumber">0</output> lumber, <output id="iron">0</output> iron and <output id="gold">0</output> gold. <br>
-        <input type="submit" value="Craft">
-    </form>
+        <form action="/town/blacksmith/craft" method="POST">
+            <label for="boots"><img src="../static/images/boots.png" height="35px" title="Boots">
+                <%= boots %>
+            </label>
+            <input type="number" id="boots" name="boots" value="0" min=0><br>
+            <label for="bracers"><img src="../static/images/bracers.png" height="35px" title="Bracers">
+                <%= bracers %>
+            </label>
+            <input type="number" id="bracers" name="bracers" value="0" min=0><br>
+            <label for="helmet"> <img src="../static/images/helmet.png" height="35px" title="Helmets">
+                <%= helmets %>
+            </label>
+            <input type="number" id="helmet" name="helmet" value="0" min=0><br>
+            <label for="lance"> <img src="../static/images/lance.png" height="35px" title="Lances">
+                <%= lances %>
+            </label>
+            <input type="number" id="lance" name="lance" value="0" min=0><br>
+            <label for="longbow"> <img src="../static/images/longbow.png" height="35px" title="Longbows">
+                <%= longbows %>
+            </label>
+            <input type="number" id="longbow" name="longbow" value="0" min=0><br>
+            <label for="shield"> <img src="../static/images/shield.png" height="35px" title="Shields">
+                <%= shields %>
+            </label>
+            <input type="number" id="shield" name="shield" value="0" min=0><br>
+            <label for="spear"><img src="../static/images/spears.png" height="35px" title="Spears">
+                <%= spears %>
+            </label>
+            <input type="number" id="spear" name="spear" value="0" min=0><br>
+            <label for="sword"> <img src="../static/images/sword.png" height="35px" title="Swords">
+                <%= swords %>
+            </label>
+            <input type="number" id="sword" name="sword" value="0" min=0><br><br>
+            Crafting cost: <output id="lumber">0</output> lumber, <output id="iron">0</output> iron and <output
+                id="gold">0</output> gold. <br>
+            <input type="submit" value="Craft">
+        </form>
 
-    <form action="/town/blacksmith/upgrade" method="POST">
-        <input type="submit" value="Upgrade">
-    </form>
+        Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron and <%= goldCost %> gold.
+                        <form action="/town/blacksmith/upgrade" method="POST">
+                            <input type="submit" value="Upgrade">
+                        </form>
 
-    <script type="text/javascript" src="../static/blacksmith.js"></script> 
+                        <script type="text/javascript" src="../static/blacksmith.js"></script>
 </body>
 
 </html>

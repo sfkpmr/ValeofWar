@@ -483,6 +483,11 @@ app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
     res.render('pages/trainingField')
 });
 
+app.get("/credits", async (req, res) => {
+
+    res.sendFile(path.join(__dirname, '/views/pages/credits.html'));
+});
+
 app.get("/town/workshop", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
@@ -549,6 +554,7 @@ app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
 
+    type = "blacksmith"
     blacksmith = user.blacksmithLevel;
 
     boots = user.boots;
@@ -559,6 +565,11 @@ app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
     shields = user.shields;
     spears = user.spears;
     swords = user.swords;
+
+    lumberCost = await calcBuildingLumberCost(type, blacksmith + 1);
+    stoneCost = await calcBuildingStoneCost(type, blacksmith + 1);
+    ironCost = await calcBuildingIronCost(type, blacksmith + 1);
+    goldCost = await calcBuildingGoldCost(type, blacksmith + 1);
 
     res.render('pages/blacksmith');
 });

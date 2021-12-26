@@ -10,14 +10,14 @@ const sword = { iron: 50, gold: 15 };
 function craftingCost(val) {
     let lumberCost = 0, ironCost = 0, goldCost = 0;
 
-    boots = parseInt(document.getElementById('boots').value);
-    bracers = parseInt(document.getElementById('bracers').value);
-    helmets = parseInt(document.getElementById('helmets').value);
-    lances = parseInt(document.getElementById('lances').value);
-    longbows = parseInt(document.getElementById('longbows').value);
-    shields = parseInt(document.getElementById('shields').value);
-    spears = parseInt(document.getElementById('spears').value);
-    swords = parseInt(document.getElementById('swords').value);
+    boots = document.getElementById('boots').value;
+    bracers = document.getElementById('bracers').value;
+    helmets = document.getElementById('helmet').value;
+    lances = document.getElementById('lance').value;
+    longbows = document.getElementById('longbow').value;
+    shields = document.getElementById('shield').value;
+    spears = document.getElementById('spear').value;
+    swords = document.getElementById('sword').value;
 
     lumberCost += lances * lance.lumber;
     lumberCost += longbows * longbow.lumber;

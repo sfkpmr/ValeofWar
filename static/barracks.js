@@ -1,3 +1,7 @@
+const archer = { grain: 25, lumber: 50, gold: 10 };
+const spearman = { grain: 25, lumber: 50 };
+const swordsman = { grain: 50, iron: 50, gold: 25 };
+
 function barracksTrainCost() {
     let grainCost = 0, lumberCost = 0, ironCost = 0, goldCost = 0;
 
@@ -5,16 +9,18 @@ function barracksTrainCost() {
     spearmen = document.getElementById("spearmen").value;
     swordsmen = document.getElementById("swordsmen").value;
 
-    grainCost += parseInt(archers) * 10;
-    lumberCost += parseInt(archers) * 20;
-    goldCost += parseInt(archers) * 10;
 
-    grainCost += parseInt(spearmen) * 10;
-    lumberCost += parseInt(spearmen) * 5;
+    grainCost += archers * archer.grain;
+    grainCost += spearmen * spearman.grain;
+    grainCost += swordsmen * swordsman.grain;
 
-    grainCost += parseInt(swordsmen) * 10;
-    ironCost += parseInt(swordsmen) * 20;
-    goldCost += parseInt(swordsmen) * 10;
+    lumberCost += archers * archer.lumber;
+    lumberCost += spearmen * spearman.lumber;
+
+    ironCost += swordsmen * swordsman.iron;
+
+    goldCost += archers * archer.gold;
+    goldCost += swordsmen * swordsman.gold;
 
     document.getElementById("grain").innerHTML = grainCost;
     document.getElementById("lumber").innerHTML = lumberCost;
