@@ -65,3 +65,53 @@ socket.on('updatePower', async function () {
         alert("HTTP-Error: " + defenseResponse.status);
     }
 });
+socket.on('getGrainIncome', async function () {
+    let response = await fetch("/api/getGrainIncome");
+
+    if (response.ok) {
+        let json = await response.json();
+        document.getElementById("grainIncome").innerHTML = json;
+    } else {
+        alert("HTTP-Error: " + response.status);
+    }
+});
+socket.on('getLumberIncome', async function () {
+    let response = await fetch("/api/getLumberIncome");
+
+    if (response.ok) {
+        let json = await response.json();
+        document.getElementById("lumberIncome").innerHTML = json;
+    } else {
+        alert("HTTP-Error: " + response.status);
+    }
+});
+socket.on('getStoneIncome', async function () {
+    let response = await fetch("/api/getStoneIncome");
+
+    if (response.ok) {
+        let json = await response.json();
+        document.getElementById("stoneIncome").innerHTML = json;
+    } else {
+        alert("HTTP-Error: " + response.status);
+    }
+});
+socket.on('getIronIncome', async function () {
+    let response = await fetch("/api/getIronIncome");
+
+    if (response.ok) {
+        let json = await response.json();
+        document.getElementById("ironIncome").innerHTML = json;
+    } else {
+        alert("HTTP-Error: " + response.status);
+    }
+});
+socket.on('getGoldIncome', async function () {
+    let response = await fetch("/api/getGoldIncome");
+
+    if (response.ok) {
+        let json = await response.json();
+        document.getElementById("goldIncome").innerHTML = json;
+    } else {
+        alert("HTTP-Error: " + response.status);
+    }
+});

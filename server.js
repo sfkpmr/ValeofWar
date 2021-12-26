@@ -26,7 +26,7 @@ const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, c
 const { trainTroops, craftArmor } = require("./modules/troops.js");
 const { getUser, getUserByEmail } = require("./modules/database.js");
 const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource } = require("./modules/buildings.js");
-const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources } = require("./modules/resources.js");
+const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources, incomeCalc } = require("./modules/resources.js");
 
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
 const client = new MongoClient(uri);
@@ -102,6 +102,11 @@ async function main() {
                     knights = JSON.stringify(user.knights);
                     batteringrams = JSON.stringify(user.batteringrams);
                     siegetowers = JSON.stringify(user.siegetowers);
+                    farms = JSON.stringify(user.farms);
+                    lumbercamps = JSON.stringify(user.lumberCamps);
+                    quarries = JSON.stringify(user.quarries);
+                    ironmines = JSON.stringify(user.ironMines);
+                    goldmines = JSON.stringify(user.goldMines);
 
                     //TODO update damage when making armor
 
@@ -156,6 +161,21 @@ async function main() {
                         io.to(userMap[i]).emit("updateSiegeTowers", siegetowers);
                         updateDamage = true;
                     };
+                    if (farms !== null && farms !== undefined) {
+                        io.to(userMap[i]).emit("getGrainIncome");
+                    };
+                    if (lumbercamps !== null && lumbercamps !== undefined) {
+                        io.to(userMap[i]).emit("getLumberIncome");
+                    };
+                    if (quarries !== null && quarries !== undefined) {
+                        io.to(userMap[i]).emit("getStoneIncome");
+                    };
+                    if (ironmines !== null && ironmines !== undefined) {
+                        io.to(userMap[i]).emit("getIronIncome");
+                    };
+                    if (goldmines !== null && goldmines !== undefined) {
+                        io.to(userMap[i]).emit("getGoldIncome");
+                    };
 
                     if (updateDamage) {
                         io.to(userMap[i]).emit("updatePower");
@@ -208,6 +228,46 @@ app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
     res.send(JSON.stringify(result))
 });
 
+app.get("/api/:getIncome", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
+
+    requestedIncome = req.params.getIncome;
+
+    var levels = 0, income = 0;
+    function calc(i) {
+        levels += i;
+    };
+
+    if (requestedIncome === "getGrainIncome") {
+        const count = user.farms;
+        count.forEach(calc);
+        income = incomeCalc("grain", levels);
+    } else if (requestedIncome === "getLumberIncome") {
+        const count = user.lumberCamps;
+        count.forEach(calc);
+        income = incomeCalc("lumber", levels);
+    }
+    else if (requestedIncome === "getStoneIncome") {
+        const count = user.quarries;
+        count.forEach(calc);
+        income = incomeCalc("stone", levels);
+    }
+    else if (requestedIncome === "getIronIncome") {
+        const count = user.ironMines;
+        count.forEach(calc);
+        income = incomeCalc("iron", levels);
+    }
+    else if (requestedIncome === "getGoldIncome") {
+        const count = user.goldMines;
+        count.forEach(calc);
+        income = incomeCalc("gold", levels);
+    } else {
+        levels = null;
+    }
+
+    res.send(JSON.stringify(income))
+});
+
 app.get("/profile", requiresAuth(), async (req, res) => {
 
     //res.send(JSON.stringify(req.oidc.user));
@@ -247,6 +307,47 @@ app.get("/vale", requiresAuth(), async (req, res) => {
     knights = user.knights;
     batteringrams = user.batteringrams;
     siegetowers = user.siegetowers;
+
+
+
+    grainLevels = 0, lumberLevels = 0, stoneLevels = 0, ironLevels = 0, goldLevels = 0, grainIncome = 0, lumberIncome = 0, stoneIncome = 0, ironIncome = 0, goldIncome = 0;
+    function grainCalc(i) {
+        grainLevels += i;
+    };
+    function lumberCalc(i) {
+        lumberLevels += i;
+    };
+    function stoneCalc(i) {
+        stoneLevels += i;
+    };
+    function ironCalc(i) {
+        ironLevels += i;
+    };
+    function goldCalc(i) {
+        goldLevels += i;
+    };
+
+    const farms = user.farms;
+    farms.forEach(grainCalc);
+    grainIncome = incomeCalc("grain", grainLevels);
+
+    const lumberCamps = user.lumberCamps;
+    lumberCamps.forEach(lumberCalc);
+    lumberIncome = incomeCalc("lumber", lumberLevels);
+
+    const quarries = user.quarries;
+    quarries.forEach(stoneCalc);
+    stoneIncome = incomeCalc("stone", stoneLevels);
+
+    const ironMines = user.ironMines;
+    ironMines.forEach(ironCalc);
+    ironIncome = incomeCalc("iron", ironLevels);
+
+    const goldMines = user.goldMines;
+    goldMines.forEach(goldCalc);
+    goldIncome = incomeCalc("gold", goldLevels);
+
+
 
     attackValue = await calculateAttack(user);
     defenseValue = await calculateDefense(user);

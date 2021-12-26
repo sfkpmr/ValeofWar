@@ -21,19 +21,19 @@
 
       <t> <img src="../static/images/grain.png" alt="Grain" title="Grain"> <output id="grain">
           <%= grain %>
-        </output> </t><br>
+        </output> (+<output id="grainIncome"><%= grainIncome%></output>) </t><br>
       <t> <img src="../static/images/wood.png" alt="Lumber" title="Lumber"> <output id="lumber">
           <%= lumber %>
-        </output> </t><br>
+        </output> (+<output id="lumberIncome"><%= lumberIncome%></output>) </t><br>
       <t> <img src="../static/images/stone.png" alt="Stone" title="Stone"> <output id="stone">
           <%= stone %>
-        </output> </t><br>
-      <t> <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> <output id="iron">
+        </output> (+<output id="stoneIncome"><%= stoneIncome%></output>) </t><br>
+      <t> <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"><output id="iron">
           <%= iron %>
-        </output> </t><br>
+        </output> (+<output id="ironIncome"><%= ironIncome%></output>)</t><br>
       <t><img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"> <output id="gold">
           <%= gold %>
-        </output> </t><br>
+        </output> (+<output id="goldIncome"><%= goldIncome%></output>)</t><br>
       <hr class="solid">
       <t> <img src="../static/images/recruit.png" alt="Recruits" title="Recruits"> <output id="recruits">
           <%= recruits %>
@@ -67,13 +67,15 @@
           <%= siegetowers %>
         </output></t><br>
       <hr class="solid">
-      <t>Attack power: <output id="attack">
-          <%= attackValue %>
-        </output></t><br>
-      <t>Defense power: <output id="defense">
-          <%= defenseValue %>
-        </output></t><br>
-      <t>Incomes</t><br>
+      <t><img src="../static/images/attack.png" alt="Attack damage" title="Attack damage"> <output id="attackdamage">
+          <output id="attack">
+            <%= attackValue %>
+          </output></t><br>
+      <t><img src="../static/images/defend.png" alt="Defense damage" title="Defense damage"> <output id="defensedamage">
+          <output id="defense">
+            <%= defenseValue %>
+          </output></t><br>
+   
       <a href="/credits">Credits</a>
     </div>
     <iframe src="/land" name="iframe"></iframe>
