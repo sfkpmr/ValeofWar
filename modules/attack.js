@@ -1,6 +1,17 @@
 const e = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 
+boot = { attackDamage: 10, defenseDamage: 10 };
+bracer = { attackDamage: 5, defenseDamage: 10 };
+helmet = { attackDamage: 15, defenseDamage: 15 };
+longbow = { attackDamage: 20, defenseDamage: 30 };
+lance = { attackDamage: 25, defenseDamage: 10 };
+shield = { attackDamage: 10, defenseDamage: 20 };
+spear = { attackDamage: 10, defenseDamage: 25 };
+sword = { attackDamage: 10, defenseDamage: 10 };
+batteringram = { attackDamage: 25 };
+siegetower = { attackDamage: 50 };
+
 module.exports = {
 
     getAttackLog: async function (client, ObjectId) {
@@ -19,15 +30,10 @@ module.exports = {
 
     getInvolvedAttackLogs: async function (client, username) {
         const cursor = client.db("gamedb").collection("attacks").find({ $or: [{ "attacker": username }, { "defender": username }] })
-
-        //console.log(cursor)
-
         const result = await cursor.toArray();
-
         if (result[0] === undefined) {
             return false;
         }
-
         return result;
     },
 
@@ -84,7 +90,7 @@ module.exports = {
         }
 
         var archerDamage = 0, spearmenDamage = 0, swordsmenDamage = 0, horsemenDamage = 0, knightsDamage = 0;
-        const bootsDamage = 2, bracersDamage = 2, helmetDamage = 2, longbowDamage = 2, lanceDamage = 2, shieldDamage = 2, spearDamage = 2, swordDamage = 2, batteringramDamage = 10, siegetowerDamage = 50;
+        const bootsDamage = boot.attackDamage, bracersDamage = bracer.attackDamage, helmetDamage = helmet.attackDamage, longbowDamage = longbow.attackDamage, lanceDamage = lance.attackDamage, shieldDamage = shield.attackDamage, spearDamage = spear.attackDamage, swordDamage = sword.attackDamage, batteringramDamage = batteringram.attackDamage, siegetowerDamage = siegetower.attackDamage;
         if (archers !== undefined && archers !== null) {
             archerDamage = archers * 10;
             if (boots >= archers) {
@@ -312,7 +318,7 @@ module.exports = {
         }
 
         var archerDamage = 0, spearmenDamage = 0, horsemenDamage = 0, knightsDamage = 0;
-        const bootsDamage = 2, bracersDamage = 2, helmetDamage = 2, longbowDamage = 2, lanceDamage = 2, shieldDamage = 2, spearDamage = 2, swordDamage = 2;
+        const bootsDamage = boot.defenseDamage, bracersDamage = bracer.defenseDamage, helmetDamage = helmet.defenseDamage, longbowDamage = longbow.defenseDamage, lanceDamage = lance.defenseDamage, shieldDamage = shield.defenseDamage, spearDamage = spear.defenseDamage, swordDamage = sword.defenseDamage;
         if (archers !== undefined && archers !== null) {
             archerDamage = archers * 10;
             if (boots >= archers) {

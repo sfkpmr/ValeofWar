@@ -8,7 +8,6 @@
 
 <body>
 
-
     <% if (result.length> 0 ){ %>
         <% for (var i=0; i < filteredResult.length; i++ ) { %>
             <a href="/mailbox/log/<%= filteredResult[i]._id %>">
@@ -17,9 +16,7 @@
                 <%= filteredResult[i].time.toLocaleTimeString() %><br>
                     <% } %>
 
-
                         <div class="pagination">
-
 
                             <% if ( currentPage> 4){%>
                                 <a href="/mailbox/log/page/<%= currentPage -4%>">&laquo;</a>
