@@ -27,7 +27,7 @@
 
                         <% } else { %>
                             Blacksmith level: <%= blacksmith %> <br><br>
-                            At the blacksmith you can craft armor and weapons for your troops.<br>
+                                At the blacksmith you can craft armor and weapons for your troops.<br>
                                 <br>
                                 <div class="training">
                                     <form action="/town/blacksmith/craft" method="POST">
@@ -83,7 +83,8 @@
 
                                     Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron
                                                 and <%= goldCost %>
-                                                    gold.
+                                                    gold.<br>
+                                                    <br>
                                                     <form action="/town/blacksmith/upgrade" method="POST">
                                                         <input type="submit" value="Upgrade">
                                                     </form>

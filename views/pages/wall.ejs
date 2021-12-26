@@ -11,17 +11,19 @@
 
     Wall level: <%= wall %> <br>
         <br>
-        Walls boosts your defenses and hides part of your resources from enemy raiders.<br>
+        Walls boosts your defenses and hides part of your resources from enemy raiders.<br><br>
 
         <% if (wall <=19){ %>
-            <br>
-            <form action="/town/wall/upgrade" method="POST">
-                <input type="submit" value="Upgrade">
-            </form>
-            <% } else { %>
-                <br>
-                The walls are already at max level!
-                <% } %>
+            Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron and <%= goldCost %>
+                            gold.<br>
+                            <br>
+                            <form action="/town/wall/upgrade" method="POST">
+                                <input type="submit" value="Upgrade">
+                            </form>
+                            <% } else { %>
+                                <br>
+                                The walls are already at max level!
+                                <% } %>
 
 </body>
 

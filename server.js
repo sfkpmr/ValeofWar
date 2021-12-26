@@ -107,6 +107,8 @@ async function main() {
                     quarries = JSON.stringify(user.quarries);
                     ironmines = JSON.stringify(user.ironMines);
                     goldmines = JSON.stringify(user.goldMines);
+                    trainingfield = JSON.stringify(user.trainingfieldLevel);
+                    stables = JSON.stringify(user.stablesLevel);
 
                     //TODO update damage when making armor
 
@@ -175,6 +177,12 @@ async function main() {
                     };
                     if (goldmines !== null && goldmines !== undefined) {
                         io.to(userMap[i]).emit("getGoldIncome");
+                    };
+                    if (trainingfield !== null && trainingfield !== undefined) {
+                        io.to(userMap[i]).emit("getRecruitsIncome");
+                    };
+                    if (stables !== null && stables !== undefined) {
+                        io.to(userMap[i]).emit("getHorseIncome");
                     };
 
                     if (updateDamage) {
@@ -261,6 +269,10 @@ app.get("/api/:getIncome", requiresAuth(), async (req, res) => {
         const count = user.goldMines;
         count.forEach(calc);
         income = incomeCalc("gold", levels);
+    } else if (requestedIncome === "getRecruitsIncome") {
+        income = user.trainingfieldLevel * 5;
+    } else if (requestedIncome === "getHorseIncome") {
+        income = user.stablesLevel * 3;
     } else {
         levels = null;
     }
@@ -308,8 +320,6 @@ app.get("/vale", requiresAuth(), async (req, res) => {
     batteringrams = user.batteringrams;
     siegetowers = user.siegetowers;
 
-
-
     grainLevels = 0, lumberLevels = 0, stoneLevels = 0, ironLevels = 0, goldLevels = 0, grainIncome = 0, lumberIncome = 0, stoneIncome = 0, ironIncome = 0, goldIncome = 0;
     function grainCalc(i) {
         grainLevels += i;
@@ -347,7 +357,8 @@ app.get("/vale", requiresAuth(), async (req, res) => {
     goldMines.forEach(goldCalc);
     goldIncome = incomeCalc("gold", goldLevels);
 
-
+    recruitsIncome = user.trainingfieldLevel * 5;
+    horseIncome = user.stablesLevel * 3;
 
     attackValue = await calculateAttack(user);
     defenseValue = await calculateDefense(user);
@@ -581,8 +592,15 @@ app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
 
     trainingField = user.trainingfieldLevel;
+    type = "trainingfield"
+
+    lumberCost = await calcBuildingLumberCost(type, trainingField + 1);
+    stoneCost = await calcBuildingStoneCost(type, trainingField + 1);
+    ironCost = await calcBuildingIronCost(type, trainingField + 1);
+    goldCost = await calcBuildingGoldCost(type, trainingField + 1);
 
     res.render('pages/trainingField')
+
 });
 
 app.get("/credits", async (req, res) => {

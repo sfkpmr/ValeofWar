@@ -13,15 +13,17 @@
         <br>
         The training field gathers fresh recruits for your army.
         <br>
-        <% if (trainingField <=19){ %>
-            <form action="/town/trainingfield/upgrade" method="POST">
-                <input type="submit" value="Upgrade">
-            </form>
+        <br> Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron and <%= goldCost %>
+                        gold.<br><br>
+                        <% if (trainingField <=19){ %>
+                            <form action="/town/trainingfield/upgrade" method="POST">
+                                <input type="submit" value="Upgrade">
+                            </form>
 
-            <% } else { %>
-                <br>
-                The training field is already at max level!
-                <% } %>
+                            <% } else { %>
+
+                                The training field is already at max level!
+                                <% } %>
 </body>
 
 </html>

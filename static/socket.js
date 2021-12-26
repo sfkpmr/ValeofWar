@@ -115,3 +115,23 @@ socket.on('getGoldIncome', async function () {
         alert("HTTP-Error: " + response.status);
     }
 });
+socket.on('getRecruitsIncome', async function () {
+    let response = await fetch("/api/getRecruitsIncome");
+
+    if (response.ok) {
+        let json = await response.json();
+        document.getElementById("recruitsIncome").innerHTML = json;
+    } else {
+        alert("HTTP-Error: " + response.status);
+    }
+});
+socket.on('getHorseIncome', async function () {
+    let response = await fetch("/api/getHorseIncome");
+
+    if (response.ok) {
+        let json = await response.json();
+        document.getElementById("horseIncome").innerHTML = json;
+    } else {
+        alert("HTTP-Error: " + response.status);
+    }
+});

@@ -26,7 +26,7 @@
 
                             Stables level: <%= stables %> <br>
                             <br>
-                            The stables is where you train additional soldiers on horseback.<br><br>
+                            The stables is where you raise horses and train additional soldiers on horseback<br><br>
                                 <div class="training">
                                     <form action="/town/stables/train" method="POST">
                                         <label for="horsemen"><img src="../static/images/horseman.png" height="35px"
@@ -52,7 +52,7 @@
                                 <% if (stables <=19){ %>
                                     Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron
                                                 and <%= goldCost %> gold.
-                                                    <br>
+                                                    <br><br>
                                                     <form action="/town/stables/upgrade" method="POST">
                                                         <input type="submit" value="Upgrade">
                                                     </form>

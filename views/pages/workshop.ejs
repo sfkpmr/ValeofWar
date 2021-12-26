@@ -30,9 +30,9 @@
                         <% } else { %>
 
                             Workshop level: <%= workshop %> <br>
-                            <br>
-                            The workshop lets you construct powerful siege weapons.
-                            <br>
+                                <br>
+                                The workshop lets you construct powerful siege weapons.
+                                <br>
                                 <br>
                                 <div class="training">
                                     <form action="/town/workshop/train" method="POST">
@@ -54,7 +54,7 @@
                                 <br>
                                 <% if (workshop <=19){ %>
                                     Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron
-                                                and <%= goldCost %> gold.
+                                                and <%= goldCost %> gold.<br><br>
                                                     <form action="/town/workshop/upgrade" method="POST">
                                                         <input type="submit" value="Upgrade">
                                                     </form>
