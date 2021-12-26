@@ -470,11 +470,11 @@ app.get("/mailbox/log/:id", requiresAuth(), async (req, res) => {
     }
     log = await getAttackLog(client, searchObject);
 
-    
 
-    if(user.username === log.attacker){
+
+    if (user.username === log.attacker) {
         attackUrl = `/profile/${log.defender}/attack`
-    }else{
+    } else {
         attackUrl = `/profile/${log.attacker}/attack`
     }
 
@@ -516,20 +516,61 @@ app.get("/mailbox/log/page/:nr", requiresAuth(), async (req, res) => {
             startPoint = (currentPage - 1) * 20;
         }
 
-        const objectToArray = result => {
+        const objectToArray2 = result => {
             const keys = Object.keys(result);
             const res = [];
-            for (let i = startPoint; i < startPoint + 20; i++) {
+            for (let i = 0; i < keys.length; i++) {
                 res.push(result[keys[i]]);
-                if (result[keys[i + 1]] === null || result[keys[i + 1]] === undefined) {
+            };
+            return res;
+        };
+
+        tempArray = objectToArray2(result);
+        reverseArray = [];
+
+        for (i = tempArray.length - 1; i >= 0; i--) {
+            reverseArray.push(tempArray[i]);
+            //   console.log(i)
+        }
+
+        const objectToArray = reverseArray => {
+            const keys = Object.keys(reverseArray);
+            const res = [];
+            for (let i = startPoint; i < startPoint + 20; i++) {
+                res.push(reverseArray[keys[i]]);
+                if (reverseArray[keys[i + 1]] === null || reverseArray[keys[i + 1]] === undefined) {
                     i = Number.MAX_SAFE_INTEGER;
                 }
             };
             return res;
         };
-        filteredResult = objectToArray(result);
+        filteredResult = objectToArray(reverseArray);
+        // reverseArray = [];
 
-        log = filteredResult
+        //console.log(filteredResult[0])
+        //  reverseArray.push(filteredResult[0]);
+        // reverseArray.push(filteredResult[1]);
+        // console.log(reverseArray)
+
+        // reverseArray.push(1);
+        // console.log(reverseArray)
+        // reverseArray.push(2);
+        // console.log(reverseArray)
+        // reverseArray.push(3);
+        // console.log(reverseArray)
+
+        // console.log(filteredResult.length + " " + JSON.stringify(filteredResult[0]), JSON.stringify(filteredResult[19]))
+
+        // console.log(filteredResult.length)
+        // for (i = filteredResult.length - 1; i >= 0; i--) {
+        //     reverseArray.push(filteredResult[i]);
+        //     //   console.log(i)
+        // }
+        // console.log(reverseArray.length)
+        // console.log(reverseArray);
+        // console.log("-------------------");
+        // console.log(reverseArray[0])
+
 
         res.render('pages/log')
     }
