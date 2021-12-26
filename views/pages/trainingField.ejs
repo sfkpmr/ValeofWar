@@ -11,10 +11,16 @@
 
     Training field level: <%= trainingField %> <br>
         <br>
-        <form action="/town/trainingfield/upgrade" method="POST">
-            <input type="submit" value="Upgrade">
-        </form>
+        The training field gathers fresh recruits for your army.
+        <br>
+        <% if (trainingField <=19){ %>
+            <form action="/town/trainingfield/upgrade" method="POST">
+                <input type="submit" value="Upgrade">
+            </form>
 
+            <% } else { %>
+                The training field is already at max level!
+                <% } %>
 </body>
 
 </html>

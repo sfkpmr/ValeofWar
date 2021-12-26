@@ -7,31 +7,53 @@
 
 <body>
 
-    <!-- TODO server check barrack exists and has levels-->
-    Stables level: <%= stables %> <br>
+    <% if (stables===0){ %>
+
+        We don't have a stable yet!<br>
         <br>
-        Horsemen: <%= horsemen %> <br>
-            Knights: <%= knights %> <br>
-                <br>
-                <form action="/town/stables/train" method="POST">
-                    <label for="horsemen">Horsemen:</label><br>
-                    <input type="number" id="horsemen" name="horsemen" value="0" min=0><br>
-                    <label for="knights">Knights:</label><br>
-                    <input type="number" id="knights" name="knights" value="0" min=0><br><br>
-                    Training cost: <output id="grain">0</output> grain, <output id="lumber">0</output> lumber, <output
-                        id="iron">0</output> iron,
-                    <output id="gold">0</output> gold, <output id="recruits">0</output> recuits and <output
-                        id="horses">0</output> horses.<br>
+        Construct one for: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron and <%= goldCost %>
+                        gold.
+                        <br>
+                        <br>
+                        <form action="/town/stables/upgrade" method="POST">
+                            <input type="submit" value="Construct">
+                        </form>
 
-                    <input type="submit" value="Train">
-                </form>
 
-                Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron and <%= goldCost %> gold.
-                <br>
-                <form action="/town/stables/upgrade" method="POST">
-                    <input type="submit" value="Upgrade">
-                </form>
-                <script type="text/javascript" src="../static/stables.js"></script>
+
+                        <% } else { %>
+
+                            Stables level: <%= stables %> <br>
+                                <br>
+                                Horsemen: <%= horsemen %> <br>
+                                    Knights: <%= knights %> <br>
+                                        <br>
+                                        <form action="/town/stables/train" method="POST">
+                                            <label for="horsemen">Horsemen:</label><br>
+                                            <input type="number" id="horsemen" name="horsemen" value="0" min=0><br>
+                                            <label for="knights">Knights:</label><br>
+                                            <input type="number" id="knights" name="knights" value="0" min=0><br><br>
+                                            Training cost: <output id="grain">0</output> grain, <output
+                                                id="lumber">0</output> lumber, <output id="iron">0</output> iron,
+                                            <output id="gold">0</output> gold, <output id="recruits">0</output> recuits
+                                            and <output id="horses">0</output> horses.<br>
+
+                                            <input type="submit" value="Train">
+                                        </form>
+
+                                        <% if (stables <=19){ %>
+                                            Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost
+                                                        %> iron and <%= goldCost %> gold.
+                                                            <br>
+                                                            <form action="/town/stables/upgrade" method="POST">
+                                                                <input type="submit" value="Upgrade">
+                                                            </form>
+                                                            <% } else { %>
+                                                                The stables are already at max level!
+                                                                <% } %>
+                                                                    <script type="text/javascript"
+                                                                        src="../static/stables.js"></script>
+                                                                    <% } %>
 </body>
 
 </html>

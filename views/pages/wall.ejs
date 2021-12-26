@@ -10,11 +10,17 @@
     <!-- TODO server check barrack exists and has levels-->
 
     Wall level: <%= wall %> <br>
-
         <br>
-        <form action="/town/wall/upgrade" method="POST">
-            <input type="submit" value="Upgrade">
-        </form>
+        Walls boosts your defenses and hides part of your resources from enemy raiders.<br>
+
+        <% if (wall <=19){ %>
+            <br>
+            <form action="/town/wall/upgrade" method="POST">
+                <input type="submit" value="Upgrade">
+            </form>
+            <% } else { %>
+                The walls are already at max level!
+                <% } %>
 
 </body>
 

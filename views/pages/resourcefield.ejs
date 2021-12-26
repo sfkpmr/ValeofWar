@@ -10,14 +10,19 @@
 <body>
 
     <%= title %> level: <%= resourceLevel %>
+            <br>
+            The <%= title.toLowerCase() %> provides additional resources for your town.
+                <br>
+                <% if (resourceLevel <=19){ %>
+                    <form action="/land/<%= title.toLowerCase().replace(/ /g, '') %>/<%= resourceId %>/upgrade">
+                        <input type="submit" value="Upgrade">
+                    </form>
 
-            <form action="/land/<%= title.toLowerCase().replace(/ /g, '') %>/<%= resourceId %>/upgrade">
-                <input type="submit" value="Upgrade">
-            </form>
+                    <button type="button"><a href="/land">Back</button>
+                    <% } else { %>
+                        The <%= title.toLowerCase() %> is already at max level!
+                            <% } %>
 
-            <button type="button"><a href="/land">Back</button>
-
-    
 </body>
 
 </html>

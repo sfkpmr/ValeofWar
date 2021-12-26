@@ -459,19 +459,25 @@ app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
             console.log("error")
     }
 
-    const lumberCost = await calcBuildingLumberCost(type, level + 1);
-    const stoneCost = await calcBuildingStoneCost(type, level + 1);
-    const ironCost = await calcBuildingIronCost(type, level + 1);
-    const goldCost = await calcBuildingGoldCost(type, level + 1);
-
-    if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
-        await upgradeBuilding(client, user.username, buildingName);
-        await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
+    if (level >= 20) {
+        res.redirect(`/town/${req.params.building}`);
     } else {
-        console.log("bbbb");
+        const lumberCost = await calcBuildingLumberCost(type, level + 1);
+        const stoneCost = await calcBuildingStoneCost(type, level + 1);
+        const ironCost = await calcBuildingIronCost(type, level + 1);
+        const goldCost = await calcBuildingGoldCost(type, level + 1);
+
+        if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
+            await upgradeBuilding(client, user.username, buildingName);
+            await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
+        } else {
+            console.log("bbbb");
+        }
+
+        res.redirect(`/town/${req.params.building}`);
     }
 
-    res.redirect(`/town/${req.params.building}`);
+
 });
 
 app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
@@ -819,15 +825,15 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     var updatedUser, resourceLevel, resource;
 
+    //TODO Add max level
+
     if (type === "farm") {
 
         if (resourceId >= 0 && resourceId <= maxFarms) {
             resource = "farms"
             updatedUser = user.farms;
-            console.log(updatedUser)
             resourceLevel = updatedUser[resourceId]
             updatedUser[resourceId]++;
-            console.log(updatedUser)
             updatedUser = { farms: updatedUser }
         } else {
             res.redirect("/land");
@@ -879,19 +885,26 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
         }
     }
 
-    const lumberCost = await calcBuildingLumberCost(type, resourceLevel + 1);
-    const stoneCost = await calcBuildingStoneCost(type, resourceLevel + 1);
-    const ironCost = await calcBuildingIronCost(type, resourceLevel + 1);
-    const goldCost = await calcBuildingGoldCost(type, resourceLevel + 1);
-
-    if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
-        await upgradeResource(client, user.username, updatedUser, resource);
-        await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
+    if (resourceLevel >= 20) {
+        res.redirect("/land");
     } else {
-        console.log("bbbb");
+        const lumberCost = await calcBuildingLumberCost(type, resourceLevel + 1);
+        const stoneCost = await calcBuildingStoneCost(type, resourceLevel + 1);
+        const ironCost = await calcBuildingIronCost(type, resourceLevel + 1);
+        const goldCost = await calcBuildingGoldCost(type, resourceLevel + 1);
+
+        if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
+            await upgradeResource(client, user.username, updatedUser, resource);
+            await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
+        } else {
+            console.log("bbbb");
+        }
+
+
+        res.redirect(`/land/${type}/${resourceId}`);
     }
 
-    res.redirect("/land");
+
 
 });
 
