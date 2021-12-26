@@ -24,7 +24,7 @@ app.disable('x-powered-by');
 
 const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
-const { getUser, getUserByEmail } = require("./modules/database.js");
+const { getUser, getUserByEmail, getUserById } = require("./modules/database.js");
 const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources, incomeCalc } = require("./modules/resources.js");
 
@@ -40,7 +40,7 @@ const { filter } = require("compression");
 const { get } = require("express/lib/response");
 const io = new Server(server);
 
-let userMap = {};
+let userMap = new Map();
 
 io.on('connection', (socket) => {
     date = new Date();
@@ -545,32 +545,6 @@ app.get("/mailbox/log/page/:nr", requiresAuth(), async (req, res) => {
             return res;
         };
         filteredResult = objectToArray(reverseArray);
-        // reverseArray = [];
-
-        //console.log(filteredResult[0])
-        //  reverseArray.push(filteredResult[0]);
-        // reverseArray.push(filteredResult[1]);
-        // console.log(reverseArray)
-
-        // reverseArray.push(1);
-        // console.log(reverseArray)
-        // reverseArray.push(2);
-        // console.log(reverseArray)
-        // reverseArray.push(3);
-        // console.log(reverseArray)
-
-        // console.log(filteredResult.length + " " + JSON.stringify(filteredResult[0]), JSON.stringify(filteredResult[19]))
-
-        // console.log(filteredResult.length)
-        // for (i = filteredResult.length - 1; i >= 0; i--) {
-        //     reverseArray.push(filteredResult[i]);
-        //     //   console.log(i)
-        // }
-        // console.log(reverseArray.length)
-        // console.log(reverseArray);
-        // console.log("-------------------");
-        // console.log(reverseArray[0])
-
 
         res.render('pages/log')
     }
@@ -612,6 +586,18 @@ app.get("/town/barracks", requiresAuth(), async (req, res) => {
     swordsmen = user.swordsmen;
 
     res.render('pages/barracks');
+});
+
+app.get("/online", requiresAuth(), async (req, res) => {
+
+    temp = [];
+
+    for (var i in userMap) {
+        result = await getUserById(client, i);
+        temp.push(result.username);
+    }
+
+    res.render('pages/online');
 });
 
 app.get("/town/wall", requiresAuth(), async (req, res) => {

@@ -18,5 +18,8 @@ module.exports = {
     },
     getUserByEmail: async function (client, email) {
         return await client.db("gamedb").collection("players").findOne({ "email": email });
+    },
+    getUserById: async function (client, id) {
+        return await client.db("gamedb").collection("players").findOne({ "_id": id });
     }
 }

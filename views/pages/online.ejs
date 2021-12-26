@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <title>Online users</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+</head>
+
+<body>
+
+    Users currently active:<br>
+
+    <ul>
+    <% for (var i=0; i < temp.length; i++ ) { %>
+      <li>  <a href="/profile/<%= temp[i] %>"><%= temp[i] %></a></li>
+        <% } %>
+    </ul>
+
+</body>
+
+</html>
