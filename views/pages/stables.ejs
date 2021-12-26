@@ -29,9 +29,11 @@
                                     Knights: <%= knights %> <br>
                                         <br>
                                         <form action="/town/stables/train" method="POST">
-                                            <label for="horsemen">Horsemen:</label><br>
+                                            <label for="horsemen"><img src="../static/images/horseman.png" height="35px"
+                                                    title="Horseman"> Current: <%= horsemen %> Train:</label>
                                             <input type="number" id="horsemen" name="horsemen" value="0" min=0><br>
-                                            <label for="knights">Knights:</label><br>
+                                            <label for="knights"><img src="../static/images/knight.png" height="35px"
+                                                    title="Knight"> Current: <%= knights %> Train:</label>
                                             <input type="number" id="knights" name="knights" value="0" min=0><br><br>
                                             Training cost: <output id="grain">0</output> grain, <output
                                                 id="lumber">0</output> lumber, <output id="iron">0</output> iron,

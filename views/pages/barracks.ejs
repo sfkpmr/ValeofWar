@@ -12,36 +12,36 @@
     <!-- TODO Display max number of units/armor you can afford right now -->
 
     Barracks level: <%= barracks %> <br>
-        <br>
-        Archers: <%= archers %> <br>
-            Spearmen: <%= spearmen %> <br>
-                Swordsmen: <%= swordsmen %> <br>
-                    <br>
-                    <!-- Old validation: oninput="validity.valid||(value='');" -->
-                    <form action="/town/barracks/train" method="POST">
-                        <label for="archers">Archers:</label>
-                        <input type="number" id="archers" name="archers" value="0" min=0><br>
-                        <label for="spearmen">Spearmen:</label>
-                        <input type="number" id="spearmen" name="spearmen" value="0"><br>
-                        <label for="swordsmen">Swordsmen:</label>
-                        <input type="number" id="swordsmen" name="swordsmen" value="0"><br><br>
-                        Training cost: <output id="grain">0</output> grain, <output id="lumber">0</output> lumber,
-                        <output id="iron">0</output> iron, <output id="gold">0</output>
-                        gold and <output id="recruits">0</output> recuits. <br>
 
-                        <input type="submit" value="Train">
-                    </form>
-                    <br>
-                    <% if (barracks <=19){ %>
-                        Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron and <%=
-                                        goldCost %> gold.
-                                        <form action="/town/barracks/upgrade" method="POST">
-                                            <input type="submit" value="Upgrade">
-                                        </form>
-                                        <% } else { %>
-                                            The barracks is already at max level!
-                                            <% } %>
-                                                <script type="text/javascript" src="../static/barracks.js"></script>
+        <br>
+        <!-- Old validation: oninput="validity.valid||(value='');" -->
+        <form action="/town/barracks/train" method="POST">
+            <label for="archers"><img src="../static/images/archer.png" height="35px" title="Archer">
+                Current: <%= archers %> Train:</label>
+            <input type="number" id="archers" name="archers" value="0" min=0><br>
+            <label for="spearmen"><img src="../static/images/spearman.png" height="35px" title="Spearman">
+                Current: <%= spearmen %> Train:</label>
+            <input type="number" id="spearmen" name="spearmen" value="0"><br>
+            <label for="swordsmen"><img src="../static/images/swordsman.png" height="35px" title="Swordsman"> Current:
+                <%= swordsmen %> Train:</label>
+            <input type="number" id="swordsmen" name="swordsmen" value="0"><br><br>
+            Training cost: <output id="grain">0</output> grain, <output id="lumber">0</output> lumber,
+            <output id="iron">0</output> iron, <output id="gold">0</output>
+            gold and <output id="recruits">0</output> recuits. <br>
+
+            <input type="submit" value="Train">
+        </form>
+        <br>
+        <% if (barracks <=19){ %>
+            Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron and <%= goldCost %>
+                            gold.
+                            <form action="/town/barracks/upgrade" method="POST">
+                                <input type="submit" value="Upgrade">
+                            </form>
+                            <% } else { %>
+                                The barracks is already at max level!
+                                <% } %>
+                                    <script type="text/javascript" src="../static/barracks.js"></script>
 </body>
 
 </html>

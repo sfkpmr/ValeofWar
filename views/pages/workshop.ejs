@@ -30,35 +30,35 @@
 
                             Workshop level: <%= workshop %> <br>
                                 <br>
-                                Battering rams: <%= batteringrams %><br>
-                                    Siege towers: <%= siegetowers %><br>
-                                        <br>
-                                        <form action="/town/workshop/train" method="POST">
-                                            <label for="batteringram">Battering ram:</label>
-                                            <input type="number" id="batteringram" name="batteringram" value="0"
-                                                min=0><br>
-                                            <label for="siegetower">Siege tower:</label>
-                                            <input type="number" id="siegetower" name="siegetower" value="0"
-                                                min=0><br><br>
-                                            Build cost: <output id="lumber">0</output> lumber, <output
-                                                id="iron">0</output> iron and
-                                            <output id="gold">0</output> gold. <br>
-                                            <input type="submit" value="Build">
-                                        </form>
-                                        <br>
-                                        <% if (workshop <=19){ %>
-                                            Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost
-                                                        %> iron and <%= goldCost %> gold.
-                                                            <form action="/town/workshop/upgrade" method="POST">
-                                                                <input type="submit" value="Upgrade">
-                                                            </form>
-                                                            <% } else { %>
-                                                                The workshop is already at max level!
 
-                                                                <script type="text/javascript"
-                                                                    src="../static/workshop.js"></script>
-                                                                <% } %>
-                                                                    <% } %>
+                                <form action="/town/workshop/train" method="POST">
+                                    <label for="batteringram"><img src="../static/images/batteringram.png" height="35px"
+                                            title="Battering ram">
+                                        Current: <%= batteringrams %> Train:</label>
+                                    <input type="number" id="batteringram" name="batteringram" value="0" min=0><br>
+                                    <label for="siegetower"><img src="../static/images/siegetower.png" height="35px"
+                                            title="Siege tower">
+                                        Current: <%= siegetowers %> Train:</label>
+                                    <input type="number" id="siegetower" name="siegetower" value="0" min=0><br><br>
+                                    Build cost: <output id="lumber">0</output> lumber, <output id="iron">0</output> iron
+                                    and
+                                    <output id="gold">0</output> gold. <br>
+                                    <input type="submit" value="Build">
+                                </form>
+                                <br>
+                                <% if (workshop <=19){ %>
+                                    Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron
+                                                and <%= goldCost %> gold.
+                                                    <form action="/town/workshop/upgrade" method="POST">
+                                                        <input type="submit" value="Upgrade">
+                                                    </form>
+                                                    <% } else { %>
+                                                        The workshop is already at max level!
+
+                                                        <script type="text/javascript"
+                                                            src="../static/workshop.js"></script>
+                                                        <% } %>
+                                                            <% } %>
 </body>
 
 </html>
