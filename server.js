@@ -218,11 +218,6 @@ app.get("/profile", requiresAuth(), async (req, res) => {
     res.redirect(`/profile/${user.username}`)
 });
 
-app.get("/test", requiresAuth(), async (req, res) => {
-
-    res.render('pages/test')
-});
-
 //make post?
 app.get("/api/getUser/:id", requiresAuth(), async (req, res) => {
 

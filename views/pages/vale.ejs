@@ -4,84 +4,79 @@
 <head>
   <title>Vale of War</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" type="text/css" href="static/style2.css" />
+  <link rel="stylesheet" type="text/css" href="static/style.css" />
 </head>
 
+
 <body>
+  <div class="layout">
+    <div class="top">
+      <a href="/town" target="iframe">Town</a>
+      <a href="/land" target="iframe">Land</a>
+      <a href="/mailbox" target="iframe">Mailbox</a>
+      <a href="/profile" target="iframe">Profile</a>
+      <a href="/logout">Log out</a>
+    </div>
+    <div class="side">
 
-  <div class="topnav">
-    <a href="/town" target="iframe">Town</a>
-    <a href="/land" target="iframe">Land</a>
-    <a href="/mailbox" target="iframe">Mailbox</a>
-    <a href="/profile" target="iframe">Profile</a>
-    <a href="/logout">Log out</a>
-  </div>
-  <div class="sidenav">
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <t> <img src="../static/images/grain.png" alt="Grain" title="Grain"> <output id="grain">
-        <%= grain %>
-      </output> </t><br>
-    <t> <img src="../static/images/wood.png" alt="Lumber" title="Lumber"> <output id="lumber">
-        <%= lumber %>
-      </output> </t><br>
-    <t> <img src="../static/images/stone.png" alt="Stone" title="Stone"> <output id="stone">
-        <%= stone %>
-      </output> </t><br>
-    <t> <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> <output id="iron">
-        <%= iron %>
-      </output> </t><br>
-    <t><img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"> <output id="gold">
-        <%= gold %>
-      </output> </t><br>
-    <hr class="solid">
-    <t> <img src="../static/images/recruit.png" alt="Recruits" title="Recruits"> <output id="recruits">
-        <%= recruits %>
-      </output>
-    </t><br>
-    <t> <img src="../static/images/horse.png" alt="Horses" title="Horses"> <output id="horses">
-        <%= horses %>
-      </output>
-    </t><br>
-    <hr class="solid">
-    <t> <img src="../static/images/archer.png" alt="Archers" title="Archers"> <output id="archers">
-        <%= archers %>
-      </output></t><br>
-    <t> <img src="../static/images/spearman.png" alt="Spearmen" title="Spearmen"> <output id="spearmen">
-        <%= spearmen %>
-      </output></t><br>
-    <t> <img src="../static/images/swordsman.png" alt="Swordmen" title="Swordmen"> <output id="swordsmen">
-        <%= swordsmen %>
-      </output></t><br>
-    <t> <img src="../static/images/horseman.png" alt="Horsemen" title="Horsemen"> <output id="horsemen">
-        <%= horsemen %>
-      </output></t><br>
-    <t> <img src="../static/images/knight.png" alt="Knights" title="Knights"> <output id="knights">
-        <%= knights %>
-      </output></t><br>
-    <t> <img src="../static/images/batteringram.png" alt="Battering rams" title="Battering rams"> <output
-        id="batteringrams">
-        <%= batteringrams %>
-      </output></t><br>
-    <t> <img src="../static/images/siegetower.png" alt="Siege towers" title="Siege towers"> <output id="siegetowers">
-        <%= siegetowers %>
-      </output></t><br>
-    <hr class="solid">
-    <t>Attack power: <output id="attack">
-        <%= attackValue %>
-      </output></t><br>
-    <t>Defense power: <output id="defense">
-        <%= defenseValue %>
-      </output></t><br>
-    <t>Incomes</t><br>
-    <a href="/credits">Credits</a>
-  </div>
-
-  <div class="main">
-    <iframe src="/town" name="iframe" frameBorder="0"></iframe>
+      <t> <img src="../static/images/grain.png" alt="Grain" title="Grain"> <output id="grain">
+          <%= grain %>
+        </output> </t><br>
+      <t> <img src="../static/images/wood.png" alt="Lumber" title="Lumber"> <output id="lumber">
+          <%= lumber %>
+        </output> </t><br>
+      <t> <img src="../static/images/stone.png" alt="Stone" title="Stone"> <output id="stone">
+          <%= stone %>
+        </output> </t><br>
+      <t> <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> <output id="iron">
+          <%= iron %>
+        </output> </t><br>
+      <t><img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"> <output id="gold">
+          <%= gold %>
+        </output> </t><br>
+      <hr class="solid">
+      <t> <img src="../static/images/recruit.png" alt="Recruits" title="Recruits"> <output id="recruits">
+          <%= recruits %>
+        </output>
+      </t><br>
+      <t> <img src="../static/images/horse.png" alt="Horses" title="Horses"> <output id="horses">
+          <%= horses %>
+        </output>
+      </t><br>
+      <hr class="solid">
+      <t> <img src="../static/images/archer.png" alt="Archers" title="Archers"> <output id="archers">
+          <%= archers %>
+        </output></t><br>
+      <t> <img src="../static/images/spearman.png" alt="Spearmen" title="Spearmen"> <output id="spearmen">
+          <%= spearmen %>
+        </output></t><br>
+      <t> <img src="../static/images/swordsman.png" alt="Swordmen" title="Swordmen"> <output id="swordsmen">
+          <%= swordsmen %>
+        </output></t><br>
+      <t> <img src="../static/images/horseman.png" alt="Horsemen" title="Horsemen"> <output id="horsemen">
+          <%= horsemen %>
+        </output></t><br>
+      <t> <img src="../static/images/knight.png" alt="Knights" title="Knights"> <output id="knights">
+          <%= knights %>
+        </output></t><br>
+      <t> <img src="../static/images/batteringram.png" alt="Battering rams" title="Battering rams"> <output
+          id="batteringrams">
+          <%= batteringrams %>
+        </output></t><br>
+      <t> <img src="../static/images/siegetower.png" alt="Siege towers" title="Siege towers"> <output id="siegetowers">
+          <%= siegetowers %>
+        </output></t><br>
+      <hr class="solid">
+      <t>Attack power: <output id="attack">
+          <%= attackValue %>
+        </output></t><br>
+      <t>Defense power: <output id="defense">
+          <%= defenseValue %>
+        </output></t><br>
+      <t>Incomes</t><br>
+      <a href="/credits">Credits</a>
+    </div>
+    <iframe src="/land" name="iframe"></iframe>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
