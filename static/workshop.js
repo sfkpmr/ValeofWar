@@ -6,7 +6,7 @@ function workshopBuildCost() {
     var lumberCost = 0, ironCost = 0, goldCost = 0;
 
     batteringRams = parseInt(document.getElementById('batteringram').value);
-    siegeTowers = parseInt(document.getElementById('batteringram').value);
+    siegeTowers = parseInt(document.getElementById('siegetower').value);
 
     lumberCost += batteringRams * batteringRam.lumber;
     lumberCost += siegeTowers * siegeTower.lumber;
