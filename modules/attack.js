@@ -13,20 +13,20 @@ module.exports = {
     },
 
     createAttackLog: async function (client, data) {
-
         result = await client.db("gamedb").collection("attacks").insertOne(data);
-
         return result.insertedId;
-
     },
 
     getInvolvedAttackLogs: async function (client, username) {
-        //const result = await client.db("gamedb").collection("attacks").find({ $or: [ { "attacker": username }, { "defender": username } ] }).toArray();
-        //const result = await client.db("gamedb").collection("attacks").find().toArray;
-
         const cursor = client.db("gamedb").collection("attacks").find({ $or: [{ "attacker": username }, { "defender": username }] })
 
+        //console.log(cursor)
+
         const result = await cursor.toArray();
+
+        if (result[0] === undefined) {
+            return false;
+        }
 
         return result;
     },
@@ -34,13 +34,13 @@ module.exports = {
     calculateAttack: async function (attacker) {
 
         //todo rename variable to user?
-        archers = attacker.archers;
-        spearmen = attacker.spearmen;
-        horsemen = attacker.horsemen;
-        knights = attacker.knights;
-        swordsmen = attacker.swordsmen;
-        batteringrams = attacker.batteringrams;
-        siegetowers = attacker.siegetowers;
+        const archers = attacker.archers;
+        const spearmen = attacker.spearmen;
+        const horsemen = attacker.horsemen;
+        const knights = attacker.knights;
+        const swordsmen = attacker.swordsmen;
+        //batteringrams = attacker.batteringrams;
+        //siegetowers = attacker.siegetowers;
         var boots = attacker.boots;
         var bracers = attacker.bracers;
         var helmets = attacker.helmets;
@@ -261,31 +261,11 @@ module.exports = {
             }
         }
 
-        // if (archers !== undefined && archers !== null) {
-        //     archerDamage = archers * 10;
-        // } if (spearmen !== undefined && spearmen !== null) {
-        //     spearmenDamage = spearmen * 5;
-        // } if (horsemen !== undefined && horsemen !== null) {
-        //     horsemenDamage = horsemen * 15;
-        // } if (knights !== undefined && knights !== null) {
-        //     knightsDamage = knights * 20;
-        // } if (swordsmen !== undefined && swordsmen !== null) {
-        //     swordsmenDamage = swordsmen * 20;
-        // } if (batteringrams !== undefined && batteringrams !== null) {
-        //     archerDamage = archerDamage * batteringrams;
-        //     spearmenDamage = spearmenDamage * batteringrams;
-        // } if (siegetowers !== undefined && siegetowers !== null) {
-        //     //fix does double calc with battering ram dmg
-        //     archerDamage = archerDamage * siegetowers * 5;
-        //     spearmenDamage = spearmenDamage * siegetowers * 5;
-        // }
-
         return archerDamage + spearmenDamage + horsemenDamage + knightsDamage + swordsmenDamage;
     },
 
     calculateDefense: async function (defender) {
 
-        //todo add recruits damage
         //todo losing armor
         const archers = defender.archers;
         const spearmen = defender.spearmen;
@@ -301,8 +281,6 @@ module.exports = {
         var shields = defender.shields;
         var spears = defender.spears;
         var swords = defender.spears;
-
-
 
         //todo account for nr of weapons, check nulls
 
@@ -481,8 +459,6 @@ module.exports = {
             }
 
         }
-
-
 
         // console.log(("aaaaaaaaaaaaaaaa " + archerDamage + " " + spearmenDamage + " " + swordsmenDamage + " " + horsemenDamage + " " + knightsDamage + " " + walls))
         // console.log(boots + " " + bracers + " " + helmets + " " + longbows)

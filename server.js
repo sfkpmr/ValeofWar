@@ -31,7 +31,7 @@ const { addResources, removeResources, checkIfCanAfford, stealResources, loseRes
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
 const client = new MongoClient(uri);
 
-const maxFarms = 8, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 7;
+const maxFarms = 4, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 4;
 
 const { Server } = require("socket.io");
 const attack = require("./modules/attack.js");
@@ -39,11 +39,11 @@ const req = require("express/lib/request");
 const { filter } = require("compression");
 const io = new Server(server);
 
-//hashset instead? track all sockets for many windows?
-let map = {};
+let userMap = {};
 
 io.on('connection', (socket) => {
-    console.log(socket.id + " connected.");
+    date = new Date();
+    console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " " + socket.id + " connected.")
 
     io.to(socket.id).emit("sync");
 
@@ -52,11 +52,12 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log(socket.id + " disconnected.");
+        date = new Date();
+        console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " " + socket.id + " disconnected.")
 
-        for (var i in map) {
-            if (map[i] === socket.id) {
-                delete map[i]
+        for (var i in userMap) {
+            if (userMap[i] === socket.id) {
+                delete userMap[i]
             }
         }
 
@@ -83,7 +84,7 @@ async function main() {
         const changeStream = collection.watch(pipeline);
 
         changeStream.on('change', (next) => {
-            for (var i in map) {
+            for (var i in userMap) {
                 if (i === next.documentKey._id) {
                     //https://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
                     user = next.updateDescription.updatedFields;
@@ -108,57 +109,57 @@ async function main() {
                     updateDamage = false;
 
                     if (grain !== null && grain !== undefined) {
-                        io.to(map[i]).emit("updateGrain", grain);
+                        io.to(userMap[i]).emit("updateGrain", grain);
                     };
                     if (lumber !== null && lumber !== undefined) {
-                        io.to(map[i]).emit("updateLumber", lumber);
+                        io.to(userMap[i]).emit("updateLumber", lumber);
                     };
                     if (stone !== null && stone !== undefined) {
-                        io.to(map[i]).emit("updateStone", stone);
+                        io.to(userMap[i]).emit("updateStone", stone);
                     };
                     if (iron !== null && iron !== undefined) {
-                        io.to(map[i]).emit("updateIron", iron);
+                        io.to(userMap[i]).emit("updateIron", iron);
                     };
                     if (gold !== null && gold !== undefined) {
-                        io.to(map[i]).emit("updateGold", gold);
+                        io.to(userMap[i]).emit("updateGold", gold);
                     };
                     if (recruits !== null && recruits !== undefined) {
-                        io.to(map[i]).emit("updateRecruits", recruits);
+                        io.to(userMap[i]).emit("updateRecruits", recruits);
                     };
                     if (horses !== null && horses !== undefined) {
-                        io.to(map[i]).emit("updateHorses", horses);
+                        io.to(userMap[i]).emit("updateHorses", horses);
                     };
                     if (archers !== null && archers !== undefined) {
-                        io.to(map[i]).emit("updateArchers", archers);
+                        io.to(userMap[i]).emit("updateArchers", archers);
                         updateDamage = true;
                     };
                     if (spearmen !== null && spearmen !== undefined) {
-                        io.to(map[i]).emit("updateSpearmen", spearmen);
+                        io.to(userMap[i]).emit("updateSpearmen", spearmen);
                         updateDamage = true;
                     };
                     if (swordsmen !== null && swordsmen !== undefined) {
-                        io.to(map[i]).emit("updateSwordsmen", swordsmen);
+                        io.to(userMap[i]).emit("updateSwordsmen", swordsmen);
                         updateDamage = true;
                     };
                     if (horsemen !== null && horsemen !== undefined) {
-                        io.to(map[i]).emit("updateHorsemen", horsemen);
+                        io.to(userMap[i]).emit("updateHorsemen", horsemen);
                         updateDamage = true;
                     };
                     if (knights !== null && knights !== undefined) {
-                        io.to(map[i]).emit("updateKnights", knights);
+                        io.to(userMap[i]).emit("updateKnights", knights);
                         updateDamage = true;
                     };
                     if (batteringrams !== null && batteringrams !== undefined) {
-                        io.to(map[i]).emit("updateBatteringRams", batteringrams);
+                        io.to(userMap[i]).emit("updateBatteringRams", batteringrams);
                         updateDamage = true;
                     };
                     if (siegetowers !== null && siegetowers !== undefined) {
-                        io.to(map[i]).emit("updateSiegeTowers", siegetowers);
+                        io.to(userMap[i]).emit("updateSiegeTowers", siegetowers);
                         updateDamage = true;
                     };
 
                     if (updateDamage) {
-                        io.to(map[i]).emit("updatePower");
+                        io.to(userMap[i]).emit("updatePower");
                     };
 
                 } else {
@@ -230,23 +231,10 @@ app.get("/test", requiresAuth(), async (req, res) => {
 app.get("/api/getUser/:id", requiresAuth(), async (req, res) => {
 
     //catch om någon gör request på annat sätt än "rätt sätt", och inte har email
-    //banan = { "username": req.oidc.user.email }
     user = await getUserByEmail(client, req.oidc.user.email);
-    //console.log("WWWWWWWWWWWWWWWWW " + req.params.id + " " + req.oidc.user.email + " bananana: " + user._id)
-    map[user._id] = req.params.id
+    userMap[user._id] = req.params.id
 
     res.status(200).end();
-});
-
-app.get("/test2", requiresAuth(), async (req, res) => {
-
-    console.log("------------")
-    var keys = Object.keys(map);
-    keys.forEach(key => {
-        console.log(key + '|' + map[key]);
-    });
-
-    res.send("test2")
 });
 
 app.get("/vale", requiresAuth(), async (req, res) => {
@@ -280,12 +268,9 @@ app.get("/profile/:username", requiresAuth(), async (req, res) => {
     const currentUser = req.oidc.user.email;
     const profileUser = await getUser(client, req.params.username);
 
-
     if (profileUser === false) {
-        console.log("!!!!!!!!!!!!!")
         res.send("No such user");
     } else {
-        console.log("????????????????????????")
 
         gold = profileUser.gold;
         iron = profileUser.iron;
@@ -324,8 +309,12 @@ app.get("/mailbox/log", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
     result = await getInvolvedAttackLogs(client, user.username)
+    if (result === false) {
+        res.send("No attack logs")
+    } else {
+        res.redirect('/mailbox/log/page/1')
+    }
 
-    res.redirect('/mailbox/log/page/1')
 });
 
 app.get("/mailbox/log/:id", requiresAuth(), async (req, res) => {
@@ -777,7 +766,7 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
 app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
 
     type = req.params.type;
-    resourceId = req.params.number;
+    resourceId = parseInt(req.params.number);
     const user = await getUserByEmail(client, req.oidc.user.email);
     var invalidId;
 
@@ -837,7 +826,7 @@ app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
 app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
 
     type = req.params.type;
-    resourceId = req.params.number;
+    resourceId = parseInt(req.params.number);
     const user = await getUserByEmail(client, req.oidc.user.email);
     var updatedUser, resourceLevel, resource;
 
@@ -921,7 +910,7 @@ app.get("/land/:type/:number/establish", requiresAuth(), async (req, res) => {
 
     //TODO error check
     type = req.params.type;
-    resourceId = req.params.number;
+    resourceId = parseInt(req.params.number);
     const user = await getUserByEmail(client, req.oidc.user.email);
     var updatedUser;
 
@@ -984,13 +973,14 @@ server.listen(port, () => {
 app.use(express.static(path.join(__dirname, 'pages')));
 // Handle 404
 app.use(function (req, res) {
-    res.status(404);
-    res.render('pages/404');
+    date = new Date();
+    console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " Bad URL: " + req.path);
+    res.status(404).render('pages/404');
 });
 
 // Handle 500
 app.use(function (error, req, res, next) {
-    console.log(new Date() + " " + error)
-    res.status(500);
-    res.render('pages/500');
+    date = new Date();
+    console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " " + error + " " + req.path);
+    res.status(500).render('pages/500');
 });
