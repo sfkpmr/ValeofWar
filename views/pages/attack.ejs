@@ -19,6 +19,17 @@
     The attackers got their hands on <%= log.goldLoot %> gold, <%= log.grainLoot %> grain, <%= log.lumberLoot %> lumber, <%= log.stoneLoot %> stone and <%= log.ironLoot %> 
     iron in the ensuing turmoil!
     <br>
+    <br>
+    <% if (log.attacker === username) {%>
+        <form action=<%=attackUrl%> >
+<input type="submit" value="Attack again!">
+    </form>
+        <% } else { %>
+            <form action=<%=attackUrl%>>
+            <input type="submit" value="Attack back!">
+        </form>
+        <%}%>
+  
 
 </body>
 

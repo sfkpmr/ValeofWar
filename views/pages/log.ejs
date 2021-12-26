@@ -11,8 +11,11 @@
     <% if (result.length> 0 ){ %>
         <% for (var i=0; i < filteredResult.length; i++ ) { %>
             <a href="/mailbox/log/<%= filteredResult[i]._id %>">
-                <%= filteredResult[i].attacker %> attacked <%= filteredResult[i].defender%>
-            </a> at <%= filteredResult[i].time.toLocaleDateString() %>
+
+                <% if (filteredResult[i].attacker===username) { %>
+                    We attacked <%=filteredResult[i].defender%><% } else { %>
+                            <%=filteredResult[i].attacker %> attacked
+                                us<%}%></a> at <%= filteredResult[i].time.toLocaleDateString() %>
                 <%= filteredResult[i].time.toLocaleTimeString() %><br>
                     <% } %>
 

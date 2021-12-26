@@ -37,6 +37,7 @@ const { Server } = require("socket.io");
 const attack = require("./modules/attack.js");
 const req = require("express/lib/request");
 const { filter } = require("compression");
+const { get } = require("express/lib/response");
 const io = new Server(server);
 
 let userMap = {};
@@ -411,7 +412,7 @@ app.get("/mailbox/log", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     result = await getInvolvedAttackLogs(client, user.username)
     if (result === false) {
-        res.send("No attack logs")
+        res.send("You haven't attacked anyone yet!")
     } else {
         res.redirect('/mailbox/log/page/1')
     }
@@ -420,6 +421,8 @@ app.get("/mailbox/log", requiresAuth(), async (req, res) => {
 
 app.get("/mailbox/log/:id", requiresAuth(), async (req, res) => {
 
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    username = user.username;
     //TODO check only show your logs
     //error check if invalid format
 
@@ -432,8 +435,17 @@ app.get("/mailbox/log/:id", requiresAuth(), async (req, res) => {
     }
     log = await getAttackLog(client, searchObject);
 
+    
+
+    if(user.username === log.attacker){
+        attackUrl = `/profile/${log.defender}/attack`
+    }else{
+        attackUrl = `/profile/${log.attacker}/attack`
+    }
+
+
     if (log === false) {
-        res.send("No such log")
+        res.send("No such log!")
     } else {
         res.render('pages/attack')
     }
@@ -442,6 +454,7 @@ app.get("/mailbox/log/:id", requiresAuth(), async (req, res) => {
 app.get("/mailbox/log/page/:nr", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
+    username = user.username;
     result = await getInvolvedAttackLogs(client, user.username)
 
     maxPages = Math.ceil(Object.keys(result).length / 20);
@@ -811,6 +824,7 @@ app.post("/town/barracks/train", requiresAuth(), async (req, res) => {
 
 app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
 
+    //TODO Make POST
     //TODO attack limiter //reset all at midnight? //losses
     //TODO validate db input
 
@@ -921,6 +935,11 @@ app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
     //  title = "none"
     //  resourceLevel = 0;
     //}
+
+    lumberCost = await calcBuildingLumberCost(type, resourceLevel + 1);
+    stoneCost = await calcBuildingStoneCost(type, resourceLevel + 1);
+    ironCost = await calcBuildingIronCost(type, resourceLevel + 1);
+    goldCost = await calcBuildingGoldCost(type, resourceLevel + 1);
 
     if (invalidId) {
         res.redirect("/land");
