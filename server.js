@@ -1138,10 +1138,12 @@ app.get("/land/:type/:number/establish", requiresAuth(), async (req, res) => {
         updatedUser.push(1);
         updatedUser = { farms: updatedUser }
     } else if (type === "goldmine") {
+        type = "goldMine";
         updatedUser = user.goldMines;
         updatedUser.push(1);
         updatedUser = { goldMines: updatedUser }
     } else if (type === "ironmine") {
+        type = "ironMine";
         updatedUser = user.ironMines;
         updatedUser.push(1);
         updatedUser = { ironMines: updatedUser }
