@@ -22,7 +22,7 @@ app.use(compression());
 // Remove x-powered-by Express
 app.disable('x-powered-by');
 
-const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense } = require("./modules/attack.js");
+const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, armyLosses } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
 const { getUser, getUserByEmail, getUserById } = require("./modules/database.js");
 const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource } = require("./modules/buildings.js");
@@ -910,37 +910,53 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
         console.log("Total defense: " + defenseDamage + " Total attack: " + attackDamage);
 
         const closeness = attackDamage / (attackDamage + defenseDamage);
-        var divider;
+        var resourceDivider, attackTroopDivider, defenseTroopDivider;
 
         if (closeness <= 0.1) {
-            divider = 100;
+            resourceDivider = 100;
+            attackTroopDivider = 5;
+            defenseTroopDivider = 100;
         } else if (closeness <= 0.2) {
-            divider = 80;
+            resourceDivider = 80;
+            attackTroopDivider = 7;
+            defenseTroopDivider = 80;
         } else if (closeness <= 0.4) {
-            divider = 60;
+            resourceDivider = 20;
+            attackTroopDivider = 10;
+            defenseTroopDivider = 60;
         } else if (closeness <= 0.6) {
-            divider = 40;
+            resourceDivider = 5;
+            attackTroopDivider = 5;
+            defenseTroopDivider = 5;
         } else if (closeness <= 0.8) {
-            divider = 20;
+            resourceDivider = 20;
+            attackTroopDivider = 20;
+            defenseTroopDivider = 10;
         } else if (closeness <= 0.9) {
-            divider = 10;
+            resourceDivider = 10;
+            attackTroopDivider = 30;
+            defenseTroopDivider = 10;
         } else {
-            divider = 5;
+            resourceDivider = 100;
+            attackTroopDivider = 50;
+            defenseTroopDivider = 20;
         }
 
         wallBonus = 1 - ((defender.wallLevel * 2.5) * 0.01);
 
-        goldLoot = Math.round((defender.gold / divider) * wallBonus);
-        lumberLoot = Math.round((defender.lumber / divider) * wallBonus);
-        stoneLoot = Math.round((defender.stone / divider) * wallBonus);
-        grainLoot = Math.round((defender.grain / divider) * wallBonus);
-        ironLoot = Math.round((defender.iron / divider) * wallBonus);
+        goldLoot = Math.round((defender.gold / resourceDivider) * wallBonus);
+        lumberLoot = Math.round((defender.lumber / resourceDivider) * wallBonus);
+        stoneLoot = Math.round((defender.stone / resourceDivider) * wallBonus);
+        grainLoot = Math.round((defender.grain / resourceDivider) * wallBonus);
+        ironLoot = Math.round((defender.iron / resourceDivider) * wallBonus);
 
         stealResources(client, attacker.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
         loseResources(client, defender.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
 
-        attackerLosses = 0;
-        defenderLosses = 0;
+        console.log("dividers " + attackTroopDivider, defenseTroopDivider)
+
+        attackerLosses = await armyLosses(client, attacker, attackTroopDivider);
+        defenderLosses = await armyLosses(client, defender, defenseTroopDivider);
 
         const data = {
             "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "defender": defender.username, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLoot,
@@ -1161,7 +1177,8 @@ async function checkAll() {
 //ev kör när någon interagerar med afk folk
 var minutes = 15, the_interval = minutes * 60 * 1000;
 setInterval(function () {
-    console.log("Adding resources for everyone!");
+    date = new Date();
+    console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " Adding resources for everyone!");
     checkAll();
 }, the_interval);
 

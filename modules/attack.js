@@ -1,5 +1,6 @@
 const e = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
+const { setDatabaseValue } = require("../modules/database.js");
 
 archer = { attackDamage: 10, defenseDamage: 10 };
 spearman = { attackDamage: 10, defenseDamage: 10 };
@@ -450,5 +451,56 @@ module.exports = {
 
         return Math.round((archerDamage + spearmenDamage + horsemenDamage + knightsDamage + swordsmenDamage) * (1 + (walls / 10)));
 
+    },
+
+    armyLosses: async function (client, username, divider) {
+
+
+        archers = username.archers;
+        spearmen = username.spearmen;
+        swordsmen = username.swordsmen;
+        horsemen = username.horsemen;
+        knights = username.knights;
+        batteringrams = username.batteringrams;
+        siegetowers = username.siegetowers;
+
+        totalTroops = archers + spearmen + swordsmen + horsemen + knights + batteringrams + siegetowers;
+        battleLosses = Math.round(totalTroops / divider);
+
+        lossesCounter = battleLosses;
+        archerLosses = Math.floor(Math.random() * lossesCounter);
+        lossesCounter = lossesCounter - archerLosses;
+        spearmenLosses = Math.floor(Math.random() * lossesCounter);
+        lossesCounter = lossesCounter - spearmenLosses;
+        swordsmenLosses = Math.floor(Math.random() * lossesCounter);
+        lossesCounter = lossesCounter - swordsmenLosses;
+        horsemenLosses = Math.floor(Math.random() * lossesCounter);
+        lossesCounter = lossesCounter - horsemenLosses;
+        knightsLosses = Math.floor(Math.random() * lossesCounter);
+        lossesCounter = lossesCounter - knightsLosses;
+        batteringramLosses = Math.floor(Math.random() * lossesCounter);
+        lossesCounter = lossesCounter - batteringramLosses;
+        siegetowerLosses = Math.floor(Math.random() * lossesCounter);
+        lossesCounter = lossesCounter - siegetowerLosses;
+        console.log(archerLosses, spearmenLosses, swordsmenLosses, horsemenLosses, knightsLosses, batteringramLosses, siegetowerLosses);
+
+        newArchers = archers - archerLosses;
+        newSpearmen = spearmen - spearmenLosses;
+        newSwordsmen = swordsmen - swordsmenLosses;
+        newHorsemen = horsemen - horsemenLosses;
+        newKnights = knights - knightsLosses;
+        newBatteringrams = batteringrams - batteringramLosses;
+        newSiegetowers = siegetowers - siegetowerLosses;
+
+        data = { archers: newArchers, spearmen: newSpearmen, swordsmen: newSwordsmen, horsemen: newHorsemen, knights: newKnights, batteringrams: newBatteringrams, siegtowers: newSiegetowers }
+
+        console.log(data)
+        //console.log(username)
+
+        await setDatabaseValue(client, username.username, data);
+
+        return battleLosses;
+
     }
+
 }
