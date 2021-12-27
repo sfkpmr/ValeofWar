@@ -16,7 +16,6 @@ function stablesTrainCost(val) {
     goldCost += knights * knight.gold;
 
     document.getElementById("grain").innerHTML = grainCost;
-    document.getElementById("lumber").innerHTML = lumberCost;
     document.getElementById("iron").innerHTML = ironCost;
     document.getElementById("gold").innerHTML = goldCost;
     document.getElementById("recruits").innerHTML = parseInt(horsemen) + parseInt(knights);
