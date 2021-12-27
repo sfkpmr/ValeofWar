@@ -469,19 +469,55 @@ module.exports = {
         battleLosses = Math.round(totalTroops / divider);
 
         lossesCounter = battleLosses;
-        batteringramLosses = Math.floor(Math.random() * lossesCounter);
+
+        if (lossesCounter > batteringrams) {
+            potentialBatteringramLosses = batteringrams;
+        } else {
+            potentialBatteringramLosses = lossesCounter;
+        }
+        batteringramLosses = Math.floor(Math.random() * potentialBatteringramLosses);
         lossesCounter = lossesCounter - batteringramLosses;
-        siegetowerLosses = Math.floor(Math.random() * lossesCounter);
+        if (lossesCounter > siegetowers) {
+            potentialSiegtowerLosses = siegetowers;
+        } else {
+            potentialSiegtowerLosses = lossesCounter;
+        }
+        siegetowerLosses = Math.floor(Math.random() * potentialSiegtowerLosses);
         lossesCounter = lossesCounter - siegetowerLosses;
-        spearmenLosses = Math.floor(Math.random() * lossesCounter);
+        if (lossesCounter > spearmen) {
+            potentialSpearmenLosses = spearmen;
+        } else {
+            potentialSpearmenLosses = lossesCounter;
+        }
+        spearmenLosses = Math.floor(Math.random() * potentialSpearmenLosses);
         lossesCounter = lossesCounter - spearmenLosses;
-        swordsmenLosses = Math.floor(Math.random() * lossesCounter);
+        if (lossesCounter > swordsmen) {
+            potentialSwordsmenLosses = swordsmen;
+        } else {
+            potentialSwordsmenLosses = lossesCounter;
+        }
+        swordsmenLosses = Math.floor(Math.random() * potentialSwordsmenLosses);
         lossesCounter = lossesCounter - swordsmenLosses;
-        horsemenLosses = Math.floor(Math.random() * lossesCounter);
+        if (lossesCounter > horsemen) {
+            potentialHorsemenLosses = horsemen;
+        } else {
+            potentialHorsemenLosses = lossesCounter;
+        }
+        horsemenLosses = Math.floor(Math.random() * potentialHorsemenLosses);
         lossesCounter = lossesCounter - horsemenLosses;
-        knightsLosses = Math.floor(Math.random() * lossesCounter);
+        if (lossesCounter > knights) {
+            potentialKnightsLosses = knights;
+        } else {
+            potentialKnightsLosses = lossesCounter;
+        }
+        knightsLosses = Math.floor(Math.random() * potentialKnightsLosses);
         lossesCounter = lossesCounter - knightsLosses;
-        archerLosses = Math.floor(Math.random() * lossesCounter);
+        if (lossesCounter > archers) {
+            potentialArcherLosses = archers;
+        } else {
+            potentialArcherLosses = lossesCounter;
+        }
+        archerLosses = Math.floor(Math.random() * potentialArcherLosses);
         lossesCounter = lossesCounter - archerLosses;
         console.log(username.username + " lost " + archerLosses, spearmenLosses, swordsmenLosses, horsemenLosses, knightsLosses, batteringramLosses, siegetowerLosses);
 
@@ -516,6 +552,8 @@ module.exports = {
         }
 
         data = { archers: newArchers, spearmen: newSpearmen, swordsmen: newSwordsmen, horsemen: newHorsemen, knights: newKnights, batteringrams: newBatteringrams, siegetowers: newSiegetowers }
+
+        console.log(JSON.stringify(data));
 
         await setDatabaseValue(client, username.username, data);
 
