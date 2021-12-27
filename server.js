@@ -25,7 +25,7 @@ app.disable('x-powered-by');
 const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, armyLosses } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
 const { getUser, getUserByEmail, getUserById } = require("./modules/database.js");
-const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource } = require("./modules/buildings.js");
+const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource, restoreWallHealth, lowerWallHealth } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources, incomeCalc } = require("./modules/resources.js");
 
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
@@ -607,6 +607,8 @@ app.get("/online", requiresAuth(), async (req, res) => {
 app.get("/town/wall", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     wall = user.wallLevel;
+    currentWallHealth = user.currentWallHealth;
+    maxWallHealth = wall * 100;
     type = "wall"
     defenseBonus = wall * 10;
     lumberCost = await calcBuildingLumberCost(type, wall + 1);
@@ -662,13 +664,15 @@ app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
         if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
             await upgradeBuilding(client, user.username, buildingName);
             await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
+            if (type === "wall") {
+                await restoreWallHealth(client, user);
+            }
         } else {
             console.log("bbbb");
         }
 
         res.redirect(`/town/${req.params.building}`);
     }
-
 
 });
 
@@ -685,6 +689,27 @@ app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
     goldCost = await calcBuildingGoldCost(type, trainingField + 1);
 
     res.render('pages/trainingField')
+
+});
+
+app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
+
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    type = "wall"
+
+    lumberCost = await calcBuildingLumberCost(type, user.wallLevel);
+    stoneCost = await calcBuildingStoneCost(type, user.wallLevel);
+    ironCost = await calcBuildingIronCost(type, user.wallLevel);
+    goldCost = await calcBuildingGoldCost(type, user.wallLevel);
+
+    if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
+        await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
+        restoreWallHealth(client, user);
+    } else {
+        console.log("bbbb");
+    }
+
+    res.render('pages/wall')
 
 });
 
@@ -747,7 +772,6 @@ app.get("/town/stables", requiresAuth(), async (req, res) => {
     stoneCost = await calcBuildingStoneCost(type, stables + 1);
     ironCost = await calcBuildingIronCost(type, stables + 1);
     goldCost = await calcBuildingGoldCost(type, stables + 1);
-
 
     horsemen = user.horsemen;
     knights = user.knights;
@@ -960,6 +984,8 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
         attackerLosses = await armyLosses(client, attacker, attackTroopDivider);
         defenderLosses = await armyLosses(client, defender, defenseTroopDivider);
 
+        await lowerWallHealth(client, defender, Math.floor(Math.random() * 5));
+
         const data = {
             "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "defender": defender.username, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLoot,
             "grainLoot": grainLoot, "lumberLoot": lumberLoot, "stoneLoot": stoneLoot, "ironLoot": ironLoot
@@ -1042,8 +1068,6 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     var updatedUser, resourceLevel, resource;
 
-    //TODO Add max level
-
     if (type === "farm") {
 
         if (resourceId >= 0 && resourceId <= maxFarms) {
@@ -1120,8 +1144,6 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
 
         res.redirect(`/land/${type}/${resourceId}`);
     }
-
-
 
 });
 
