@@ -1,6 +1,6 @@
-const archer = { grain: 25, lumber: 50, gold: 10 };
-const spearman = { grain: 25, lumber: 50 };
-const swordsman = { grain: 50, iron: 50, gold: 25 };
+const archer = { grain: 25, lumber: 50, gold: 10, attackDamage: 10, defenseDamage: 10 };
+const spearman = { grain: 25, lumber: 50, attackDamage: 10, defenseDamage: 10 };
+const swordsman = { grain: 50, iron: 50, gold: 25, attackDamage: 20, defenseDamage: 20 };
 
 function barracksTrainCost() {
     let grainCost = 0, lumberCost = 0, ironCost = 0, goldCost = 0;
@@ -32,3 +32,9 @@ function barracksTrainCost() {
 document.getElementById("archers").addEventListener("input", barracksTrainCost);
 document.getElementById("spearmen").addEventListener("input", barracksTrainCost);
 document.getElementById("swordsmen").addEventListener("input", barracksTrainCost);
+document.getElementById("archerAttackDamage").innerHTML = archer.attackDamage;
+document.getElementById("archerDefenseDamage").innerHTML = archer.defenseDamage;
+document.getElementById("spearmanAttackDamage").innerHTML = spearman.attackDamage;
+document.getElementById("spearmanDefenseDamage").innerHTML = spearman.defenseDamage;
+document.getElementById("swordsmanAttackDamage").innerHTML = swordsman.attackDamage;
+document.getElementById("swordsmanDefenseDamage").innerHTML = swordsman.defenseDamage;

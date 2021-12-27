@@ -1,5 +1,5 @@
-const horseman = { grain: 100, iron: 25 };
-const knight = { grain: 100, iron: 100, gold: 50 };
+const horseman = { grain: 100, iron: 25, attackDamage: 5, defenseDamage: 5 };
+const knight = { grain: 100, iron: 100, gold: 50, attackDamage: 20, defenseDamage: 20 };
 
 function stablesTrainCost(val) {
     let grainCost = 0, lumberCost = 0, ironCost = 0, goldCost = 0;
@@ -25,3 +25,7 @@ function stablesTrainCost(val) {
 
 document.getElementById("horsemen").addEventListener("input", stablesTrainCost);
 document.getElementById("knights").addEventListener("input", stablesTrainCost);
+document.getElementById("horsemanAttackDamage").innerHTML = horseman.attackDamage;
+document.getElementById("horsemanDefenseDamage").innerHTML = horseman.defenseDamage;
+document.getElementById("knightAttackDamage").innerHTML = knight.attackDamage;
+document.getElementById("knightDefenseDamage").innerHTML = knight.defenseDamage;

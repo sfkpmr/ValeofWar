@@ -5,6 +5,7 @@
     <title>
         <%= title %> - Level: <%= resourceLevel %>
     </title>
+    <link rel="stylesheet" type="text/css" href="../../static/style.css" />
 </head>
 
 <body>
@@ -15,18 +16,23 @@
             The <%= title.toLowerCase() %> provides additional resources for your town.
                 <br> <br>
                 <% if (resourceLevel <=19){ %>
-                    Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron and <%=
-                                    goldCost %>
-                                    gold.<br><br>
+                    <div class="resources"> Upgrade cost: <%= lumberCost %> <img src="../../static/images/wood.png"
+                                height="35px" title="Lumber">
+                            <%= stoneCost %> <img src="../../static/images/stone.png" height="35px" title="Stone">
+                                <%= ironCost %> <img src="../../static/images/iron-ingots.png" height="35px"
+                                        title="Iron">
+                                    and <%= goldCost %>
+                                        <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
+                    </div>
+                    <br>
 
-                                    <form
-                                        action="/land/<%= title.toLowerCase().replace(/ /g, '') %>/<%= resourceId %>/upgrade">
-                                        <input type="submit" value="Upgrade">
-                                    </form>
+                    <form action="/land/<%= title.toLowerCase().replace(/ /g, '') %>/<%= resourceId %>/upgrade">
+                        <input type="submit" value="Upgrade">
+                    </form>
 
-                                    <% } else { %>
-                                        The <%= title.toLowerCase() %> is already at max level!
-                                            <% } %>
+                    <% } else { %>
+                        The <%= title.toLowerCase() %> is already at max level!
+                            <% } %>
 
 </body>
 

@@ -5,11 +5,19 @@
     <title>
         Empty <%= title.toLowerCase() %>
     </title>
+    <link rel="stylesheet" type="text/css" href="../../static/style.css" />
 </head>
 
 <body>
 
     There is no <%= title.toLowerCase() %> here yet!<br><br>
+
+        <div class="resources"> Cost to establish: <%= lumberCost %> <img src="../../static/images/wood.png"
+                    height="35px" title="Lumber">
+                <%= stoneCost %> <img src="../../static/images/stone.png" height="35px" title="Stone">
+                    <%= ironCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron"> and <%=
+                            goldCost %>
+                            <img src="../../static/images/gold-ingots.png" height="35px" title="Gold"> </div><br>
 
         <form action="/land/<%= title.toLowerCase().replace(/ /g, '') %>/<%= resourceId %>/establish">
             <input type="submit" value="Establish!">

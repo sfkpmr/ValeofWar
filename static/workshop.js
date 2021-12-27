@@ -1,5 +1,5 @@
-const batteringRam = { lumber: 500, iron: 100, gold: 50 };
-const siegeTower = { lumber: 1000, iron: 100, gold: 100 };
+const batteringRam = { lumber: 500, iron: 100, gold: 50, attackDamage: 250 };
+const siegeTower = { lumber: 1000, iron: 100, gold: 100, attackDamage: 500 };
 
 function workshopBuildCost() {
 
@@ -25,3 +25,5 @@ function workshopBuildCost() {
 
 document.getElementById("batteringram").addEventListener("input", workshopBuildCost);
 document.getElementById("siegetower").addEventListener("input", workshopBuildCost);
+document.getElementById("batteringramAttackDamage").innerHTML = batteringRam.attackDamage;
+document.getElementById("siegetowerAttackDamage").innerHTML = siegeTower.attackDamage;

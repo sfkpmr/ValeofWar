@@ -15,95 +15,106 @@
 
         We don't have a blacksmith yet!<br>
         <br>
-        Construct one for: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron and <%= goldCost %>
-                        gold.
-                        <br>
-                        <br>
-                        <form action="/town/blacksmith/upgrade" method="POST">
-                            <input type="submit" value="Construct">
-                        </form>
+        <div class="resources"> Construct one for: <%= lumberCost %> <img src="../static/images/wood.png" height="35px"
+                    title="Lumber">
+                <%= stoneCost %> <img src="../static/images/stone.png" height="35px" title="Stone">
+                    <%= ironCost %> <img src="../static/images/iron-ingots.png" height="35px" title="Iron"> and <%=
+                            goldCost %>
+                            <img src="../static/images/gold-ingots.png" height="35px" title="Gold"> </div>
+        <br>
+        <form action="/town/blacksmith/upgrade" method="POST">
+            <input type="submit" value="Construct">
+        </form>
 
 
 
-                        <% } else { %>
-                            Blacksmith level: <%= blacksmith %> <br><br>
-                                At the blacksmith you can craft armor and weapons for your troops.<br>
-                                <br>
-                                <div class="training">
-                                    <form action="/town/blacksmith/craft" method="POST">
-                                        <label for="boots"><img src="../static/images/boots.png" height="35px"
-                                                title="Boots"> Current: <%= boots %> Craft:
-                                        </label>
-                                        <input type="number" id="boots" name="boots" value="0" min=0><br>
-                                        <label for="bracers"><img src="../static/images/bracers.png" height="35px"
-                                                title="Bracers">
-                                            Current: <%= bracers %> Craft:
-                                        </label>
-                                        <input type="number" id="bracers" name="bracers" value="0" min=0><br>
-                                        <label for="helmet"> <img src="../static/images/helmet.png" height="35px"
-                                                title="Helmets">
-                                            Current: <%= helmets %> Craft:
-                                        </label>
-                                        <input type="number" id="helmet" name="helmet" value="0" min=0><br>
-                                        <label for="lance"> <img src="../static/images/lance.png" height="35px"
-                                                title="Lances">
-                                            Current: <%= lances %> Craft:
-                                        </label>
-                                        <input type="number" id="lance" name="lance" value="0" min=0><br>
-                                        <label for="longbow"> <img src="../static/images/longbow.png" height="35px"
-                                                title="Longbows">
-                                            Current: <%= longbows %> Craft:
-                                        </label>
-                                        <input type="number" id="longbow" name="longbow" value="0" min=0><br>
-                                        <label for="shield"> <img src="../static/images/shield.png" height="35px"
-                                                title="Shields">
-                                            Current: <%= shields %> Craft:
-                                        </label>
-                                        <input type="number" id="shield" name="shield" value="0" min=0><br>
-                                        <label for="spear"><img src="../static/images/spears.png" height="35px"
-                                                title="Spears">
-                                            Current: <%= spears %> Craft:
-                                        </label>
-                                        <input type="number" id="spear" name="spear" value="0" min=0><br>
-                                        <label for="sword"> <img src="../static/images/sword.png" height="35px"
-                                                title="Swords">
-                                            Current: <%= swords %> Craft:
-                                        </label>
-                                        <input type="number" id="sword" name="sword" value="0" min=0><br><br>
-                                        <div class="resources">Crafting cost: <output id="lumber">0</output> <img
-                                                src="../static/images/wood.png" alt="Lumber" title="Lumber">, <output
-                                                id="iron">0</output> iron and
-                                            <output id="gold">0</output> <img src="../static/images/gold-ingots.png"
-                                                alt="Gold" title="Gold">
-                                        </div><br>
-                                        <input type="submit" value="Craft">
-                                    </form>
-                                    <br>
-                                </div>
+        <% } else { %>
+            Blacksmith level: <%= blacksmith %> <br><br>
+                At the blacksmith you can craft armor and weapons for your troops.<br>
+                <br>
+                <div class="training">
+                    <form action="/town/blacksmith/craft" method="POST">
+                        <label for="boots"><img src="../static/images/boots.png" height="35px" title="Boots"> Current:
+                            <%= boots %> Craft:
+                        </label>
+                        <input type="number" id="boots" name="boots" value="0" min=0> Attack damage: <output
+                            id="bootAttackDamage">0</output> Defense damage: <output
+                            id="bootDefenseDamage">0</output><br>
+                        <label for="bracers"><img src="../static/images/bracers.png" height="35px" title="Bracers">
+                            Current: <%= bracers %> Craft:
+                        </label>
+                        <input type="number" id="bracers" name="bracers" value="0" min=0> Attack damage: <output
+                            id="bracerAttackDamage">0</output> Defense damage: <output
+                            id="bracerDefenseDamage">0</output><br>
+                        <label for="helmet"> <img src="../static/images/helmet.png" height="35px" title="Helmets">
+                            Current: <%= helmets %> Craft:
+                        </label>
+                        <input type="number" id="helmet" name="helmet" value="0" min=0> Attack damage: <output
+                            id="helmetAttackDamage">0</output> Defense damage: <output
+                            id="helmetDefenseDamage">0</output><br>
+                        <label for="lance"> <img src="../static/images/lance.png" height="35px" title="Lances">
+                            Current: <%= lances %> Craft:
+                        </label>
+                        <input type="number" id="lance" name="lance" value="0" min=0> Attack damage: <output
+                            id="lanceAttackDamage">0</output> Defense damage: <output
+                            id="lanceDefenseDamage">0</output><br>
+                        <label for="longbow"> <img src="../static/images/longbow.png" height="35px" title="Longbows">
+                            Current: <%= longbows %> Craft:
+                        </label>
+                        <input type="number" id="longbow" name="longbow" value="0" min=0> Attack damage: <output
+                            id="longbowAttackDamage">0</output> Defense damage: <output
+                            id="longbowDefenseDamage">0</output><br>
+                        <label for="shield"> <img src="../static/images/shield.png" height="35px" title="Shields">
+                            Current: <%= shields %> Craft:
+                        </label>
+                        <input type="number" id="shield" name="shield" value="0" min=0> Attack damage: <output
+                            id="shieldAttackDamage">0</output> Defense damage: <output
+                            id="shieldDefenseDamage">0</output><br>
+                        <label for="spear"><img src="../static/images/spears.png" height="35px" title="Spears">
+                            Current: <%= spears %> Craft:
+                        </label>
+                        <input type="number" id="spear" name="spear" value="0" min=0> Attack damage: <output
+                            id="spearAttackDamage">0</output> Defense damage: <output
+                            id="spearDefenseDamage">0</output><br>
+                        <label for="sword"> <img src="../static/images/sword.png" height="35px" title="Swords">
+                            Current: <%= swords %> Craft:
+                        </label>
+                        <input type="number" id="sword" name="sword" value="0" min=0> Attack damage: <output
+                            id="swordAttackDamage">0</output> Defense damage: <output
+                            id="swordDefenseDamage">0</output><br><br>
+                        <div class="resources">Crafting cost: <output id="lumber">0</output> <img
+                                src="../static/images/wood.png" alt="Lumber" title="Lumber">, <output
+                                id="iron">0</output> <img src="../static/images/iron-ingots.png" alt="Iron"
+                                title="Iron"> and
+                            <output id="gold">0</output> <img src="../static/images/gold-ingots.png" alt="Gold"
+                                title="Gold">
+                        </div><br>
+                        <input type="submit" value="Craft">
+                    </form>
+                    <br>
+                </div>
 
-                                <% if (blacksmith <=19){ %>
-
-
-                                    <div class="resources">
-                                        Upgrade cost: <%= lumberCost %> <img src="../static/images/wood.png"
-                                                alt="Lumber" title="Lumber">, <%= stoneCost %> <img
-                                                    src="../static/images/stone.png" alt="Stone" title="Stone">, <%=
-                                                    ironCost %>
-                                                    <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron">
-                                                    and <%= goldCost %>
-                                                        <img src="../static/images/gold-ingots.png" alt="Gold"
-                                                            title="Gold"></div>
-                                    <br>
-                                    <form action="/town/blacksmith/upgrade" method="POST">
-                                        <input type="submit" value="Upgrade">
-                                    </form>
+                <% if (blacksmith <=19){ %>
 
 
-                                    <% } else { %>
-                                        The blacksmith is already at max level!
-                                        <% } %>
-                                            <% } %>
-                                                <script type="text/javascript" src="../static/blacksmith.js"></script>
+                    <div class="resources">
+                        Upgrade cost: <%= lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
+                                title="Lumber">, <%= stoneCost %> <img src="../static/images/stone.png" alt="Stone"
+                                    title="Stone">, <%= ironCost %>
+                                    <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron">
+                                    and <%= goldCost %>
+                                        <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div>
+                    <br>
+                    <form action="/town/blacksmith/upgrade" method="POST">
+                        <input type="submit" value="Upgrade">
+                    </form>
+
+
+                    <% } else { %>
+                        The blacksmith is already at max level!
+                        <% } %>
+                            <% } %>
+                                <script type="text/javascript" src="../static/blacksmith.js"></script>
 </body>
 
 </html>
