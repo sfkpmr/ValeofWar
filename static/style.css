@@ -91,3 +91,9 @@ hr.solid {
   background-color: #4CAF50;
   color: white;
 }
+
+.resources img {
+  width: 25px;
+  height: auto;
+  vertical-align: middle;
+}

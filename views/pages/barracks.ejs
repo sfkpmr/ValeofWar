@@ -23,15 +23,21 @@
                 <input type="number" id="archers" name="archers" value="0" min=0><br>
                 <label for="spearmen"><img src="../static/images/spearman.png" height="35px" title="Spearman">
                     Current: <%= spearmen %> Train:</label>
-                <input type="number" id="spearmen" name="spearmen" value="0"><br>
+                <input type="number" id="spearmen" name="spearmen" value="0" min=0><br>
                 <label for="swordsmen"><img src="../static/images/swordsman.png" height="35px" title="Swordsman">
                     Current:
                     <%= swordsmen %> Train:
                 </label>
-                <input type="number" id="swordsmen" name="swordsmen" value="0"><br><br>
-                Training cost: <output id="grain">0</output> grain, <output id="lumber">0</output> lumber,
-                <output id="iron">0</output> iron, <output id="gold">0</output>
-                gold and <output id="recruits">0</output> recruits. <br>
+                <input type="number" id="swordsmen" name="swordsmen" value="0" min=0><br><br>
+                <div class="resources">Training cost: <output id="grain">0</output> <img
+                        src="../static/images/grain.png" alt="Grain" title="Grain">, <output id="lumber">0</output> <img
+                        src="../static/images/wood.png" alt="Lumber" title="Lumber">, <output id="iron">0</output> iron,
+                    <output id="gold">0</output> <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold">
+                    and
+                    <output id="recruits">0</output>
+                    <img src="../static/images/recruit.png" alt="Recruits" title="Recruits">
+
+                </div>
                 <br>
                 <input type="submit" value="Train">
             </form>
@@ -39,15 +45,18 @@
         </div>
         <br>
         <% if (barracks <=19){ %>
-            Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron and <%= goldCost %>
-                            gold.<br><br>
-                            <form action="/town/barracks/upgrade" method="POST">
-                                <input type="submit" value="Upgrade">
-                            </form>
-                            <% } else { %>
-                                The barracks is already at max level!
-                                <% } %>
-                                    <script type="text/javascript" src="../static/barracks.js"></script>
+            <div class="resources">
+                Upgrade cost: <%= lumberCost %> <img src="../static/images/wood.png" alt="Lumber" title="Lumber">, <%=
+                        stoneCost %> <img src="../static/images/stone.png" alt="Stone" title="Stone">, <%= ironCost %>
+                            <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> and <%= goldCost %>
+                                <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div><br>
+            <form action="/town/barracks/upgrade" method="POST">
+                <input type="submit" value="Upgrade">
+            </form>
+            <% } else { %>
+                The barracks is already at max level!
+                <% } %>
+                    <script type="text/javascript" src="../static/barracks.js"></script>
 </body>
 
 </html>

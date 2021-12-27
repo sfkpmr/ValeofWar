@@ -70,9 +70,12 @@
                                             Current: <%= swords %> Craft:
                                         </label>
                                         <input type="number" id="sword" name="sword" value="0" min=0><br><br>
-                                        Crafting cost: <output id="lumber">0</output> lumber, <output
-                                            id="iron">0</output>
-                                        iron and <output id="gold">0</output> gold. <br><br>
+                                        <div class="resources">Crafting cost: <output id="lumber">0</output> <img
+                                                src="../static/images/wood.png" alt="Lumber" title="Lumber">, <output
+                                                id="iron">0</output> iron and
+                                            <output id="gold">0</output> <img src="../static/images/gold-ingots.png"
+                                                alt="Gold" title="Gold">
+                                        </div><br>
                                         <input type="submit" value="Craft">
                                     </form>
                                     <br>
@@ -81,20 +84,26 @@
                                 <% if (blacksmith <=19){ %>
 
 
-                                    Upgrade cost: <%= lumberCost %> lumber, <%= stoneCost %> stone, <%= ironCost %> iron
-                                                and <%= goldCost %>
-                                                    gold.<br>
-                                                    <br>
-                                                    <form action="/town/blacksmith/upgrade" method="POST">
-                                                        <input type="submit" value="Upgrade">
-                                                    </form>
+                                    <div class="resources">
+                                        Upgrade cost: <%= lumberCost %> <img src="../static/images/wood.png"
+                                                alt="Lumber" title="Lumber">, <%= stoneCost %> <img
+                                                    src="../static/images/stone.png" alt="Stone" title="Stone">, <%=
+                                                    ironCost %>
+                                                    <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron">
+                                                    and <%= goldCost %>
+                                                        <img src="../static/images/gold-ingots.png" alt="Gold"
+                                                            title="Gold"></div>
+                                    <br>
+                                    <form action="/town/blacksmith/upgrade" method="POST">
+                                        <input type="submit" value="Upgrade">
+                                    </form>
 
-                                                    <script type="text/javascript"
-                                                        src="../static/blacksmith.js"></script>
-                                                    <% } else { %>
-                                                        The blacksmith is already at max level!
-                                                        <% } %>
-                                                            <% } %>
+
+                                    <% } else { %>
+                                        The blacksmith is already at max level!
+                                        <% } %>
+                                            <% } %>
+                                                <script type="text/javascript" src="../static/blacksmith.js"></script>
 </body>
 
 </html>
