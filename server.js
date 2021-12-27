@@ -112,6 +112,7 @@ async function main() {
                     goldmines = JSON.stringify(user.goldMines);
                     trainingfield = JSON.stringify(user.trainingfieldLevel);
                     stables = JSON.stringify(user.stablesLevel);
+                    wall = JSON.stringify(user.wallLevel);
 
                     boots = JSON.stringify(user.boots);
                     bracers = JSON.stringify(user.bracers);
@@ -195,6 +196,9 @@ async function main() {
                     };
                     if (stables !== null && stables !== undefined) {
                         io.to(userMap[i]).emit("getHorseIncome");
+                    };
+                    if (wall !== null && wall !== undefined) {
+                        updateDamage = true;
                     };
                     if (boots !== null && boots !== undefined) {
                         updateDamage = true;
