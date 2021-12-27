@@ -63,11 +63,6 @@ iframe {
   color: #f1f1f1;
 }
 
-/* Solid border */
-hr.solid {
-  border-top: 3px solid white;
-}
-
 .side a {
   padding: 6px 8px 6px 16px;
   text-decoration: none;
@@ -75,6 +70,9 @@ hr.solid {
   color: black;
   display: block;
 }
+
+/* https://www.w3schools.com/Css/css3_pagination.asp */
+
 .pagination {
   display: inline-block;
 }
@@ -97,6 +95,10 @@ hr.solid {
   height: auto;
   vertical-align: middle;
 }
+
+/* Author: Kenneth Perkins
+Date:   Dec 23, 2020
+Taken From: https://www.programmingnotes.org/ */
 
 .divider-content {
   color: white;
