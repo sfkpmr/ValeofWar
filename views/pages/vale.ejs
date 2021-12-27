@@ -20,6 +20,13 @@
     </div>
     <div class="side">
 
+      <div class="divider">
+        <span class="divider-line"></span>
+        <span class="divider-content">
+            Resources
+        </span>
+        <span class="divider-line"></span>
+    </div>
       <t> <img src="../static/images/grain.png" alt="Grain" title="Grain"> <output id="grain">
           <%= grain %></output> (+<output id="grainIncome"><%= grainIncome%></output>) </t><br>
       <t> <img src="../static/images/wood.png" alt="Lumber" title="Lumber"> <output id="lumber">
@@ -30,14 +37,26 @@
           <%= iron %></output> (+<output id="ironIncome"><%= ironIncome%></output>)</t><br>
       <t><img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"> <output id="gold">
           <%= gold %></output> (+<output id="goldIncome"><%= goldIncome%></output>)</t><br>
-      <hr class="solid">
+          <div class="divider">
+            <span class="divider-line"></span>
+            <span class="divider-content">
+                Recruits
+            </span>
+            <span class="divider-line"></span>
+        </div>
       <t> <img src="../static/images/recruit.png" alt="Recruits" title="Recruits"> <output id="recruits">
           <%= recruits %></output> (+<output id="recruitsIncome"><%= recruitsIncome%></output>)
       </t><br>
       <t> <img src="../static/images/horse.png" alt="Horses" title="Horses"> <output id="horses">
           <%= horses %></output> (+<output id="horseIncome"><%= horseIncome%></output>)
       </t><br>
-      <hr class="solid">
+      <div class="divider">
+        <span class="divider-line"></span>
+        <span class="divider-content">
+            Troops
+        </span>
+        <span class="divider-line"></span>
+    </div>
       <t> <img src="../static/images/archer.png" alt="Archers" title="Archers"> <output id="archers">
           <%= archers %>
         </output></t><br>
@@ -60,7 +79,13 @@
       <t> <img src="../static/images/siegetower.png" alt="Siege towers" title="Siege towers"> <output id="siegetowers">
           <%= siegetowers %>
         </output></t><br>
-      <hr class="solid">
+        <div class="divider">
+          <span class="divider-line"></span>
+          <span class="divider-content">
+              Powers
+          </span>
+          <span class="divider-line"></span>
+      </div>
       <t><img src="../static/images/attack.png" alt="Attack damage" title="Attack damage"> <output id="attackdamage">
           <output id="attack">
             <%= attackValue %>
