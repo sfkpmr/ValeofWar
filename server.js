@@ -953,8 +953,6 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
         stealResources(client, attacker.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
         loseResources(client, defender.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
 
-        console.log("dividers " + attackTroopDivider, defenseTroopDivider)
-
         attackerLosses = await armyLosses(client, attacker, attackTroopDivider);
         defenderLosses = await armyLosses(client, defender, defenseTroopDivider);
 

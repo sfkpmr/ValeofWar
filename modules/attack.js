@@ -455,7 +455,6 @@ module.exports = {
 
     armyLosses: async function (client, username, divider) {
 
-
         archers = username.archers;
         spearmen = username.spearmen;
         swordsmen = username.swordsmen;
@@ -464,12 +463,16 @@ module.exports = {
         batteringrams = username.batteringrams;
         siegetowers = username.siegetowers;
 
+        console.log(username.username, "has", archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers)
+
         totalTroops = archers + spearmen + swordsmen + horsemen + knights + batteringrams + siegetowers;
         battleLosses = Math.round(totalTroops / divider);
 
         lossesCounter = battleLosses;
-        archerLosses = Math.floor(Math.random() * lossesCounter);
-        lossesCounter = lossesCounter - archerLosses;
+        batteringramLosses = Math.floor(Math.random() * lossesCounter);
+        lossesCounter = lossesCounter - batteringramLosses;
+        siegetowerLosses = Math.floor(Math.random() * lossesCounter);
+        lossesCounter = lossesCounter - siegetowerLosses;
         spearmenLosses = Math.floor(Math.random() * lossesCounter);
         lossesCounter = lossesCounter - spearmenLosses;
         swordsmenLosses = Math.floor(Math.random() * lossesCounter);
@@ -478,11 +481,9 @@ module.exports = {
         lossesCounter = lossesCounter - horsemenLosses;
         knightsLosses = Math.floor(Math.random() * lossesCounter);
         lossesCounter = lossesCounter - knightsLosses;
-        batteringramLosses = Math.floor(Math.random() * lossesCounter);
-        lossesCounter = lossesCounter - batteringramLosses;
-        siegetowerLosses = Math.floor(Math.random() * lossesCounter);
-        lossesCounter = lossesCounter - siegetowerLosses;
-        console.log(archerLosses, spearmenLosses, swordsmenLosses, horsemenLosses, knightsLosses, batteringramLosses, siegetowerLosses);
+        archerLosses = Math.floor(Math.random() * lossesCounter);
+        lossesCounter = lossesCounter - archerLosses;
+        console.log(username.username + " lost " + archerLosses, spearmenLosses, swordsmenLosses, horsemenLosses, knightsLosses, batteringramLosses, siegetowerLosses);
 
         newArchers = archers - archerLosses;
         newSpearmen = spearmen - spearmenLosses;
@@ -492,10 +493,29 @@ module.exports = {
         newBatteringrams = batteringrams - batteringramLosses;
         newSiegetowers = siegetowers - siegetowerLosses;
 
-        data = { archers: newArchers, spearmen: newSpearmen, swordsmen: newSwordsmen, horsemen: newHorsemen, knights: newKnights, batteringrams: newBatteringrams, siegtowers: newSiegetowers }
+        if (newArchers < 0) {
+            newArchers = 0;
+        }
+        if (newSpearmen < 0) {
+            newSpearmen = 0;
+        }
+        if (newSwordsmen < 0) {
+            newSwordsmen = 0;
+        }
+        if (newHorsemen < 0) {
+            newHorsemen = 0;
+        }
+        if (newKnights < 0) {
+            newKnights = 0;
+        }
+        if (newBatteringrams < 0) {
+            newBatteringrams = 0;
+        }
+        if (newSiegetowers < 0) {
+            newSiegetowers = 0;
+        }
 
-        console.log(data)
-        //console.log(username)
+        data = { archers: newArchers, spearmen: newSpearmen, swordsmen: newSwordsmen, horsemen: newHorsemen, knights: newKnights, batteringrams: newBatteringrams, siegetowers: newSiegetowers }
 
         await setDatabaseValue(client, username.username, data);
 
