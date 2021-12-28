@@ -3,7 +3,7 @@
 
 <head>
     <title>Barracks</title>
-    <link rel="stylesheet" type="text/css" href="../static/test.css" />
+    <link rel="stylesheet" type="text/css" href="../static/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
@@ -23,7 +23,7 @@
             <form action="/town/barracks/train" method="POST">
                 <label for="archers"><img src="../static/images/archer.png" height="35px" title="Archer">
                     Current: <%= archers %> Train:</label>
-                <input type="number" id="archers" name="archers" value="0" min=0> Attack damage: <output
+                <input type="number" id="archers" name="archers" value="0" min=0 size="10"> Attack damage: <output
                     id="archerAttackDamage">0</output> Defense damage: <output id="archerDefenseDamage">0</output><br>
                 <label for="spearmen"><img src="../static/images/spearman.png" height="35px" title="Spearman">
                     Current: <%= spearmen %> Train:</label>
@@ -48,7 +48,7 @@
 
                 </div>
                 <br>
-                <input type="submit" value="Train">
+                <input type="submit" class="submitButton" value="Train">
             </form>
 
         </div>

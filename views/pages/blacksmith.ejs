@@ -4,6 +4,9 @@
 <head>
     <title>Blacksmith</title>
     <link rel="stylesheet" type="text/css" href="../static/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -23,7 +26,7 @@
                             <img src="../static/images/gold-ingots.png" height="35px" title="Gold"> </div>
         <br>
         <form action="/town/blacksmith/upgrade" method="POST">
-            <input type="submit" value="Construct">
+            <input type="submit" class="submitButton" value="Construct">
         </form>
 
 
@@ -89,7 +92,7 @@
                             <output id="gold">0</output> <img src="../static/images/gold-ingots.png" alt="Gold"
                                 title="Gold">
                         </div><br>
-                        <input type="submit" value="Craft">
+                        <input type="submit" class="submitButton" value="Craft">
                     </form>
                     <br>
                 </div>
@@ -106,7 +109,7 @@
                                         <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div>
                     <br>
                     <form action="/town/blacksmith/upgrade" method="POST">
-                        <input type="submit" value="Upgrade">
+                        <input type="submit" class="submitButton" value="Upgrade">
                     </form>
 
 
