@@ -257,7 +257,7 @@ app.get("/", (req, res) => {
     if (authenticated) {
         res.redirect("/vale")
     } else {
-        res.render('pages/index')
+        res.sendFile(path.join(__dirname, '/views/pages/index.html'));
     }
 
 });
