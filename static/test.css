@@ -1,0 +1,19 @@
+.submitButton {
+    background-image: url(../static/images/board.png);
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    /* put the height and width of your image here */
+    height: 50px;
+    width: 156px;
+    border: none;
+    color: white;
+    font-weight: bold;
+    font-family: 'Lobster', cursive;
+    background-color: transparent;
+  }
+
+  img {
+    width: 25px;
+    height: auto;
+    vertical-align: middle;
+  }

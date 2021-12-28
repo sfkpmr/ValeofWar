@@ -1,7 +1,8 @@
 body {
   margin: 0;
   font-family: "Lato", sans-serif;
-  background: darkgrey;
+  background-image:linear-gradient(darkgrey, white);
+  background-repeat: no-repeat;
 }
 
 .layout {
@@ -14,7 +15,7 @@ body {
 }
 
 .top {
-  background: darkgrey;
+  background-image:linear-gradient(darkgrey);
   grid-area: top;
   padding-top: 20px;
   padding-left: 20%;
@@ -31,7 +32,7 @@ body {
 }
 
 .side {
-  background: darkgrey;
+   background-image:linear-gradient(darkgrey);;
   grid-area: side;
 }
 
@@ -137,4 +138,14 @@ Taken From: https://www.programmingnotes.org/ */
   -ms-flex-direction: row;
   flex-direction: row;
   display: flex;
+}
+
+.submitButton {
+  background-image: url(../static/images/board.png);
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  /* put the height and width of your image here */
+  height: 50px;
+  width: 200px;
+  border: none;
 }
