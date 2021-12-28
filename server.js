@@ -1063,7 +1063,7 @@ app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
 
 app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
 
-    var type = req.params.type;
+    type = req.params.type;
     resourceId = parseInt(req.params.number);
     const user = await getUserByEmail(client, req.oidc.user.email);
     var updatedUser, resourceLevel, resource;
@@ -1081,7 +1081,6 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
         }
     } else if (type === "goldmine") {
         if (resourceId >= 0 && resourceId <= maxGoldMines) {
-            type = "goldMine";
             resource = "goldMines"
             updatedUser = user.goldMines;
             resourceLevel = updatedUser[resourceId]
@@ -1093,7 +1092,6 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
         }
     } else if (type === "ironmine") {
         if (resourceId >= 0 && resourceId <= maxIronMines) {
-            type = "goldMine";
             resource = "ironMines"
             updatedUser = user.ironMines;
             resourceLevel = updatedUser[resourceId]
