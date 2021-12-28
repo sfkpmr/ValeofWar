@@ -449,7 +449,13 @@ module.exports = {
         // console.log(("aaaaaaaaaaaaaaaa " + archerDamage + " " + spearmenDamage + " " + swordsmenDamage + " " + horsemenDamage + " " + knightsDamage + " " + walls))
         // console.log(boots + " " + bracers + " " + helmets + " " + longbows)
 
-        return Math.round((archerDamage + spearmenDamage + horsemenDamage + knightsDamage + swordsmenDamage) * (1 + (walls / 10)));
+        wallBonus = (1 + (walls / 10));
+        if (defender.currentWallHealth === 0) {
+            wallBonus = 1;
+        }
+        console.log(wallBonus)
+
+        return Math.round((archerDamage + spearmenDamage + horsemenDamage + knightsDamage + swordsmenDamage) * wallBonus);
 
     },
 

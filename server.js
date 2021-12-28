@@ -123,7 +123,7 @@ async function main() {
                     spears = JSON.stringify(user.spears);
                     swords = JSON.stringify(user.swords);
 
-                    //TODO update damage when making armor
+                    currentWallHealth = JSON.stringify(user.currentWallHealth);
 
                     updateDamage = false;
 
@@ -222,6 +222,9 @@ async function main() {
                         updateDamage = true;
                     };
                     if (swords !== null && swords !== undefined) {
+                        updateDamage = true;
+                    };
+                    if (currentWallHealth !== null && currentWallHealth !== undefined) {
                         updateDamage = true;
                     };
 
@@ -1003,7 +1006,7 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
 
         const wallDamage = Math.floor(Math.random() * 5);
 
-        await lowerWallHealth(client, defender, Math.floor(wallDamage));
+        await lowerWallHealth(client, defender, wallDamage);
 
         const data = {
             "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "defender": defender.username, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLoot,

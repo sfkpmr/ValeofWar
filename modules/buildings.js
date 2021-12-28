@@ -335,6 +335,9 @@ module.exports = {
     lowerWallHealth: async function (client, defender, amount) {
 
         newHealth = defender.currentWallHealth - amount;
+        if (newHealth < 0){
+            newHealth = 0;
+        }
         data = {currentWallHealth: newHealth};
      
         await setDatabaseValue(client, defender.username, data);
