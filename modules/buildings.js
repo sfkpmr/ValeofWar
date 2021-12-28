@@ -324,5 +324,19 @@ module.exports = {
         }
         return Math.round(cost);
 
+    },
+    restoreWallHealth: async function (client, user) {
+
+        newHealth = user.wallLevel * 100;
+        data = {currentWallHealth: newHealth};
+     
+        await setDatabaseValue(client, user.username, data);
+    },
+    lowerWallHealth: async function (client, defender, amount) {
+
+        newHealth = defender.currentWallHealth - amount;
+        data = {currentWallHealth: newHealth};
+     
+        await setDatabaseValue(client, defender.username, data);
     }
 }

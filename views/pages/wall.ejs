@@ -16,21 +16,27 @@
 
         Current defense bonus: +<%= defenseBonus %>%
             <br><br>
-            <% if (wall <=19){ %>
-                <div class="resources">
-                    Upgrade cost: <%= lumberCost %> <img src="../static/images/wood.png" alt="Lumber" title="Lumber">,
-                        <%= stoneCost %> <img src="../static/images/stone.png" alt="Stone" title="Stone">, <%= ironCost
-                                %>
-                                <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> and <%= goldCost %>
-                                    <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div>
-                <br>
-                <form action="/town/wall/upgrade" method="POST">
-                    <input type="submit" value="Upgrade">
-                </form>
-                <% } else { %>
-                    <br>
-                    The walls are already at max level!
-                    <% } %>
+            Wall health: <%= currentWallHealth %> out of <%= maxWallHealth %>.<br><br>
+                    <form action="/town/wall/repair" method="POST">
+                        <input type="submit" value="Repair">
+                    </form><br>
+                    <% if (wall <=19){ %>
+                        <div class="resources">
+                            Upgrade cost: <%= lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
+                                    title="Lumber">,
+                                <%= stoneCost %> <img src="../static/images/stone.png" alt="Stone" title="Stone">, <%=
+                                        ironCost %>
+                                        <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> and <%=
+                                            goldCost %>
+                                            <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div>
+                        <br>
+                        <form action="/town/wall/upgrade" method="POST">
+                            <input type="submit" value="Upgrade">
+                        </form>
+                        <% } else { %>
+                            <br>
+                            The walls are already at max level!
+                            <% } %>
 
 </body>
 

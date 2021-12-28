@@ -551,9 +551,7 @@ module.exports = {
             newSiegetowers = 0;
         }
 
-        data = { archers: newArchers, spearmen: newSpearmen, swordsmen: newSwordsmen, horsemen: newHorsemen, knights: newKnights, batteringrams: newBatteringrams, siegetowers: newSiegetowers }
-
-        console.log(JSON.stringify(data));
+        data = { archers: newArchers, spearmen: newSpearmen, swordsmen: newSwordsmen, horsemen: newHorsemen, knights: newKnights, batteringrams: newBatteringrams, siegetowers: newSiegetowers };
 
         await setDatabaseValue(client, username.username, data);
 
