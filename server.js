@@ -260,7 +260,7 @@ app.get("/", (req, res) => {
     if (authenticated) {
         res.redirect("/vale")
     } else {
-        res.sendFile(path.join(__dirname, '/views/pages/index.html'));
+        res.sendFile(path.join(__dirname, '/static/index.html'));
     }
 
 });
@@ -439,10 +439,6 @@ app.get("/profile/:username", requiresAuth(), async (req, res) => {
             res.render('pages/publicprofile');
         }
     }
-});
-
-app.get("/base", requiresAuth(), (req, res) => {
-    res.render('pages/index')
 });
 
 app.get("/mailbox", requiresAuth(), async (req, res) => {
@@ -735,7 +731,7 @@ app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
 
 app.get("/credits", async (req, res) => {
 
-    res.sendFile(path.join(__dirname, '/views/pages/credits.html'));
+    res.sendFile(path.join(__dirname, '/static/credits.html'));
 });
 
 app.get("/town/workshop", requiresAuth(), async (req, res) => {
