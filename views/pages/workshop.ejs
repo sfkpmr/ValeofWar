@@ -4,6 +4,9 @@
 <head>
     <title>Workshop</title>
     <link rel="stylesheet" type="text/css" href="../static/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -26,7 +29,7 @@
 
         <br>
         <form action="/town/workshop/upgrade" method="POST">
-            <input type="submit" value="Construct">
+            <input type="submit" class="submitButton" value="Construct">
         </form>
 
 
@@ -57,7 +60,7 @@
                             <output id="gold">0</output> <img src="../static/images/gold-ingots.png" alt="Gold"
                                 title="Gold">
                         </div><br>
-                        <input type="submit" value="Build">
+                        <input type="submit" class="submitButton" value="Build">
                     </form>
                 </div>
                 <br>
@@ -70,7 +73,7 @@
                                     and <%= goldCost %>
                                         <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div><br>
                     <form action="/town/workshop/upgrade" method="POST">
-                        <input type="submit" value="Upgrade">
+                        <input type="submit" class="submitButton" value="Upgrade">
                     </form>
                     <% } else { %>
                         The workshop is already at max level!

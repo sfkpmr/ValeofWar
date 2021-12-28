@@ -4,6 +4,9 @@
 <head>
     <title>Wall</title>
     <link rel="stylesheet" type="text/css" href="../static/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -17,26 +20,31 @@
         Current defense bonus: +<%= defenseBonus %>%
             <br><br>
             Wall health: <%= currentWallHealth %> out of <%= maxWallHealth %>.<br><br>
-                    <form action="/town/wall/repair" method="POST">
-                        <input type="submit" value="Repair">
-                    </form><br>
-                    <% if (wall <=19){ %>
-                        <div class="resources">
-                            Upgrade cost: <%= lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
-                                    title="Lumber">,
-                                <%= stoneCost %> <img src="../static/images/stone.png" alt="Stone" title="Stone">, <%=
-                                        ironCost %>
-                                        <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> and <%=
-                                            goldCost %>
-                                            <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div>
-                        <br>
-                        <form action="/town/wall/upgrade" method="POST">
-                            <input type="submit" value="Upgrade">
-                        </form>
-                        <% } else { %>
-                            <br>
-                            The walls are already at max level!
-                            <% } %>
+
+                    <% if (!notAtMaxHealth) { %>
+
+                        <form action="/town/wall/repair" method="POST">
+                            <input type="submit" class="submitButton" value="Repair">
+                        </form><br>
+                        <%}%>
+                            <% if (wall <=19){ %>
+                                <div class="resources">
+                                    Upgrade cost: <%= lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
+                                            title="Lumber">,
+                                        <%= stoneCost %> <img src="../static/images/stone.png" alt="Stone"
+                                                title="Stone">, <%= ironCost %>
+                                                <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> and
+                                                <%= goldCost %>
+                                                    <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold">
+                                </div>
+                                <br>
+                                <form action="/town/wall/upgrade" method="POST">
+                                    <input type="submit" class="submitButton" value="Upgrade">
+                                </form>
+                                <% } else { %>
+                                    <br>
+                                    The walls are already at max level!
+                                    <% } %>
 
 </body>
 

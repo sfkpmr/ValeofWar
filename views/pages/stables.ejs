@@ -4,6 +4,9 @@
 <head>
     <title>Stables</title>
     <link rel="stylesheet" type="text/css" href="../static/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -21,7 +24,7 @@
 
         <br>
         <form action="/town/stables/upgrade" method="POST">
-            <input type="submit" value="Construct">
+            <input type="submit" class="submitButton" value="Construct">
         </form>
 
 
@@ -46,8 +49,9 @@
                             id="knightAttackDamage">0</output> Defense damage: <output
                             id="knightDefenseDamage">0</output><br><br>
                         <div class="resources">Training cost: <output id="grain">0</output> <img
-                                src="../static/images/grain.png" alt="Grain" title="Grain">, <output id="iron">0</output> <img
-                                src="../static/images/iron-ingots.png" alt="Iron" title="Iron">,
+                                src="../static/images/grain.png" alt="Grain" title="Grain">, <output
+                                id="iron">0</output> <img src="../static/images/iron-ingots.png" alt="Iron"
+                                title="Iron">,
                             <output id="gold">0</output> <img src="../static/images/gold-ingots.png" alt="Gold"
                                 title="Gold">, <output id="recruits">0</output>
                             <img src="../static/images/recruit.png" alt="Recruits" title="Recruits">
@@ -55,7 +59,7 @@
                                 title="Horses">
                         </div><br>
 
-                        <input type="submit" value="Train">
+                        <input type="submit" class="submitButton" value="Train">
                         <br>
                         <br>
                     </form>
@@ -71,7 +75,7 @@
                                         <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div>
                     <br>
                     <form action="/town/stables/upgrade" method="POST">
-                        <input type="submit" value="Upgrade">
+                        <input type="submit" class="submitButton" value="Upgrade">
                     </form>
                     <% } else { %>
                         The stables are already at max level!

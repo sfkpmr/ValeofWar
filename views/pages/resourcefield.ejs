@@ -6,6 +6,9 @@
         <%= title %> - Level: <%= resourceLevel %>
     </title>
     <link rel="stylesheet" type="text/css" href="../../static/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -27,7 +30,7 @@
                     <br>
 
                     <form action="/land/<%= title.toLowerCase().replace(/ /g, '') %>/<%= resourceId %>/upgrade">
-                        <input type="submit" value="Upgrade">
+                        <input type="submit" class="submitButton" value="Upgrade">
                     </form>
 
                     <% } else { %>

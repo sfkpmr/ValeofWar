@@ -611,6 +611,14 @@ app.get("/town/wall", requiresAuth(), async (req, res) => {
     maxWallHealth = wall * 100;
     type = "wall"
     defenseBonus = wall * 10;
+
+    notAtMaxHealth = 0;
+    if (maxWallHealth === user.currentWallHealth) {
+        notAtMaxHealth = true;
+    } else {
+        notAtMaxHealth = false;
+    }
+
     lumberCost = await calcBuildingLumberCost(type, wall + 1);
     stoneCost = await calcBuildingStoneCost(type, wall + 1);
     ironCost = await calcBuildingIronCost(type, wall + 1);
@@ -695,21 +703,30 @@ app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
 app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
-    type = "wall"
 
-    lumberCost = await calcBuildingLumberCost(type, user.wallLevel);
-    stoneCost = await calcBuildingStoneCost(type, user.wallLevel);
-    ironCost = await calcBuildingIronCost(type, user.wallLevel);
-    goldCost = await calcBuildingGoldCost(type, user.wallLevel);
+    maxWallHealth = user.wallLevel * 100;
 
-    if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
-        await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
-        restoreWallHealth(client, user);
+    if (user.currentWallHealth < maxWallHealth) {
+
+
+        type = "wall"
+
+        lumberCost = await calcBuildingLumberCost(type, user.wallLevel);
+        stoneCost = await calcBuildingStoneCost(type, user.wallLevel);
+        ironCost = await calcBuildingIronCost(type, user.wallLevel);
+        goldCost = await calcBuildingGoldCost(type, user.wallLevel);
+
+        if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
+            await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
+            restoreWallHealth(client, user);
+        } else {
+            console.log("bbbb");
+        }
     } else {
-        console.log("bbbb");
+        console.log("Already at max HP");
     }
 
-    res.render('pages/wall')
+    res.redirect(`/town/wall`);
 
 });
 
@@ -984,11 +1001,13 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
         attackerLosses = await armyLosses(client, attacker, attackTroopDivider);
         defenderLosses = await armyLosses(client, defender, defenseTroopDivider);
 
-        await lowerWallHealth(client, defender, Math.floor(Math.random() * 5));
+        const wallDamage = Math.floor(Math.random() * 5);
+
+        await lowerWallHealth(client, defender, Math.floor(wallDamage));
 
         const data = {
             "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "defender": defender.username, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLoot,
-            "grainLoot": grainLoot, "lumberLoot": lumberLoot, "stoneLoot": stoneLoot, "ironLoot": ironLoot
+            "grainLoot": grainLoot, "lumberLoot": lumberLoot, "stoneLoot": stoneLoot, "ironLoot": ironLoot, "wallDamage": wallDamage
         };
 
         result = await createAttackLog(client, data);
@@ -1063,8 +1082,8 @@ app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
 
 app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
 
-    type = req.params.type;
-    resourceId = parseInt(req.params.number);
+    var type = req.params.type;
+    const resourceId = parseInt(req.params.number);
     const user = await getUserByEmail(client, req.oidc.user.email);
     var updatedUser, resourceLevel, resource;
 
@@ -1081,7 +1100,8 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
         }
     } else if (type === "goldmine") {
         if (resourceId >= 0 && resourceId <= maxGoldMines) {
-            resource = "goldMines"
+            type = "goldMine";
+            resource = "goldMines";
             updatedUser = user.goldMines;
             resourceLevel = updatedUser[resourceId]
             updatedUser[resourceId]++;
@@ -1092,7 +1112,8 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
         }
     } else if (type === "ironmine") {
         if (resourceId >= 0 && resourceId <= maxIronMines) {
-            resource = "ironMines"
+            type = "ironMine";
+            resource = "ironMines";
             updatedUser = user.ironMines;
             resourceLevel = updatedUser[resourceId]
             updatedUser[resourceId]++;
