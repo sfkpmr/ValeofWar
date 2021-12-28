@@ -453,7 +453,6 @@ module.exports = {
         if (defender.currentWallHealth === 0) {
             wallBonus = 1;
         }
-        console.log(wallBonus)
 
         return Math.round((archerDamage + spearmenDamage + horsemenDamage + knightsDamage + swordsmenDamage) * wallBonus);
 
