@@ -320,14 +320,14 @@ app.get("/api/:getIncome", requiresAuth(), async (req, res) => {
     res.send(JSON.stringify(income))
 });
 
-app.get("/profile", requiresAuth(), async (req, res) => {
+app.get("/settings", requiresAuth(), async (req, res) => {
 
     //res.send(JSON.stringify(req.oidc.user));
     //Test user: johanna@test.com, saodhgi-9486y-(WYTH
 
     const user = await getUserByEmail(client, req.oidc.user.email)
 
-    res.redirect(`/profile/${user.username}`)
+    res.render("pages/settings")
 });
 
 //make post?
