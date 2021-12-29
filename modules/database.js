@@ -21,5 +21,8 @@ module.exports = {
     },
     getUserById: async function (client, id) {
         return await client.db("gamedb").collection("players").findOne({ "_id": id });
+    },
+    deleteUser: async function (client, id) {
+        return await client.db("gamedb").collection("players").deleteOne({ "_id": id });
     }
 }

@@ -24,7 +24,7 @@ app.disable('x-powered-by');
 
 const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, armyLosses } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
-const { getUser, getUserByEmail, getUserById } = require("./modules/database.js");
+const { getUser, getUserByEmail, getUserById, deleteUser } = require("./modules/database.js");
 const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource, restoreWallHealth, lowerWallHealth } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources, incomeCalc } = require("./modules/resources.js");
 
@@ -39,6 +39,15 @@ const req = require("express/lib/request");
 const { filter } = require("compression");
 const { get } = require("express/lib/response");
 const io = new Server(server);
+
+var ManagementClient = require('auth0').ManagementClient;
+
+var management = new ManagementClient({
+    domain: 'dev-66gl6b4zf.eu.auth0.com',
+    clientId: 'avQSfz75P1z22yWOJ60mZ3EUHFfJBT78',
+    clientSecret: '_n0T3XSg2KC6GihkHAYYgR9T3WiFZhN1LfXuhFSgj5OfeJrVgfC0RMC6qrYPktK_',
+    scope: 'update:users delete:users',
+});
 
 let userMap = new Map();
 
@@ -85,8 +94,9 @@ async function main() {
 
         changeStream.on('change', (next) => {
             for (var i in userMap) {
-                if (i === next.documentKey._id) {
+                if (i === next.documentKey._id && next.operationType != "delete") {
                     //https://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
+                    console.log(next);
                     user = next.updateDescription.updatedFields;
 
                     grain = JSON.stringify(user.grain);
@@ -265,6 +275,24 @@ app.get("/", (req, res) => {
 
 });
 
+app.delete("/settings/delete", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
+
+    id = `auth0|${user._id}`
+
+    await deleteUser(client, user._id);
+
+    management.deleteUser({ id: id }, function (err) {
+        if (err) {
+            console.log(err);
+        }
+        console.log(id + " was deleted from auth0.");
+    });
+
+    res.status(200).end();
+    //res.redirect('/logout')
+});
+
 app.get("/api/getAttackPower", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     result = await calculateAttack(user);
@@ -328,7 +356,9 @@ app.get("/settings", requiresAuth(), async (req, res) => {
     //res.send(JSON.stringify(req.oidc.user));
     //Test user: johanna@test.com, saodhgi-9486y-(WYTH
 
-    const user = await getUserByEmail(client, req.oidc.user.email)
+    user = await getUserByEmail(client, req.oidc.user.email)
+    email = user.email;
+    console.log(email)
 
     res.render("pages/settings")
 });
