@@ -357,8 +357,6 @@ app.get("/settings", requiresAuth(), async (req, res) => {
     //Test user: johanna@test.com, saodhgi-9486y-(WYTH
 
     user = await getUserByEmail(client, req.oidc.user.email)
-    email = user.email;
-    console.log(email)
 
     res.render("pages/settings")
 });
@@ -463,8 +461,7 @@ app.get("/profile/:username", requiresAuth(), async (req, res) => {
         username = req.params.username;
 
         if (currentUser === profileUser.email) {
-            //todo add settings/delete
-            res.render('pages/myprofile');
+            res.render('pages/settings');
         } else {
             res.render('pages/publicprofile');
         }
