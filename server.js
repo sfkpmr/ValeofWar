@@ -24,7 +24,7 @@ app.disable('x-powered-by');
 
 const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, armyLosses } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
-const { getUser, getUserByEmail, getUserById, deleteUser } = require("./modules/database.js");
+const { getUser, getUserByEmail, getUserById, deleteUser, getAllTrades, addTrade, getTrade, setDatabaseValue, deleteTrade } = require("./modules/database.js");
 const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource, restoreWallHealth, lowerWallHealth } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources, incomeCalc } = require("./modules/resources.js");
 
@@ -96,7 +96,6 @@ async function main() {
             for (var i in userMap) {
                 if (i === next.documentKey._id && next.operationType != "delete") {
                     //https://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
-                    console.log("Hello " + JSON.stringify(next));
                     user = next.updateDescription.updatedFields;
 
                     grain = JSON.stringify(user.grain);
@@ -466,6 +465,126 @@ app.get("/profile/:username", requiresAuth(), async (req, res) => {
             res.render('pages/publicprofile');
         }
     }
+});
+
+app.get("/market", requiresAuth(), async (req, res) => {
+
+    const trades = await getAllTrades(client);
+
+    res.render('pages/market', { trades });
+});
+
+app.post("/market/sell", requiresAuth(), async (req, res) => {
+
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const currentGrain = user.grain;
+    const currentLumber = user.lumber;
+    const currentStone = user.stone;
+    const currentIron = user.iron;
+    const currentGold = user.gold;
+
+    const sellAmount = parseInt(req.body.sellAmount);
+    const sellResource = req.body.sellResource;
+    const buyAmount = parseInt(req.body.buyAmount);
+    const buyResource = req.body.buyResource;
+    var makeTrade = false;
+
+    if (sellResource === "Grain" && sellAmount <= currentGrain) {
+        makeTrade = true;
+    } else if (sellResource === "Lumber" && sellAmount <= currentLumber) {
+        makeTrade = true;
+    } else if (sellResource === "Stone" && sellAmount <= currentStone) {
+        makeTrade = true;
+    } else if (sellResource === "Iron" && sellAmount <= currentIron) {
+        makeTrade = true;
+    } else if (sellResource === "Gold" && sellAmount <= currentGold) {
+        makeTrade = true;
+    }
+
+    if (sellResource !== buyResource && makeTrade) {
+        data = { seller: user.username, sellAmount: sellAmount, sellResource: sellResource, buyAmount: buyAmount, buyResource: buyResource }
+        addTrade(client, data);
+    }
+    res.redirect("/market");
+});
+
+app.post("/market/buy/:id", requiresAuth(), async (req, res) => {
+
+    //TODO not buy your own stuff
+
+    const buyer = await getUserByEmail(client, req.oidc.user.email);
+    const currentBuyerGrain = buyer.grain;
+    const currentBuyerLumber = buyer.lumber;
+    const currentBuyerStone = buyer.stone;
+    const currentBuyerIron = buyer.iron;
+    const currentBuyerGold = buyer.gold;
+    const trade = await getTrade(client, req.params.id);
+    const seller = await getUser(client, trade.seller);
+    const buyResource = trade.buyResource.toString().toLowerCase();;
+    const buyAmount = trade.buyAmount;
+    const sellResource = trade.sellResource.toString().toLowerCase();
+    const sellAmount = trade.sellAmount;
+    const currentSellerGrain = seller.grain;
+    const currentSellerLumber = seller.lumber;
+    const currentSellerStone = seller.stone;
+    const currentSellerIron = seller.iron;
+    const currentSellerGold = seller.gold;
+    var dataToSeller;
+    var dataToBuyer;
+    var sellerNewSellResourceAmount, sellerNewBuyResourceAmount, buyerNewSellResourceAmount, buyerNewBuyResourceAmount;
+    var saleIsOk = false;
+
+    if (buyResource === "grain" && currentBuyerGrain >= buyAmount) {
+        sellerNewBuyResourceAmount = currentSellerGrain + buyAmount;
+        buyerNewBuyResourceAmount = currentBuyerGrain - buyAmount;
+        saleIsOk = true;
+    } else if (buyResource === "lumber" && currentBuyerLumber >= buyAmount) {
+        sellerNewBuyResourceAmount = currentSellerLumber + buyAmount;
+        buyerNewBuyResourceAmount = currentBuyerLumber - buyAmount;
+        saleIsOk = true;
+    } else if (buyResource === "stone" && currentBuyerStone >= buyAmount) {
+        sellerNewBuyResourceAmount = currentSellerStone + buyAmount;
+        buyerNewBuyResourceAmount = currentBuyerStone - buyAmount;
+        saleIsOk = true;
+    } else if (buyResource === "iron" && currentBuyerIron >= buyAmount) {
+        sellerNewBuyResourceAmount = currentSellerIron + buyAmount;
+        buyerNewBuyResourceAmount = currentBuyerIron - buyAmount;
+        saleIsOk = true;
+    } else if (buyResource === "gold" && currentBuyerGold >= buyAmount) {
+        sellerNewBuyResourceAmount = currentSellerGold + buyAmount;
+        buyerNewBuyResourceAmount = currentBuyerGold - buyAmount;
+        saleIsOk = true;
+    }
+
+    if (sellResource === "grain") {
+        sellerNewSellResourceAmount = currentSellerGrain - sellAmount;
+        buyerNewSellResourceAmount = currentBuyerGrain + sellAmount;
+    } else if (sellResource === "lumber") {
+        sellerNewSellResourceAmount = currentSellerLumber - sellAmount;
+        buyerNewSellResourceAmount = currentBuyerLumber + sellAmount;
+    } else if (sellResource === "stone") {
+        sellerNewSellResourceAmount = currentSellerStone - sellAmount;
+        buyerNewSellResourceAmount = currentBuyerStone + sellAmount;
+    } else if (sellResource === "iron") {
+        sellerNewSellResourceAmount = currentSellerIron - sellAmount;
+        buyerNewSellResourceAmount = currentBuyerIron + sellAmount;
+    } else if (sellResource === "gold") {
+        sellerNewSellResourceAmount = currentSellerGold - sellAmount;
+        buyerNewSellResourceAmount = currentBuyerGold + sellAmount;
+    }
+
+    dataToSeller = { [sellResource]: sellerNewSellResourceAmount, [buyResource]: sellerNewBuyResourceAmount };
+    dataToBuyer = { [sellResource]: buyerNewSellResourceAmount, [buyResource]: buyerNewBuyResourceAmount };
+
+    if (saleIsOk) {
+        await setDatabaseValue(client, seller.username, dataToSeller);
+        await setDatabaseValue(client, buyer.username, dataToBuyer);
+        await deleteTrade(client, new ObjectId(trade._id));
+        console.log("seller", dataToSeller);
+        console.log("buyer", dataToBuyer);
+    }
+
+    res.redirect('/market')
 });
 
 app.get("/mailbox", requiresAuth(), async (req, res) => {

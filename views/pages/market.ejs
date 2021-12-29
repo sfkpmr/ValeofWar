@@ -1,0 +1,41 @@
+<html>
+
+<head></head>
+
+<body>
+    <form action="/market/sell" method="post">
+        <label for="sellResource">Trade</label>
+        <input type="number" id="sellAmount" name="sellAmount" value="0" min=0>
+        <select name="sellResource" id="sellResource">
+            <option value="Grain">Grain</option>
+            <option value="Lumber">Lumber</option>
+            <option value="Stone">Stone</option>
+            <option value="Iron">Iron</option>
+            <option value="Gold">Gold</option>
+        </select>
+        for
+        <input type="number" id="buyAmount" name="buyAmount" value="0" min=0>
+        <select name="buyResource" id="buyResource">
+            <option value="Grain">Grain</option>
+            <option value="Lumber">Lumber</option>
+            <option value="Stone">Stone</option>
+            <option value="Iron">Iron</option>
+            <option value="Gold">Gold</option>
+        </select>
+        <input type="submit" value="Offer">
+    </form>
+
+
+    <% for (let i=0; i < trades.length; i++) { %>
+        Trading <%= trades[i].sellAmount %>
+            <%= trades[i].sellResource %> for <%= trades[i].buyAmount %>
+                    <%= trades[i].buyResource %>
+                        <form action="/market/buy/<%= trades[i]._id %>" method="post">
+                            <button type="submit">Make trade</button>
+                        </form>
+                        <br>
+                        <%}%>
+                            </form>
+</body>
+
+</html>
