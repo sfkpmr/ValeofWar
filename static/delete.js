@@ -12,5 +12,5 @@ function myFunction() {
     }
 }
 
-document.getElementById("delete").addEventListener("onclick", myFunction);
+document.getElementById("delete").addEventListener("click", myFunction);
 

@@ -96,7 +96,7 @@ async function main() {
             for (var i in userMap) {
                 if (i === next.documentKey._id && next.operationType != "delete") {
                     //https://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
-                    console.log(next);
+                    console.log("Hello " + JSON.stringify(next));
                     user = next.updateDescription.updatedFields;
 
                     grain = JSON.stringify(user.grain);
