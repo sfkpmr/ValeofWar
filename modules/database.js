@@ -6,6 +6,7 @@ module.exports = {
         await client.db("gamedb").collection("players").updateOne({ "username": username }, { $inc: data });
     },
     setDatabaseValue: async function (client, username, data) {
+        console.log(username, data)
         await client.db("gamedb").collection("players").updateOne({ "username": username }, { $set: data });
     },
     getUser: async function (client, username) {
@@ -24,5 +25,41 @@ module.exports = {
     },
     deleteUser: async function (client, id) {
         return await client.db("gamedb").collection("players").deleteOne({ "_id": id });
-    }
+    },
+    getAllTrades: async function (client) {
+        //const result = await client.db("gamedb").collection("trades").findOne({ "_id": ObjectId });
+        const cursor = await client.db("gamedb").collection("trades").find();
+        const result = await cursor.toArray();
+        return result;
+    },
+    addTrade: async function (client, data) {
+        try {
+            return await client.db("gamedb").collection("trades").insertOne(data);
+        } catch (e) {
+            console.log(e);
+        }
+    },
+    getTrade: async function (client, id) {
+        searchObject = new ObjectId(id);
+        return await client.db("gamedb").collection("trades").findOne({ "_id": searchObject });
+    },
+    deleteTrade: async function (client, id) {
+        return await client.db("gamedb").collection("trades").deleteOne({ "_id": id });
+    },
+    hasTrades: async function (client, username) {
+        const cursor = client.db("gamedb").collection("trades").find({ "seller": username })
+        const result = await cursor.toArray();
+        if (result[0] === undefined) {
+            return false;
+        }
+        return true;
+    },
+    getUserTrades: async function (client, username) {
+        const cursor = client.db("gamedb").collection("trades").find({ "seller": username })
+        const result = await cursor.toArray();
+        if (result[0] === undefined) {
+            return false;
+        }
+        return result;
+    },
 }

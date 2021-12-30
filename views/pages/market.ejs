@@ -1,0 +1,107 @@
+<html>
+
+<head>
+
+    <style>
+        /* Style the form - display items horizontally */
+        .form-inline {
+            display: flex;
+            flex-flow: row wrap;
+            align-items: center;
+        }
+
+        /* Add some margins for each label */
+        .form-inline label {
+            margin: 5px 10px 5px 0;
+        }
+
+        /* Style the input fields */
+        .form-inline input {
+            vertical-align: middle;
+            margin: 5px 10px 5px 0;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+        }
+
+        /* Style the submit button */
+        .form-inline button {
+            padding: 10px 20px;
+            background-color: dodgerblue;
+            border: 1px solid #ddd;
+            color: white;
+        }
+
+        .form-inline button:hover {
+            background-color: royalblue;
+        }
+
+        /* Add responsiveness - display the form controls vertically instead of horizontally on screens that are less than 800px wide */
+        @media (max-width: 800px) {
+            .form-inline input {
+                margin: 10px 0;
+            }
+
+            .form-inline {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <form action="/market/sell" method="post">
+        <label for="sellResource">Trade</label>
+        <input type="number" id="sellAmount" name="sellAmount" min=0 required>
+        <select name="sellResource" id="sellResource">
+            <option value="Grain">Grain</option>
+            <option value="Lumber">Lumber</option>
+            <option value="Stone">Stone</option>
+            <option value="Iron">Iron</option>
+            <option value="Gold">Gold</option>
+        </select>
+        for
+        <input type="number" id="buyAmount" name="buyAmount" min=0 required>
+        <select name="buyResource" id="buyResource">
+            <option value="Grain">Grain</option>
+            <option value="Lumber" selected>Lumber</option>
+            <option value="Stone">Stone</option>
+            <option value="Iron">Iron</option>
+            <option value="Gold">Gold</option>
+        </select>
+        <input type="submit" value="Offer">
+    </form>
+
+
+    <% for (let i=0; i < trades.length; i++) { %>
+        <form class="form-inline" method="post">
+            <label>Trading</label>
+            <label for="sellAmount">
+                <%= trades[i].sellAmount %>
+            </label>
+            <label for="sellResource">
+                <%= trades[i].sellResource.toLowerCase() %>
+            </label>
+            <label>for</label>
+            <label for="buyAmount">
+                <%= trades[i].buyAmount %>
+            </label>
+            <label for="buyResource">
+                <%= trades[i].buyResource.toLowerCase() %>
+            </label>
+
+            <% if (trades[i].seller===user.username) { %>
+                <button type="submit" formaction="/market/cancel/<%= trades[i]._id %>">Cancel trade</button>
+                <br>
+                <%} else {%>
+                    <button type="submit" formaction="/market/buy/<%= trades[i]._id %>">Make trade</button>
+                    <%}%>
+        </form>
+
+
+        <%}%>
+</body>
+
+</html>

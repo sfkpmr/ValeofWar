@@ -29,12 +29,10 @@ module.exports = {
             return result;
         }
     },
-
     createAttackLog: async function (client, data) {
         result = await client.db("gamedb").collection("attacks").insertOne(data);
         return result.insertedId;
     },
-
     getInvolvedAttackLogs: async function (client, username) {
         const cursor = client.db("gamedb").collection("attacks").find({ $or: [{ "attacker": username }, { "defender": username }] })
         const result = await cursor.toArray();
@@ -43,7 +41,6 @@ module.exports = {
         }
         return result;
     },
-
     calculateAttack: async function (attacker) {
 
         //todo rename variable to user?
