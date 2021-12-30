@@ -14,7 +14,7 @@
     <!-- TODO server check barrack exists and has levels-->
     <!-- TODO Display max number of units/armor you can afford right now -->
 
-    Barracks level: <%= barracks %> <br><br>
+    Barracks level: <%= user.barracksLevel %> <br><br>
         The barracks is where you train additional foot soldiers.<br>
 
         <div class="training">
@@ -22,17 +22,17 @@
             <!-- Old validation: oninput="validity.valid||(value='');" -->
             <form action="/town/barracks/train" method="POST">
                 <label for="archers"><img src="../static/images/archer.png" height="35px" title="Archer">
-                    Current: <%= archers %> Train:</label>
+                    Current: <%= user.archers %> Train:</label>
                 <input type="number" id="archers" name="archers" value="0" min=0 size="10"> Attack damage: <output
                     id="archerAttackDamage">0</output> Defense damage: <output id="archerDefenseDamage">0</output><br>
                 <label for="spearmen"><img src="../static/images/spearman.png" height="35px" title="Spearman">
-                    Current: <%= spearmen %> Train:</label>
+                    Current: <%= user.spearmen %> Train:</label>
                 <input type="number" id="spearmen" name="spearmen" value="0" min=0> Attack damage: <output
                     id="spearmanAttackDamage">0</output> Defense damage: <output
                     id="spearmanDefenseDamage">0</output><br>
                 <label for="swordsmen"><img src="../static/images/swordsman.png" height="35px" title="Swordsman">
                     Current:
-                    <%= swordsmen %> Train:
+                    <%= user.swordsmen %> Train:
                 </label>
                 <input type="number" id="swordsmen" name="swordsmen" value="0" min=0> Attack damage: <output
                     id="swordsmanAttackDamage">0</output> Defense damage: <output
@@ -53,7 +53,7 @@
 
         </div>
         <br>
-        <% if (barracks <=19){ %>
+        <% if (user.barracksLevel <=19){ %>
             <div class="resources">
                 Upgrade cost: <%= lumberCost %> <img src="../static/images/wood.png" alt="Lumber" title="Lumber">, <%=
                         stoneCost %> <img src="../static/images/stone.png" alt="Stone" title="Stone">, <%= ironCost %>

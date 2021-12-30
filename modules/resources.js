@@ -46,7 +46,7 @@ myObj = {
         const ironIncome = myObj.incomeCalc("iron", ironLevels);
         const goldIncome = myObj.incomeCalc("gold", goldLevels);
 
-        console.log(`Giving ${grainIncome} grain, ${lumberIncome} lumber, ${goldIncome} gold, ${stoneIncome} stone, ${ironIncome} iron, ${recruitsIncome} recruits and ${horseIncome} horses to ${username}.`);
+        // console.log(`Giving ${grainIncome} grain, ${lumberIncome} lumber, ${goldIncome} gold, ${stoneIncome} stone, ${ironIncome} iron, ${recruitsIncome} recruits and ${horseIncome} horses to ${username}.`);
 
         const updatedUser = { "grain": grainIncome, "lumber": lumberIncome, "stone": stoneIncome, "gold": goldIncome, "iron": ironIncome, "recruits": recruitsIncome, "horses": horseIncome };
 
@@ -87,7 +87,7 @@ myObj = {
 
     stealResources: async function (client, username, gold, lumber, stone, iron, grain) {
 
-        console.log(username + " is stealing resources");
+        //  console.log(username + " is stealing resources");
         const user = await getUser(client, username);
 
         const newGold = Math.round(user.gold + gold);
@@ -103,7 +103,7 @@ myObj = {
 
     loseResources: async function (client, username, gold, lumber, stone, iron, grain) {
 
-        console.log(username + " is losing resources");
+        //  console.log(username + " is losing resources");
         const user = await getUser(client, username);
 
         const newGold = user.gold - gold;

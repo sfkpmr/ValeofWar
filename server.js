@@ -96,46 +96,46 @@ async function main() {
             for (var i in userMap) {
                 if (i === next.documentKey._id && next.operationType != "delete") {
                     //https://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
-                    user = next.updateDescription.updatedFields;
+                    const user = next.updateDescription.updatedFields;
 
-                    grain = JSON.stringify(user.grain);
-                    lumber = JSON.stringify(user.lumber);
-                    stone = JSON.stringify(user.stone);
-                    iron = JSON.stringify(user.iron);
-                    gold = JSON.stringify(user.gold);
-                    recruits = JSON.stringify(user.recruits);
-                    horses = JSON.stringify(user.horses);
+                    const grain = JSON.stringify(user.grain);
+                    const lumber = JSON.stringify(user.lumber);
+                    const stone = JSON.stringify(user.stone);
+                    const iron = JSON.stringify(user.iron);
+                    const gold = JSON.stringify(user.gold);
+                    const recruits = JSON.stringify(user.recruits);
+                    const horses = JSON.stringify(user.horses);
 
-                    archers = JSON.stringify(user.archers);
-                    spearmen = JSON.stringify(user.spearmen);
-                    swordsmen = JSON.stringify(user.swordsmen);
-                    horsemen = JSON.stringify(user.horsemen);
-                    knights = JSON.stringify(user.knights);
-                    batteringrams = JSON.stringify(user.batteringrams);
-                    siegetowers = JSON.stringify(user.siegetowers);
+                    const archers = JSON.stringify(user.archers);
+                    const spearmen = JSON.stringify(user.spearmen);
+                    const swordsmen = JSON.stringify(user.swordsmen);
+                    const horsemen = JSON.stringify(user.horsemen);
+                    const knights = JSON.stringify(user.knights);
+                    const batteringrams = JSON.stringify(user.batteringrams);
+                    const siegetowers = JSON.stringify(user.siegetowers);
 
-                    farms = JSON.stringify(user.farms);
-                    lumbercamps = JSON.stringify(user.lumberCamps);
-                    quarries = JSON.stringify(user.quarries);
-                    ironmines = JSON.stringify(user.ironMines);
-                    goldmines = JSON.stringify(user.goldMines);
-                    trainingfield = JSON.stringify(user.trainingfieldLevel);
-                    stables = JSON.stringify(user.stablesLevel);
-                    wall = JSON.stringify(user.wallLevel);
+                    const farms = JSON.stringify(user.farms);
+                    const lumbercamps = JSON.stringify(user.lumberCamps);
+                    const quarries = JSON.stringify(user.quarries);
+                    const ironmines = JSON.stringify(user.ironMines);
+                    const goldmines = JSON.stringify(user.goldMines);
+                    const trainingfield = JSON.stringify(user.trainingfieldLevel);
+                    const stables = JSON.stringify(user.stablesLevel);
+                    const wall = JSON.stringify(user.wallLevel);
 
-                    boots = JSON.stringify(user.boots);
-                    bracers = JSON.stringify(user.bracers);
-                    helmets = JSON.stringify(user.helmets);
-                    lances = JSON.stringify(user.lances);
-                    longbows = JSON.stringify(user.longbows);
-                    shields = JSON.stringify(user.shields);
-                    spears = JSON.stringify(user.spears);
-                    swords = JSON.stringify(user.swords);
+                    const boots = JSON.stringify(user.boots);
+                    const bracers = JSON.stringify(user.bracers);
+                    const helmets = JSON.stringify(user.helmets);
+                    const lances = JSON.stringify(user.lances);
+                    const longbows = JSON.stringify(user.longbows);
+                    const shields = JSON.stringify(user.shields);
+                    const spears = JSON.stringify(user.spears);
+                    const swords = JSON.stringify(user.swords);
 
-                    currentWallHealth = JSON.stringify(user.currentWallHealth);
+                    const currentWallHealth = JSON.stringify(user.currentWallHealth);
 
-                    updateDamage = false;
-                    checkTrades = false;
+                    var updateDamage = false;
+                    var checkTrades = false;
 
                     if (grain !== null && grain !== undefined) {
                         io.to(userMap[i]).emit("updateGrain", grain);
@@ -287,7 +287,7 @@ app.get("/", (req, res) => {
 app.delete("/settings/delete", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
 
-    id = `auth0|${user._id}`
+    const id = `auth0|${user._id}`
 
     await deleteUser(client, user._id);
 
@@ -304,14 +304,14 @@ app.delete("/settings/delete", requiresAuth(), async (req, res) => {
 
 app.get("/api/getAttackPower", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
-    result = await calculateAttack(user);
+    const result = await calculateAttack(user);
 
     res.send(JSON.stringify(result))
 });
 
 app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
-    result = await calculateDefense(user);
+    const result = await calculateDefense(user);
 
     res.send(JSON.stringify(result))
 });
@@ -319,9 +319,9 @@ app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
 app.get("/api/:getIncome", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
 
-    requestedIncome = req.params.getIncome;
+    const requestedIncome = req.params.getIncome;
 
-    var levels = 0, income = 0;
+    let levels = 0, income = 0;
     function calc(i) {
         levels += i;
     };
@@ -365,7 +365,7 @@ app.get("/settings", requiresAuth(), async (req, res) => {
     //res.send(JSON.stringify(req.oidc.user));
     //Test user: johanna@test.com, saodhgi-9486y-(WYTH
 
-    user = await getUserByEmail(client, req.oidc.user.email)
+    const user = await getUserByEmail(client, req.oidc.user.email)
 
     res.render("pages/settings")
 });
@@ -374,7 +374,7 @@ app.get("/settings", requiresAuth(), async (req, res) => {
 app.get("/api/getUser/:id", requiresAuth(), async (req, res) => {
 
     //catch om någon gör request på annat sätt än "rätt sätt", och inte har email
-    user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(client, req.oidc.user.email);
     userMap[user._id] = req.params.id
 
     res.status(200).end();
@@ -384,23 +384,23 @@ app.get("/vale", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
 
-    grain = user.grain;
-    lumber = user.lumber;
-    stone = user.stone;
-    iron = user.iron;
-    gold = user.gold;
-    recruits = user.recruits;
-    horses = user.horses;
+    const grain = user.grain;
+    const lumber = user.lumber;
+    const stone = user.stone;
+    const iron = user.iron;
+    const gold = user.gold;
+    const recruits = user.recruits;
+    const horses = user.horses;
 
-    archers = user.archers;
-    spearmen = user.spearmen;
-    swordsmen = user.swordsmen;
-    horsemen = user.horsemen;
-    knights = user.knights;
-    batteringrams = user.batteringrams;
-    siegetowers = user.siegetowers;
+    const archers = user.archers;
+    const spearmen = user.spearmen;
+    const swordsmen = user.swordsmen;
+    const horsemen = user.horsemen;
+    const knights = user.knights;
+    const batteringrams = user.batteringrams;
+    const siegetowers = user.siegetowers;
 
-    grainLevels = 0, lumberLevels = 0, stoneLevels = 0, ironLevels = 0, goldLevels = 0, grainIncome = 0, lumberIncome = 0, stoneIncome = 0, ironIncome = 0, goldIncome = 0;
+    let grainLevels = 0, lumberLevels = 0, stoneLevels = 0, ironLevels = 0, goldLevels = 0, grainIncome = 0, lumberIncome = 0, stoneIncome = 0, ironIncome = 0, goldIncome = 0;
     function grainCalc(i) {
         grainLevels += i;
     };
@@ -437,13 +437,13 @@ app.get("/vale", requiresAuth(), async (req, res) => {
     goldMines.forEach(goldCalc);
     goldIncome = incomeCalc("gold", goldLevels);
 
-    recruitsIncome = user.trainingfieldLevel * 5;
-    horseIncome = user.stablesLevel * 3;
+    const recruitsIncome = user.trainingfieldLevel * 5;
+    const horseIncome = user.stablesLevel * 3;
 
-    attackValue = await calculateAttack(user);
-    defenseValue = await calculateDefense(user);
+    const attackValue = await calculateAttack(user);
+    const defenseValue = await calculateDefense(user);
 
-    res.render("pages/vale")
+    res.render("pages/vale", { grain, lumber, stone, iron, gold, recruits, horses, archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers, grainIncome, lumberIncome, stoneIncome, ironIncome, goldIncome, recruitsIncome, horseIncome, attackValue, defenseValue })
 });
 
 app.get("/profile/:username", requiresAuth(), async (req, res) => {
@@ -454,19 +454,6 @@ app.get("/profile/:username", requiresAuth(), async (req, res) => {
     if (profileUser === false) {
         res.send("No such user");
     } else {
-
-        gold = profileUser.gold;
-        iron = profileUser.iron;
-        lumber = profileUser.lumber;
-        grain = profileUser.grain;
-        stone = profileUser.stone;
-
-        archers = profileUser.archers;
-        spearmen = profileUser.spearmen;
-        swordsmen = profileUser.swordsmen;
-        horsemen = profileUser.horsemen;
-        knights = profileUser.knights;
-
         username = req.params.username;
 
         if (currentUser === profileUser.email) {
@@ -533,40 +520,42 @@ app.post("/market/cancel/:id", requiresAuth(), async (req, res) => {
 app.get("/messages/inbox", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
 
-    messages = await getUserMessages(client, user.username);
-    if (messages === false) {
-        res.send("No messages")
-    } else {
+    const messages = await getUserMessages(client, user.username);
+    if (messages) {
         res.redirect('/messages/inbox/page/1')
+    } else {
+        res.send("No messages")
+
     }
 });
 
 app.get("/messages/new", requiresAuth(), async (req, res) => {
 
-    recipient = "";
-    res.render("pages/writeMessage")
+    const recipient = "";
+    res.render("pages/writeMessage", { recipient })
 
 });
 
 app.get("/messages/new/:username", requiresAuth(), async (req, res) => {
 
-    recipient = req.params.username;
-    res.render("pages/writeMessage")
+    const recipient = req.params.username;
+    res.render("pages/writeMessage", { recipient })
 
 });
 
 app.get("/messages/inbox/:id", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
-    username = user.username;
+    const username = user.username;
     //TODO check only show your logs
     //error check if invalid format
 
-    message = await getMessageById(client, new ObjectId(req.params.id));
+    const message = await getMessageById(client, new ObjectId(req.params.id));
 
-    if (message === false) {
-        res.send("No such message!")
+    if (message) {
+        res.render('pages/message', { message })
     } else {
-        res.render('pages/message')
+        res.send("No such message!")
+
     }
 
 });
@@ -574,10 +563,10 @@ app.get("/messages/inbox/:id", requiresAuth(), async (req, res) => {
 app.post("/messages/send", requiresAuth(), async (req, res) => {
     const sender = await getUserByEmail(client, req.oidc.user.email);
     const receiver = await getUser(client, req.body.recipient);
-    text = req.body.message;
+    const message = req.body.message;
 
     if (receiver != false) {
-        data = { sentTo: receiver.username, sentBy: sender.username, message: text, time: new Date() };
+        data = { sentTo: receiver.username, sentBy: sender.username, message: message, time: new Date() };
         result = await addMessage(client, data);
         res.redirect(`/messages/inbox/${result}`);
     } else {
@@ -588,10 +577,10 @@ app.post("/messages/send", requiresAuth(), async (req, res) => {
 app.post("/messages/send/:username", requiresAuth(), async (req, res) => {
     const sender = await getUserByEmail(client, req.oidc.user.email);
     const receiver = await getUser(client, req.params.username);
-    text = req.body.message;
+    const message = req.body.message;
 
     if (receiver != false) {
-        data = { sentTo: receiver.username, sentBy: sender.username, message: text, time: new Date() };
+        data = { sentTo: receiver.username, sentBy: sender.username, message: message, time: new Date() };
         result = await addMessage(client, data);
         res.redirect(`/messages/inbox/${result}`);
     } else {
@@ -683,8 +672,6 @@ app.post("/market/buy/:id", requiresAuth(), async (req, res) => {
     const currentSellerStone = seller.stone;
     const currentSellerIron = seller.iron;
     const currentSellerGold = seller.gold;
-    var dataToSeller;
-    var dataToBuyer;
     var sellerNewSellResourceAmount, sellerNewBuyResourceAmount, buyerNewSellResourceAmount, buyerNewBuyResourceAmount;
     var saleIsOk = false;
 
@@ -727,15 +714,13 @@ app.post("/market/buy/:id", requiresAuth(), async (req, res) => {
         buyerNewSellResourceAmount = currentBuyerGold + sellAmount;
     }
 
-    dataToSeller = { [sellResource]: sellerNewSellResourceAmount, [buyResource]: sellerNewBuyResourceAmount };
-    dataToBuyer = { [sellResource]: buyerNewSellResourceAmount, [buyResource]: buyerNewBuyResourceAmount };
+    const dataToSeller = { [sellResource]: sellerNewSellResourceAmount, [buyResource]: sellerNewBuyResourceAmount };
+    const dataToBuyer = { [sellResource]: buyerNewSellResourceAmount, [buyResource]: buyerNewBuyResourceAmount };
 
     if (saleIsOk) {
         await setDatabaseValue(client, seller.username, dataToSeller);
         await setDatabaseValue(client, buyer.username, dataToBuyer);
         await deleteTrade(client, new ObjectId(trade._id));
-        console.log("seller", dataToSeller);
-        console.log("buyer", dataToBuyer);
     }
 
     res.redirect('/market')
@@ -748,11 +733,11 @@ app.get("/mailbox", requiresAuth(), async (req, res) => {
 app.get("/mailbox/log", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
-    result = await getInvolvedAttackLogs(client, user.username)
-    if (result === false) {
-        res.send("You haven't attacked anyone yet!")
-    } else {
+    const result = await getInvolvedAttackLogs(client, user.username)
+    if (result) {
         res.redirect('/mailbox/log/page/1')
+    } else {
+        res.send("You haven't attacked anyone yet!")
     }
 
 });
@@ -760,20 +745,11 @@ app.get("/mailbox/log", requiresAuth(), async (req, res) => {
 app.get("/mailbox/log/:id", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
-    username = user.username;
+    const username = user.username;
     //TODO check only show your logs
     //error check if invalid format
 
-    var searchObject;
-    try {
-        searchObject = new ObjectId(req.params.id);
-    }
-    catch (err) {
-        log = false;
-    }
-    log = await getAttackLog(client, searchObject);
-
-
+    const log = await getAttackLog(client, new ObjectId(req.params.id));
 
     if (user.username === log.attacker) {
         attackUrl = `/profile/${log.defender}/attack`
@@ -781,11 +757,10 @@ app.get("/mailbox/log/:id", requiresAuth(), async (req, res) => {
         attackUrl = `/profile/${log.attacker}/attack`
     }
 
-
-    if (log === false) {
-        res.send("No such log!")
+    if (log) {
+        res.render('pages/attack', { log })
     } else {
-        res.render('pages/attack')
+        res.send("No such log!")
     }
 });
 
@@ -876,19 +851,14 @@ app.get("/town/barracks", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
     const type = "barracks"
+    const barracksLevel = user.barracksLevel;
 
-    barracks = user.barracksLevel;
+    const lumberCost = await calcBuildingLumberCost(type, barracksLevel + 1);
+    const stoneCost = await calcBuildingStoneCost(type, barracksLevel + 1);
+    const ironCost = await calcBuildingIronCost(type, barracksLevel + 1);
+    const goldCost = await calcBuildingGoldCost(type, barracksLevel + 1);
 
-    lumberCost = await calcBuildingLumberCost(type, barracks + 1);
-    stoneCost = await calcBuildingStoneCost(type, barracks + 1);
-    ironCost = await calcBuildingIronCost(type, barracks + 1);
-    goldCost = await calcBuildingGoldCost(type, barracks + 1);
-
-    archers = user.archers;
-    spearmen = user.spearmen;
-    swordsmen = user.swordsmen;
-
-    res.render('pages/barracks');
+    res.render('pages/barracks', { user, lumberCost, stoneCost, ironCost, goldCost });
 });
 
 app.get("/online", requiresAuth(), async (req, res) => {
@@ -900,35 +870,34 @@ app.get("/online", requiresAuth(), async (req, res) => {
         temp.push(result.username);
     }
 
-    res.render('pages/online');
+    res.render('pages/online', { user });
 });
 
 app.get("/town/wall", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     wall = user.wallLevel;
-    currentWallHealth = user.currentWallHealth;
-    maxWallHealth = wall * 100;
-    type = "wall"
-    defenseBonus = wall * 10;
+    const maxWallHealth = wall * 100;
+    const type = "wall"
+    const defenseBonus = wall * 10;
 
-    notAtMaxHealth = 0;
+    var notAtMaxHealth;
     if (maxWallHealth === user.currentWallHealth) {
         notAtMaxHealth = true;
     } else {
         notAtMaxHealth = false;
     }
 
-    lumberCost = await calcBuildingLumberCost(type, wall + 1);
-    stoneCost = await calcBuildingStoneCost(type, wall + 1);
-    ironCost = await calcBuildingIronCost(type, wall + 1);
-    goldCost = await calcBuildingGoldCost(type, wall + 1);
-    res.render('pages/wall')
+    const lumberCost = await calcBuildingLumberCost(type, wall + 1);
+    const stoneCost = await calcBuildingStoneCost(type, wall + 1);
+    const ironCost = await calcBuildingIronCost(type, wall + 1);
+    const goldCost = await calcBuildingGoldCost(type, wall + 1);
+    res.render('pages/wall', { user, maxWallHealth, notAtMaxHealth, lumberCost, stoneCost, ironCost, goldCost, defenseBonus })
 });
 
 app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
 
-    type = req.params.building;
+    const type = req.params.building;
     var buildingName, level;
 
     switch (type) {
@@ -987,15 +956,15 @@ app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
 
-    trainingField = user.trainingfieldLevel;
-    type = "trainingfield"
+    const trainingField = user.trainingfieldLevel;
+    const type = "trainingfield"
 
-    lumberCost = await calcBuildingLumberCost(type, trainingField + 1);
-    stoneCost = await calcBuildingStoneCost(type, trainingField + 1);
-    ironCost = await calcBuildingIronCost(type, trainingField + 1);
-    goldCost = await calcBuildingGoldCost(type, trainingField + 1);
+    const lumberCost = await calcBuildingLumberCost(type, trainingField + 1);
+    const stoneCost = await calcBuildingStoneCost(type, trainingField + 1);
+    const ironCost = await calcBuildingIronCost(type, trainingField + 1);
+    const goldCost = await calcBuildingGoldCost(type, trainingField + 1);
 
-    res.render('pages/trainingField')
+    res.render('pages/trainingField', { trainingField, lumberCost, stoneCost, ironCost, goldCost })
 
 });
 
@@ -1030,7 +999,6 @@ app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
 });
 
 app.get("/credits", async (req, res) => {
-
     res.sendFile(path.join(__dirname, '/static/credits.html'));
 });
 
@@ -1039,17 +1007,17 @@ app.get("/town/workshop", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const type = "workshop"
 
-    workshop = user.workshopLevel;
+    const workshop = user.workshopLevel;
 
-    batteringrams = user.batteringrams;
-    siegetowers = user.siegetowers;
+    const batteringrams = user.batteringrams;
+    const siegetowers = user.siegetowers;
 
     lumberCost = await calcBuildingLumberCost(type, workshop + 1);
     stoneCost = await calcBuildingStoneCost(type, workshop + 1);
     ironCost = await calcBuildingIronCost(type, workshop + 1);
     goldCost = await calcBuildingGoldCost(type, workshop + 1);
 
-    res.render('pages/workshop')
+    res.render('pages/workshop', { workshop, batteringrams, siegetowers })
 });
 
 app.post("/town/workshop/train", requiresAuth(), async (req, res) => {
@@ -1082,63 +1050,61 @@ app.get("/town/stables", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const type = "stables"
 
-    stables = user.stablesLevel;
+    const stables = user.stablesLevel;
 
-    lumberCost = await calcBuildingLumberCost(type, stables + 1);
-    stoneCost = await calcBuildingStoneCost(type, stables + 1);
-    ironCost = await calcBuildingIronCost(type, stables + 1);
-    goldCost = await calcBuildingGoldCost(type, stables + 1);
+    const lumberCost = await calcBuildingLumberCost(type, stables + 1);
+    const stoneCost = await calcBuildingStoneCost(type, stables + 1);
+    const ironCost = await calcBuildingIronCost(type, stables + 1);
+    const goldCost = await calcBuildingGoldCost(type, stables + 1);
 
-    horsemen = user.horsemen;
-    knights = user.knights;
+    const horsemen = user.horsemen;
+    const knights = user.knights;
 
-    res.render('pages/stables');
+    res.render('pages/stables', { stables, lumberCost, stoneCost, ironCost, goldCost, horsemen, knights });
 });
 
 app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
 
-    type = "blacksmith"
-    blacksmith = user.blacksmithLevel;
+    const type = "blacksmith"
+    const blacksmith = user.blacksmithLevel;
 
-    boots = user.boots;
-    bracers = user.bracers;
-    helmets = user.helmets;
-    lances = user.lances;
-    longbows = user.longbows;
-    shields = user.shields;
-    spears = user.spears;
-    swords = user.swords;
+    const boots = user.boots;
+    const bracers = user.bracers;
+    const helmets = user.helmets;
+    const lances = user.lances;
+    const longbows = user.longbows;
+    const shields = user.shields;
+    const spears = user.spears;
+    const swords = user.swords;
 
-    lumberCost = await calcBuildingLumberCost(type, blacksmith + 1);
-    stoneCost = await calcBuildingStoneCost(type, blacksmith + 1);
-    ironCost = await calcBuildingIronCost(type, blacksmith + 1);
-    goldCost = await calcBuildingGoldCost(type, blacksmith + 1);
+    const lumberCost = await calcBuildingLumberCost(type, blacksmith + 1);
+    const stoneCost = await calcBuildingStoneCost(type, blacksmith + 1);
+    const ironCost = await calcBuildingIronCost(type, blacksmith + 1);
+    const goldCost = await calcBuildingGoldCost(type, blacksmith + 1);
 
-    res.render('pages/blacksmith');
+    res.render('pages/blacksmith', { blacksmith, boots, bracers, helmets, lances, longbows, shields, spears, swords, lumberCost, stoneCost, ironCost, goldCost });
 });
 
 app.post("/town/blacksmith/craft", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
 
-    var goldCost = 0, lumberCost = 0, ironCost = 0;
+    const boots = parseInt(req.body.boots);
+    const bracers = parseInt(req.body.bracers);
+    const helmets = parseInt(req.body.helmet);
+    const lances = parseInt(req.body.lance);
+    const longbows = parseInt(req.body.longbow);
+    const shields = parseInt(req.body.shield);
+    const spears = parseInt(req.body.spear);
+    const swords = parseInt(req.body.sword);
 
-    boots = parseInt(req.body.boots);
-    bracers = parseInt(req.body.bracers);
-    helmets = parseInt(req.body.helmet);
-    lances = parseInt(req.body.lance);
-    longbows = parseInt(req.body.longbow);
-    shields = parseInt(req.body.shield);
-    spears = parseInt(req.body.spear);
-    swords = parseInt(req.body.sword);
+    const lumberCost = calcLumberCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
+    const ironCost = calcIronCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
+    const goldCost = calcGoldCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
 
-    lumberCost = calcLumberCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
-    ironCost = calcIronCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
-    goldCost = calcGoldCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
-
-    updateUser = {
+    const updateUser = {
         "shields": shields, "swords": swords, "bracers": bracers, "longbows": longbows, "spears": spears, "lances": lances, "boots": boots, "helmets": helmets
     }
 
@@ -1286,19 +1252,19 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
             defenseTroopDivider = 20;
         }
 
-        wallBonus = 1 - ((defender.wallLevel * 2.5) * 0.01);
+        const wallBonus = 1 - ((defender.wallLevel * 2.5) * 0.01);
 
-        goldLoot = Math.round((defender.gold / resourceDivider) * wallBonus);
-        lumberLoot = Math.round((defender.lumber / resourceDivider) * wallBonus);
-        stoneLoot = Math.round((defender.stone / resourceDivider) * wallBonus);
-        grainLoot = Math.round((defender.grain / resourceDivider) * wallBonus);
-        ironLoot = Math.round((defender.iron / resourceDivider) * wallBonus);
+        const goldLoot = Math.round((defender.gold / resourceDivider) * wallBonus);
+        const lumberLoot = Math.round((defender.lumber / resourceDivider) * wallBonus);
+        const stoneLoot = Math.round((defender.stone / resourceDivider) * wallBonus);
+        const grainLoot = Math.round((defender.grain / resourceDivider) * wallBonus);
+        const ironLoot = Math.round((defender.iron / resourceDivider) * wallBonus);
 
         stealResources(client, attacker.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
         loseResources(client, defender.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
 
-        attackerLosses = await armyLosses(client, attacker, attackTroopDivider);
-        defenderLosses = await armyLosses(client, defender, defenseTroopDivider);
+        const attackerLosses = await armyLosses(client, attacker, attackTroopDivider);
+        const defenderLosses = await armyLosses(client, defender, defenseTroopDivider);
 
         const wallDamage = Math.floor(Math.random() * 5);
 
@@ -1309,7 +1275,7 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
             "grainLoot": grainLoot, "lumberLoot": lumberLoot, "stoneLoot": stoneLoot, "ironLoot": ironLoot, "wallDamage": wallDamage
         };
 
-        result = await createAttackLog(client, data);
+        const result = await createAttackLog(client, data);
 
         res.redirect(`/mailbox/log/${result}`);
     }
@@ -1364,17 +1330,17 @@ app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
     //  title = "none"
     //  resourceLevel = 0;
     //}
-    lumberCost = await calcBuildingLumberCost(type, resourceLevel + 1);
-    stoneCost = await calcBuildingStoneCost(type, resourceLevel + 1);
-    ironCost = await calcBuildingIronCost(type, resourceLevel + 1);
-    goldCost = await calcBuildingGoldCost(type, resourceLevel + 1);
+    const lumberCost = await calcBuildingLumberCost(type, resourceLevel + 1);
+    const stoneCost = await calcBuildingStoneCost(type, resourceLevel + 1);
+    const ironCost = await calcBuildingIronCost(type, resourceLevel + 1);
+    const goldCost = await calcBuildingGoldCost(type, resourceLevel + 1);
 
     if (invalidId) {
         res.redirect("/land");
     } else if (resourceLevel !== undefined) {
-        res.render('pages/resourcefield');
+        res.render('pages/resourcefield', { lumberCost, stoneCost, ironCost, goldCost });
     } else {
-        res.render('pages/emptyfield');
+        res.render('pages/emptyfield', { lumberCost, stoneCost, ironCost, goldCost });
     }
 
 });
@@ -1387,7 +1353,6 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
     var updatedUser, resourceLevel, resource;
 
     if (type === "farm") {
-
         if (resourceId >= 0 && resourceId <= maxFarms) {
             resource = "farms"
             updatedUser = user.farms;
@@ -1518,12 +1483,12 @@ async function checkAll() {
 }
 
 async function validateUserTrades(id) {
-    user = await getUserById(client, id);
-    currentGrain = user.grain;
-    currentLumber = user.lumber;
-    currentStone = user.stone;
-    currentIron = user.iron;
-    currentGold = user.gold;
+    const user = await getUserById(client, id);
+    const currentGrain = user.grain;
+    const currentLumber = user.lumber;
+    const currentStone = user.stone;
+    const currentIron = user.iron;
+    const currentGold = user.gold;
     var cancelTrade = false;
     if (await hasTrades(client, user.username)) {
         trades = await getUserTrades(client, user.username);
@@ -1548,34 +1513,32 @@ async function validateUserTrades(id) {
     };
 }
 
-
-
 //måste köra för alla så folk kan anfalla folk som är afk
 //ev kör när någon interagerar med afk folk
 var minutes = 15, the_interval = minutes * 60 * 1000;
 setInterval(function () {
-    date = new Date();
+    const date = new Date();
     console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " Adding resources for everyone!");
     checkAll();
 }, the_interval);
 
 const port = process.env.PORT || 3000;
 server.listen(port, () => {
-    date = new Date();
+    const date = new Date();
     console.log(date.toLocaleDateString(), date.toLocaleTimeString() + ` Listening on https://localhost:${port}`);
 });
 
 app.use(express.static(path.join(__dirname, 'pages')));
 // Handle 404
 app.use(function (req, res) {
-    date = new Date();
+    const date = new Date();
     console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " Bad URL: " + req.path);
     res.status(404).render('pages/404');
 });
 
 // Handle 500
 app.use(function (error, req, res, next) {
-    date = new Date();
+    const date = new Date();
     console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " " + error + " " + req.path);
     res.status(500).render('pages/500');
 });
