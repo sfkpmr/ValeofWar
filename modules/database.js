@@ -6,7 +6,6 @@ module.exports = {
         await client.db("gamedb").collection("players").updateOne({ "username": username }, { $inc: data });
     },
     setDatabaseValue: async function (client, username, data) {
-        console.log(username, data)
         await client.db("gamedb").collection("players").updateOne({ "username": username }, { $set: data });
     },
     getUser: async function (client, username) {
@@ -79,9 +78,10 @@ module.exports = {
     },
     addMessage: async function (client, data) {
         try {
-            return await client.db("gamedb").collection("messages").insertOne(data);
+            result = await client.db("gamedb").collection("messages").insertOne(data);
         } catch (e) {
             console.log(e);
         }
+        return result.insertedId;
     },
 }

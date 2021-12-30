@@ -557,7 +557,6 @@ app.get("/mailbox/inbox/:id", requiresAuth(), async (req, res) => {
 
 });
 
-
 app.post("/mailbox/send/new/:username", requiresAuth(), async (req, res) => {
 
     const sender = await getUserByEmail(client, req.oidc.user.email);
@@ -567,18 +566,22 @@ app.post("/mailbox/send/new/:username", requiresAuth(), async (req, res) => {
 
     if (receiver != false) {
         data = { sentTo: receiverName, sentBy: sender.username, message: text, time: new Date() };
-        await addMessage(client, data);
-        res.redirect('/mailbox')
+        result = await addMessage(client, data);
+        res.redirect(`/mailbox/inbox/${result}`);
     } else {
         res.send("No such user")
     }
 
 });
 
-app.get("/mailbox/send/", requiresAuth(), async (req, res) => {
+app.get("/mailbox/send", requiresAuth(), async (req, res) => {
     res.render('pages/writeMessage')
 });
 
+app.get("/mailbox/send/:username", requiresAuth(), async (req, res) => {
+    recipient = req.params.username;
+    res.render('pages/writeMessage')
+});
 
 app.post("/mailbox/send/new", requiresAuth(), async (req, res) => {
     const sender = await getUserByEmail(client, req.oidc.user.email);
@@ -587,11 +590,10 @@ app.post("/mailbox/send/new", requiresAuth(), async (req, res) => {
 
     if (receiver != false) {
         data = { sentTo: receiver.username, sentBy: sender.username, message: text, time: new Date() };
-        await addMessage(client, data);
+        result = await addMessage(client, data);
     }
 
-
-    res.render('pages/mailbox')
+    res.redirect(`/mailbox/inbox/${result}`);
 });
 
 app.get("/mailbox/inbox/page/:nr", requiresAuth(), async (req, res) => {

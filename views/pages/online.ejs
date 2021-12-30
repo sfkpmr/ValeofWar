@@ -12,9 +12,11 @@
     Players currently active:<br>
 
     <ul>
-    <% for (var i=0; i < temp.length; i++ ) { %>
-      <li>  <a href="/profile/<%= temp[i] %>"><%= temp[i] %></a></li>
-        <% } %>
+        <% for (var i=0; i < temp.length; i++ ) { %>
+            <li> <a href="/profile/<%= temp[i] %>">
+                    <%= temp[i] %>
+                </a></li>
+            <% } %>
     </ul>
 
 </body>

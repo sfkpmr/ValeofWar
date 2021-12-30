@@ -7,22 +7,23 @@
 
 <body>
 
-    Sent by <%= message.sentBy %>
-        <%= message.time.toLocaleDateString() %> at <%= message.time.toLocaleTimeString() %><br><br>
-                <%= message.message%>
+    Sent by: <a href=/profile/<%=message.sentBy %>> <%= message.sentBy %> </a> <br>
+    Sent to: <a href=/profile/<%=message.sentTo %>> <%= message.sentTo %> </a> <br>
+    Date: <%= message.time.toLocaleDateString() %> at <%= message.time.toLocaleTimeString() %><br><br>
+            <%= message.message%>
 
-                    <br>
-                    <br>
-
-
-                    <% if (message.sentBy !=username){%>
+                <br>
+                <br>
 
 
-                        <form action="/mailbox/send/new/<%=message.sentBy%>" method="post">
-                            <input type="text" name="messageText">
-                            <input type="submit" value="Reply">
-                        </form>
-                        <% } %>
+                <% if (message.sentBy !=username){%>
+
+
+                    <form action=" /mailbox/send/new/<%=message.sentBy%>" method="post">
+                        <input type="text" name="messageText">
+                        <input type="submit" value="Reply">
+                    </form>
+                    <% } %>
 
 
 
