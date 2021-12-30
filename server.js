@@ -563,9 +563,10 @@ app.post("/mailbox/send/new/:username", requiresAuth(), async (req, res) => {
     const sender = await getUserByEmail(client, req.oidc.user.email);
     const receiver = await getUser(client, req.params.username);
     text = req.body.messageText;
+    receiverName = req.params.username;
 
     if (receiver != false) {
-        data = { sentTo: req.params.username, sentBy: sender.username, message: text, time: new Date() };
+        data = { sentTo: receiverName, sentBy: sender.username, message: text, time: new Date() };
         await addMessage(client, data);
         res.redirect('/mailbox')
     } else {
@@ -588,7 +589,7 @@ app.post("/mailbox/send/new", requiresAuth(), async (req, res) => {
 
     if (receiver != false) {
 
-        data = { sentTo: req.params.username, sentBy: sender.username, message: text, time: new Date() };
+        data = { sentTo: receiver.username, sentBy: sender.username, message: text, time: new Date() };
         console.log(data)
         await addMessage(client, data);
 

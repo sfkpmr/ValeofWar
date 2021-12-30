@@ -7,17 +7,24 @@
 
 <body>
 
-    <%= message.sentBy%> tells us on <%= message.time.toLocaleDateString() %> at <%= message.time.toLocaleTimeString()
-                %>,<br>
+    Sent by <%= message.sentBy %>
+        <%= message.time.toLocaleDateString() %> at <%= message.time.toLocaleTimeString() %><br><br>
                 <%= message.message%>
 
                     <br>
                     <br>
 
-                    <form action="/mailbox/send/new/<%=message.sentBy%>" method="post">
-                        <input type="text" name="messageText">
-                        <input type="submit" value="Reply">
-                    </form>
+
+                    <% if (message.sentBy !=username){%>
+
+
+                        <form action="/mailbox/send/new/<%=message.sentBy%>" method="post">
+                            <input type="text" name="messageText">
+                            <input type="submit" value="Reply">
+                        </form>
+                        <% } %>
+
+
 
 
 
