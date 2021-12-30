@@ -892,7 +892,7 @@ app.get("/town/barracks", requiresAuth(), async (req, res) => {
 });
 
 app.get("/online", requiresAuth(), async (req, res) => {
-
+    const user = await getUserByEmail(client, req.oidc.user.email);
     temp = [];
 
     for (var i in userMap) {

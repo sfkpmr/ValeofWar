@@ -13,10 +13,19 @@
 
     <ul>
         <% for (var i=0; i < temp.length; i++ ) { %>
-            <li> <a href="/profile/<%= temp[i] %>">
+
+            <% if (temp[i]===user.username) {%>
+                <li>
                     <%= temp[i] %>
-                </a></li>
-            <% } %>
+                </li>
+                <% } else { %>
+                    <li> <a href="/profile/<%= temp[i] %>">
+                            <%= temp[i] %>
+                        </a></li>
+                    <%}%>
+
+
+                        <% } %>
     </ul>
 
 </body>
