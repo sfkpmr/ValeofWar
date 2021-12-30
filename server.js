@@ -530,18 +530,18 @@ app.post("/market/cancel/:id", requiresAuth(), async (req, res) => {
     res.redirect('/market')
 });
 
-app.get("/mailbox/inbox", requiresAuth(), async (req, res) => {
+app.get("/messages/inbox", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
 
     messages = await getUserMessages(client, user.username);
     if (messages === false) {
         res.send("No messages")
     } else {
-        res.redirect('/mailbox/inbox/page/1')
+        res.redirect('/messages/inbox/page/1')
     }
 });
 
-app.get("/mailbox/inbox/:id", requiresAuth(), async (req, res) => {
+app.get("/messages/:id", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     username = user.username;
     //TODO check only show your logs
@@ -557,48 +557,38 @@ app.get("/mailbox/inbox/:id", requiresAuth(), async (req, res) => {
 
 });
 
-app.post("/mailbox/send/new/:username", requiresAuth(), async (req, res) => {
+app.post("/messages/send", requiresAuth(), async (req, res) => {
 
     const sender = await getUserByEmail(client, req.oidc.user.email);
-    const receiver = await getUser(client, req.params.username);
-    text = req.body.messageText;
-    receiverName = req.params.username;
+    const receiver = await getUser(client, req.body.recipient);
+    text = req.body.message;
+    receiverName = receiver.username;
 
     if (receiver != false) {
         data = { sentTo: receiverName, sentBy: sender.username, message: text, time: new Date() };
         result = await addMessage(client, data);
-        res.redirect(`/mailbox/inbox/${result}`);
+        res.redirect(`/messages/${result}`);
     } else {
         res.send("No such user")
     }
 
 });
 
-app.get("/mailbox/send/:username", requiresAuth(), async (req, res) => {
-
-    if (req.params.username === "blank") {
-        recipient = "";
-    } else {
-        recipient = req.params.username;
-    }
-
-    res.render('pages/writeMessage')
-});
-
-app.post("/mailbox/send/new", requiresAuth(), async (req, res) => {
+app.post("/messages/send/:username", requiresAuth(), async (req, res) => {
     const sender = await getUserByEmail(client, req.oidc.user.email);
-    const receiver = await getUser(client, req.body.recipient);
+    const receiver = await getUser(client, req.params.username);
     text = req.body.message;
 
     if (receiver != false) {
         data = { sentTo: receiver.username, sentBy: sender.username, message: text, time: new Date() };
         result = await addMessage(client, data);
+        res.redirect(`/messages/${result}`);
+    } else {
+        res.send("No such user")
     }
-
-    res.redirect(`/mailbox/inbox/${result}`);
 });
 
-app.get("/mailbox/inbox/page/:nr", requiresAuth(), async (req, res) => {
+app.get("/messages/inbox/page/:nr", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
     username = user.username;

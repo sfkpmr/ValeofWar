@@ -19,8 +19,8 @@
                 <% if (message.sentBy !=username){%>
 
 
-                    <form action=" /mailbox/send/new/<%=message.sentBy%>" method="post">
-                        <input type="text" name="messageText">
+                    <form action=" /messages/send/<%=message.sentBy%>" method="post">
+                        <input type="text" name="message">
                         <input type="submit" value="Reply">
                     </form>
                     <% } %>
