@@ -581,18 +581,13 @@ app.get("/mailbox/send/", requiresAuth(), async (req, res) => {
 
 
 app.post("/mailbox/send/new", requiresAuth(), async (req, res) => {
-
-    console.log("pppppppppp")
     const sender = await getUserByEmail(client, req.oidc.user.email);
     const receiver = await getUser(client, req.body.recipient);
     text = req.body.message;
 
     if (receiver != false) {
-
         data = { sentTo: receiver.username, sentBy: sender.username, message: text, time: new Date() };
-        console.log(data)
         await addMessage(client, data);
-
     }
 
 
