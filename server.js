@@ -24,7 +24,7 @@ app.disable('x-powered-by');
 
 const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, armyLosses } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
-const { getUser, getUserByEmail, getUserById, deleteUser, getAllTrades, addTrade, getTrade, setDatabaseValue, deleteTrade, hasTrades, getUserTrades } = require("./modules/database.js");
+const { getUser, getUserByEmail, getUserById, deleteUser, getAllTrades, addTrade, getTrade, setDatabaseValue, deleteTrade, hasTrades, getUserTrades, getUserMessages, getMessageById, addMessage } = require("./modules/database.js");
 const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource, restoreWallHealth, lowerWallHealth } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources, incomeCalc } = require("./modules/resources.js");
 
@@ -530,10 +530,139 @@ app.post("/market/cancel/:id", requiresAuth(), async (req, res) => {
     res.redirect('/market')
 });
 
+app.get("/mailbox/inbox", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
+
+    messages = await getUserMessages(client, user.username);
+    if (messages === false) {
+        res.send("No messages")
+    } else {
+        res.redirect('/mailbox/inbox/page/1')
+    }
+});
+
+app.get("/mailbox/inbox/:id", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    username = user.username;
+    //TODO check only show your logs
+    //error check if invalid format
+
+    message = await getMessageById(client, new ObjectId(req.params.id));
+
+    if (message === false) {
+        res.send("No such message!")
+    } else {
+        res.render('pages/message')
+    }
+
+});
+
+
+app.post("/mailbox/send/new/:username", requiresAuth(), async (req, res) => {
+
+    const sender = await getUserByEmail(client, req.oidc.user.email);
+    const receiver = await getUser(client, req.params.username);
+    text = req.body.messageText;
+
+    if (receiver != false) {
+        data = { sentTo: req.params.username, sentBy: sender.username, message: text, time: new Date() };
+        await addMessage(client, data);
+        res.redirect('/mailbox')
+    } else {
+        res.send("No such user")
+    }
+
+});
+
+app.get("/mailbox/send/", requiresAuth(), async (req, res) => {
+    res.render('pages/writeMessage')
+});
+
+
+app.post("/mailbox/send/new", requiresAuth(), async (req, res) => {
+
+    console.log("pppppppppp")
+    const sender = await getUserByEmail(client, req.oidc.user.email);
+    const receiver = await getUser(client, req.body.recipient);
+    text = req.body.message;
+
+    if (receiver != false) {
+
+        data = { sentTo: req.params.username, sentBy: sender.username, message: text, time: new Date() };
+        console.log(data)
+        await addMessage(client, data);
+
+    }
+
+
+    res.render('pages/mailbox')
+});
+
+app.get("/mailbox/inbox/page/:nr", requiresAuth(), async (req, res) => {
+
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    username = user.username;
+    result = await getUserMessages(client, user.username)
+
+    maxPages = Math.ceil(Object.keys(result).length / 20);
+    //if check size/nr/osv, nr can't be negative etc
+    //TODO error check alla URL inputs
+
+    nr = parseInt(req.params.nr);
+
+    if (nr < 1 || nr > maxPages || isNaN(nr)) {
+        //todo detect % and #
+        res.redirect('/mailbox/inbox/page/1')
+    } else {
+
+        if (result.length === 0) {
+            res.render('pages/inbox')
+        }
+
+        currentPage = parseInt(req.params.nr);
+
+        var startPoint = 0;
+        if (currentPage == 1) {
+            startPoint = 0
+        } else {
+            startPoint = (currentPage - 1) * 20;
+        }
+
+        const objectToArray2 = result => {
+            const keys = Object.keys(result);
+            const res = [];
+            for (let i = 0; i < keys.length; i++) {
+                res.push(result[keys[i]]);
+            };
+            return res;
+        };
+
+        tempArray = objectToArray2(result);
+        reverseArray = [];
+
+        for (i = tempArray.length - 1; i >= 0; i--) {
+            reverseArray.push(tempArray[i]);
+            //   console.log(i)
+        }
+
+        const objectToArray = reverseArray => {
+            const keys = Object.keys(reverseArray);
+            const res = [];
+            for (let i = startPoint; i < startPoint + 20; i++) {
+                res.push(reverseArray[keys[i]]);
+                if (reverseArray[keys[i + 1]] === null || reverseArray[keys[i + 1]] === undefined) {
+                    i = Number.MAX_SAFE_INTEGER;
+                }
+            };
+            return res;
+        };
+        filteredResult = objectToArray(reverseArray);
+
+        res.render('pages/inbox')
+    }
+});
+
 app.post("/market/buy/:id", requiresAuth(), async (req, res) => {
-
-
-    console.log("vaaaaaaa")
     //TODO not buy your own stuff
 
     const buyer = await getUserByEmail(client, req.oidc.user.email);

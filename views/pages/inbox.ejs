@@ -1,0 +1,79 @@
+<html>
+
+<head>
+
+    <title>Inbox</title>
+    <link rel="stylesheet" type="text/css" href="../../../static/style.css" />
+
+</head>
+
+<body>
+
+
+
+    <% if (result.length> 0 ){ %>
+        <% for (var i=0; i < filteredResult.length; i++ ) { %>
+            <a href="/mailbox/inbox/<%= filteredResult[i]._id %>">Message from <%=filteredResult[i].sentBy%></a> at <%=
+                filteredResult[i].time.toLocaleDateString() %>
+                <%= filteredResult[i].time.toLocaleTimeString() %><br>
+                    <% } %>
+
+                        <div class="pagination">
+
+                            <% if ( currentPage> 4){%>
+                                <a href="/mailbox/inbox/page/<%= currentPage -4%>">&laquo;</a>
+                                <%}%>
+                                    <% if (currentPage> 3) {%>
+                                        <a href="/mailbox/inbox/page/<%= currentPage -3%>">
+                                            <%= currentPage -3 %>
+                                        </a>
+                                        <%}%>
+                                            <% if (currentPage> 2) {%>
+                                                <a href="/mailbox/inbox/page/<%= currentPage -2%>">
+                                                    <%= currentPage -2 %>
+                                                </a>
+                                                <%}%>
+                                                    <% if (currentPage> 1) {%>
+                                                        <a href="/mailbox/inbox/page/<%= currentPage -1%>">
+                                                            <%= currentPage -1 %>
+                                                        </a>
+                                                        <%}%>
+                                                            <a href="#" class="active">
+                                                                <%= currentPage %>
+                                                            </a>
+                                                            <% if (currentPage<maxPages ) {%>
+                                                                <a href="/mailbox/inbox/page/<%= currentPage +1%>">
+                                                                    <%= currentPage +1%>
+                                                                </a>
+                                                                <%}%>
+                                                                    <% if (currentPage+1<maxPages ) {%>
+                                                                        <a
+                                                                            href="/mailbox/inbox/page/<%= currentPage +2%>">
+                                                                            <%= currentPage +2%>
+                                                                        </a>
+                                                                        <%}%>
+                                                                            <% if (currentPage+2<maxPages ) {%>
+                                                                                <a
+                                                                                    href="/mailbox/inbox/page/<%= currentPage +3%>">
+                                                                                    <%= currentPage +3%>
+                                                                                </a>
+                                                                                <%}%>
+                                                                                    <% if (currentPage+3<maxPages ) {%>
+                                                                                        <a
+                                                                                            href="/mailbox/inbox/page/<%= currentPage +4%>">&raquo;</a>
+                                                                                        <%}%>
+                                                                                            <%} else {%>
+                                                                                                No messages
+                                                                                                <% } %>
+
+                        </div>
+                        <br>
+
+
+
+
+
+
+</body>
+
+</html>

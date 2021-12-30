@@ -62,4 +62,26 @@ module.exports = {
         }
         return result;
     },
+    getUserMessages: async function (client, username) {
+        const cursor = client.db("gamedb").collection("messages").find({ $or: [{ "sentBy": username }, { "sentTo": username }] })
+        const result = await cursor.toArray();
+        if (result[0] === undefined) {
+            return false;
+        }
+        return result;
+    },
+    getMessageById: async function (client, id) {
+        const result = client.db("gamedb").collection("messages").findOne({ "_id": id });
+        if (result === undefined) {
+            return false;
+        }
+        return result;
+    },
+    addMessage: async function (client, data) {
+        try {
+            return await client.db("gamedb").collection("messages").insertOne(data);
+        } catch (e) {
+            console.log(e);
+        }
+    },
 }
