@@ -972,21 +972,20 @@ app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
 
-    maxWallHealth = user.wallLevel * 100;
+    const maxWallHealth = user.wallLevel * 100;
 
     if (user.currentWallHealth < maxWallHealth) {
 
+        const type = "wall"
 
-        type = "wall"
-
-        lumberCost = await calcBuildingLumberCost(type, user.wallLevel);
-        stoneCost = await calcBuildingStoneCost(type, user.wallLevel);
-        ironCost = await calcBuildingIronCost(type, user.wallLevel);
-        goldCost = await calcBuildingGoldCost(type, user.wallLevel);
+        const lumberCost = await calcBuildingLumberCost(type, user.wallLevel);
+        const stoneCost = await calcBuildingStoneCost(type, user.wallLevel);
+        const ironCost = await calcBuildingIronCost(type, user.wallLevel);
+        const goldCost = await calcBuildingGoldCost(type, user.wallLevel);
 
         if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
             await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
-            restoreWallHealth(client, user);
+            restoreWallHealth(client, user); //await?
         } else {
             console.log("bbbb");
         }
@@ -1009,15 +1008,12 @@ app.get("/town/workshop", requiresAuth(), async (req, res) => {
 
     const workshop = user.workshopLevel;
 
-    const batteringrams = user.batteringrams;
-    const siegetowers = user.siegetowers;
+    const lumberCost = await calcBuildingLumberCost(type, workshop + 1);
+    const stoneCost = await calcBuildingStoneCost(type, workshop + 1);
+    const ironCost = await calcBuildingIronCost(type, workshop + 1);
+    const goldCost = await calcBuildingGoldCost(type, workshop + 1);
 
-    lumberCost = await calcBuildingLumberCost(type, workshop + 1);
-    stoneCost = await calcBuildingStoneCost(type, workshop + 1);
-    ironCost = await calcBuildingIronCost(type, workshop + 1);
-    goldCost = await calcBuildingGoldCost(type, workshop + 1);
-
-    res.render('pages/workshop', { workshop, batteringrams, siegetowers })
+    res.render('pages/workshop', { user, workshop, lumberCost, stoneCost, ironCost, goldCost })
 });
 
 app.post("/town/workshop/train", requiresAuth(), async (req, res) => {
