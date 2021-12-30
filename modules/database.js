@@ -46,4 +46,20 @@ module.exports = {
     deleteTrade: async function (client, id) {
         return await client.db("gamedb").collection("trades").deleteOne({ "_id": id });
     },
+    hasTrades: async function (client, username) {
+        const cursor = client.db("gamedb").collection("trades").find({ "seller": username })
+        const result = await cursor.toArray();
+        if (result[0] === undefined) {
+            return false;
+        }
+        return true;
+    },
+    getUserTrades: async function (client, username) {
+        const cursor = client.db("gamedb").collection("trades").find({ "seller": username })
+        const result = await cursor.toArray();
+        if (result[0] === undefined) {
+            return false;
+        }
+        return result;
+    },
 }

@@ -24,7 +24,7 @@ app.disable('x-powered-by');
 
 const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, armyLosses } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
-const { getUser, getUserByEmail, getUserById, deleteUser, getAllTrades, addTrade, getTrade, setDatabaseValue, deleteTrade } = require("./modules/database.js");
+const { getUser, getUserByEmail, getUserById, deleteUser, getAllTrades, addTrade, getTrade, setDatabaseValue, deleteTrade, hasTrades, getUserTrades } = require("./modules/database.js");
 const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource, restoreWallHealth, lowerWallHealth } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources, incomeCalc } = require("./modules/resources.js");
 
@@ -135,21 +135,27 @@ async function main() {
                     currentWallHealth = JSON.stringify(user.currentWallHealth);
 
                     updateDamage = false;
+                    checkTrades = false;
 
                     if (grain !== null && grain !== undefined) {
                         io.to(userMap[i]).emit("updateGrain", grain);
+                        checkTrades = true;
                     };
                     if (lumber !== null && lumber !== undefined) {
                         io.to(userMap[i]).emit("updateLumber", lumber);
+                        checkTrades = true;
                     };
                     if (stone !== null && stone !== undefined) {
                         io.to(userMap[i]).emit("updateStone", stone);
+                        checkTrades = true;
                     };
                     if (iron !== null && iron !== undefined) {
                         io.to(userMap[i]).emit("updateIron", iron);
+                        checkTrades = true;
                     };
                     if (gold !== null && gold !== undefined) {
                         io.to(userMap[i]).emit("updateGold", gold);
+                        checkTrades = true;
                     };
                     if (recruits !== null && recruits !== undefined) {
                         io.to(userMap[i]).emit("updateRecruits", recruits);
@@ -240,6 +246,10 @@ async function main() {
                     if (updateDamage) {
                         io.to(userMap[i]).emit("updatePower");
                     };
+
+                    if (checkTrades) {
+                        validateUserTrades(i);
+                    }
 
                 } else {
                     //console.log('fel')
@@ -469,9 +479,10 @@ app.get("/profile/:username", requiresAuth(), async (req, res) => {
 
 app.get("/market", requiresAuth(), async (req, res) => {
 
+    const user = await getUserByEmail(client, req.oidc.user.email);
     const trades = await getAllTrades(client);
 
-    res.render('pages/market', { trades });
+    res.render('pages/market', { trades, user });
 });
 
 app.post("/market/sell", requiresAuth(), async (req, res) => {
@@ -508,8 +519,24 @@ app.post("/market/sell", requiresAuth(), async (req, res) => {
     res.redirect("/market");
 });
 
+app.post("/market/cancel/:id", requiresAuth(), async (req, res) => {
+
+    console.log("apa1")
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const trade = await getTrade(client, req.params.id);
+
+    if (user.username === trade.seller) {
+        console.log("apa2")
+        await deleteTrade(client, new ObjectId(trade._id));
+    }
+
+    res.redirect('/market')
+});
+
 app.post("/market/buy/:id", requiresAuth(), async (req, res) => {
 
+
+    console.log("vaaaaaaa")
     //TODO not buy your own stuff
 
     const buyer = await getUserByEmail(client, req.oidc.user.email);
@@ -1364,6 +1391,39 @@ async function checkAll() {
         addResources(client, user.username);
     });
 }
+
+async function validateUserTrades(id) {
+    user = await getUserById(client, id);
+    currentGrain = user.grain;
+    currentLumber = user.lumber;
+    currentStone = user.stone;
+    currentIron = user.iron;
+    currentGold = user.gold;
+    var cancelTrade = false;
+    if (await hasTrades(client, user.username)) {
+        trades = await getUserTrades(client, user.username);
+
+        for (let i = 0; i < trades.length; i++) {
+            if (trades[i].sellResource === "Grain" && trades[i].sellAmount > currentGrain) {
+                cancelTrade = true;
+            } else if (trades[i].sellResource === "Lumber" && trades[i].sellAmount > currentLumber) {
+                cancelTrade = true;
+            } else if (trades[i].sellResource === "Stone" && trades[i].sellAmount > currentStone) {
+                cancelTrade = true;
+            } else if (trades[i].sellResource === "Iron" && trades[i].sellAmount > currentIron) {
+                cancelTrade = true;
+            } else if (trades[i].sellResource === "Gold" && trades[i].sellAmount > currentGold) {
+                cancelTrade = true;
+            }
+
+            if (cancelTrade) {
+                await deleteTrade(client, trades[i]._id);
+            }
+        }
+    };
+}
+
+
 
 //måste köra för alla så folk kan anfalla folk som är afk
 //ev kör när någon interagerar med afk folk
