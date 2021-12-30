@@ -574,12 +574,14 @@ app.post("/mailbox/send/new/:username", requiresAuth(), async (req, res) => {
 
 });
 
-app.get("/mailbox/send", requiresAuth(), async (req, res) => {
-    res.render('pages/writeMessage')
-});
-
 app.get("/mailbox/send/:username", requiresAuth(), async (req, res) => {
-    recipient = req.params.username;
+
+    if (req.params.username === "blank") {
+        recipient = "";
+    } else {
+        recipient = req.params.username;
+    }
+
     res.render('pages/writeMessage')
 });
 
