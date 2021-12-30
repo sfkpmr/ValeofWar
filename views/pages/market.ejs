@@ -78,17 +78,17 @@
     <% for (let i=0; i < trades.length; i++) { %>
         <form class="form-inline" method="post">
             <label>Trading</label>
-            <label for="a">
+            <label for="sellAmount">
                 <%= trades[i].sellAmount %>
             </label>
-            <label for="b">
+            <label for="sellResource">
                 <%= trades[i].sellResource.toLowerCase() %>
             </label>
             <label>for</label>
-            <label for="c">
+            <label for="buyAmount">
                 <%= trades[i].buyAmount %>
             </label>
-            <label for="d">
+            <label for="buyResource">
                 <%= trades[i].buyResource.toLowerCase() %>
             </label>
 

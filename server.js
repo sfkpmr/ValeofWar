@@ -520,13 +520,10 @@ app.post("/market/sell", requiresAuth(), async (req, res) => {
 });
 
 app.post("/market/cancel/:id", requiresAuth(), async (req, res) => {
-
-    console.log("apa1")
     const user = await getUserByEmail(client, req.oidc.user.email);
     const trade = await getTrade(client, req.params.id);
 
     if (user.username === trade.seller) {
-        console.log("apa2")
         await deleteTrade(client, new ObjectId(trade._id));
     }
 
