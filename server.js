@@ -541,7 +541,21 @@ app.get("/messages/inbox", requiresAuth(), async (req, res) => {
     }
 });
 
-app.get("/messages/:id", requiresAuth(), async (req, res) => {
+app.get("/messages/new", requiresAuth(), async (req, res) => {
+
+    recipient = "";
+    res.render("pages/writeMessage")
+
+});
+
+app.get("/messages/new/:username", requiresAuth(), async (req, res) => {
+
+    recipient = req.params.username;
+    res.render("pages/writeMessage")
+
+});
+
+app.get("/messages/inbox/:id", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     username = user.username;
     //TODO check only show your logs
@@ -558,20 +572,17 @@ app.get("/messages/:id", requiresAuth(), async (req, res) => {
 });
 
 app.post("/messages/send", requiresAuth(), async (req, res) => {
-
     const sender = await getUserByEmail(client, req.oidc.user.email);
     const receiver = await getUser(client, req.body.recipient);
     text = req.body.message;
-    receiverName = receiver.username;
 
     if (receiver != false) {
-        data = { sentTo: receiverName, sentBy: sender.username, message: text, time: new Date() };
+        data = { sentTo: receiver.username, sentBy: sender.username, message: text, time: new Date() };
         result = await addMessage(client, data);
-        res.redirect(`/messages/${result}`);
+        res.redirect(`/messages/inbox/${result}`);
     } else {
         res.send("No such user")
     }
-
 });
 
 app.post("/messages/send/:username", requiresAuth(), async (req, res) => {
@@ -582,7 +593,7 @@ app.post("/messages/send/:username", requiresAuth(), async (req, res) => {
     if (receiver != false) {
         data = { sentTo: receiver.username, sentBy: sender.username, message: text, time: new Date() };
         result = await addMessage(client, data);
-        res.redirect(`/messages/${result}`);
+        res.redirect(`/messages/inbox/${result}`);
     } else {
         res.send("No such user")
     }
@@ -1449,8 +1460,6 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
         } else {
             console.log("bbbb");
         }
-
-
         res.redirect(`/land/${type}/${resourceId}`);
     }
 

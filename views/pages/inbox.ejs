@@ -18,14 +18,14 @@
 
             <% if (filteredResult[i].sentBy===username) { %>
 
-                <a href="/messages/<%= filteredResult[i]._id %>">Message to <%=filteredResult[i].sentTo%></a> at
+                <a href="/messages/inbox/<%= filteredResult[i]._id %>">Message to <%=filteredResult[i].sentTo%></a> at
                 <%= filteredResult[i].time.toLocaleDateString() %>
                     <%= filteredResult[i].time.toLocaleTimeString() %><br>
 
                         <% } else { %>
 
 
-                            <a href="/messages/<%= filteredResult[i]._id %>">Message from
+                            <a href="/messages/inbox/<%= filteredResult[i]._id %>">Message from
                                 <%=filteredResult[i].sentBy%>
                             </a> at
                             <%= filteredResult[i].time.toLocaleDateString() %>
