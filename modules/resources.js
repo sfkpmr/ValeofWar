@@ -1,4 +1,4 @@
-const { getUser, incDatabaseValue } = require("../modules/database.js");
+const { getUser, incDatabaseValue, getUserById, hasTrades, getUserTrades, deleteTrade } = require("../modules/database.js");
 
 const baseGrainIncome = 7, baseLumberIncome = 6, baseStoneIncome = 3, baseIronIncome = 2, baseGoldIncome = 1;
 
@@ -132,6 +132,36 @@ myObj = {
         }
 
         return income = levels * baseIncome;
+    },
+    validateUserTrades: async function (client, id) {
+        const user = await getUserById(client, id);
+        const currentGrain = user.grain;
+        const currentLumber = user.lumber;
+        const currentStone = user.stone;
+        const currentIron = user.iron;
+        const currentGold = user.gold;
+
+        if (await hasTrades(client, user.username)) {
+            trades = await getUserTrades(client, user.username);
+            for (let i = 0; i < trades.length; i++) {
+                let cancelTrade = false;
+                if (trades[i].sellResource === "Grain" && trades[i].sellAmount > currentGrain) {
+                    cancelTrade = true;
+                } else if (trades[i].sellResource === "Lumber" && trades[i].sellAmount > currentLumber) {
+                    cancelTrade = true;
+                } else if (trades[i].sellResource === "Stone" && trades[i].sellAmount > currentStone) {
+                    cancelTrade = true;
+                } else if (trades[i].sellResource === "Iron" && trades[i].sellAmount > currentIron) {
+                    cancelTrade = true;
+                } else if (trades[i].sellResource === "Gold" && trades[i].sellAmount > currentGold) {
+                    cancelTrade = true;
+                }
+
+                if (cancelTrade) {
+                    await deleteTrade(client, trades[i]._id);
+                }
+            }
+        };
     }
 };
 

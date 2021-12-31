@@ -328,18 +328,25 @@ module.exports = {
     restoreWallHealth: async function (client, user) {
 
         newHealth = user.wallLevel * 100;
-        data = {currentWallHealth: newHealth};
-     
+        data = { currentWallHealth: newHealth };
+
         await setDatabaseValue(client, user.username, data);
     },
     lowerWallHealth: async function (client, defender, amount) {
 
         newHealth = defender.currentWallHealth - amount;
-        if (newHealth < 0){
+        if (newHealth < 0) {
             newHealth = 0;
         }
-        data = {currentWallHealth: newHealth};
-     
+        data = { currentWallHealth: newHealth };
+
         await setDatabaseValue(client, defender.username, data);
+    },
+    convertNegativeToZero: function (amount) {
+        if (amount < 0) {
+            return 0;
+        } else {
+            return amount;
+        }
     }
 }

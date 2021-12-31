@@ -1,7 +1,7 @@
 body {
   margin: 0;
   font-family: "Lato", sans-serif;
-  background-image:linear-gradient(darkgrey, white);
+  background-image:linear-gradient(grey, lightgrey);
   background-repeat: no-repeat;
 }
 
@@ -15,7 +15,6 @@ body {
 }
 
 .top {
-  background-image:linear-gradient(darkgrey);
   grid-area: top;
   padding-top: 20px;
   padding-left: 20%;
@@ -34,7 +33,6 @@ body {
 }
 
 .side {
-   background-image:linear-gradient(darkgrey);;
   grid-area: side;
 }
 
