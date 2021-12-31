@@ -6,7 +6,7 @@ troopsObject = {
     addTroops: async function (client, username, data) {
         await incDatabaseValue(client, username, data);
     },
-    craftArmor: async function (client, username, data) {
+    addArmor: async function (client, username, data) {
         await incDatabaseValue(client, username, data);
     },
     trainTroops: async function (client, user, trainees) {

@@ -24,9 +24,9 @@ app.disable('x-powered-by');
 
 const { addTrade } = require("./modules/market.js");
 const { getAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
-const { trainTroops, craftArmor } = require("./modules/troops.js");
+const { trainTroops } = require("./modules/troops.js");
 const { getUser, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage } = require("./modules/database.js");
-const { upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost } = require("./modules/buildings.js");
+const { upgradeBuilding, craftArmor, upgradeResource, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getIncome } = require("./modules/resources.js");
 
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
@@ -790,15 +790,10 @@ app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
     const maxWallHealth = user.wallLevel * 100;
 
     if (user.currentWallHealth < maxWallHealth) {
+        const totalCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel - 1)
 
-        const type = "wall"
-        const lumberCost = await calcBuildingLumberCost(type, user.wallLevel);
-        const stoneCost = await calcBuildingStoneCost(type, user.wallLevel);
-        const ironCost = await calcBuildingIronCost(type, user.wallLevel);
-        const goldCost = await calcBuildingGoldCost(type, user.wallLevel);
-
-        if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
-            await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
+        if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
+            await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
             restoreWallHealth(client, user); //await?
         } else {
             console.log("bbbb");
@@ -821,7 +816,6 @@ app.get("/town/workshop", requiresAuth(), async (req, res) => {
 });
 
 app.post("/town/workshop/train", requiresAuth(), async (req, res) => {
-
     const user = await getUserByEmail(client, req.oidc.user.email);
     const batteringrams = convertNegativeToZero(parseInt(req.body.batteringram));
     const siegetowers = convertNegativeToZero(parseInt(req.body.siegetower));
@@ -834,19 +828,16 @@ app.post("/town/workshop/train", requiresAuth(), async (req, res) => {
 app.get("/town/stables", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("stables", user.stablesLevel)
-
     res.render('pages/stables', { user, totalCost });
 });
 
 app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("blacksmith", user.blacksmithLevel)
-
     res.render('pages/blacksmith', { user, totalCost });
 });
 
 app.post("/town/blacksmith/craft", requiresAuth(), async (req, res) => {
-
     const user = await getUserByEmail(client, req.oidc.user.email);
 
     const boots = convertNegativeToZero(parseInt(req.body.boots));
@@ -858,20 +849,9 @@ app.post("/town/blacksmith/craft", requiresAuth(), async (req, res) => {
     const spears = convertNegativeToZero(parseInt(req.body.spear));
     const swords = convertNegativeToZero(parseInt(req.body.sword));
 
-    const lumberCost = calcLumberCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
-    const ironCost = calcIronCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
-    const goldCost = calcGoldCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
+    const craftingOrder = { boots: boots, bracers: bracers, helmets: helmets, lances: lances, longbows: longbows, shields: shields, spears: spears, swords: swords };
+    await craftArmor(client, user, craftingOrder);
 
-    const updateUser = {
-        "shields": shields, "swords": swords, "bracers": bracers, "longbows": longbows, "spears": spears, "lances": lances, "boots": boots, "helmets": helmets
-    }
-
-    if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, 0, 0, 0)) {
-        await craftArmor(client, user.username, updateUser);
-        await removeResources(client, user.username, goldCost, lumberCost, 0, ironCost, 0, 0, 0);
-    } else {
-        console.log("bbbb");
-    }
     //error check?
     res.redirect('/town/blacksmith');
 

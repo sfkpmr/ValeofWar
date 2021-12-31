@@ -618,9 +618,6 @@ attackObject = {
         return value;
     },
     attackFunc: async function (client, attacker, defender) {
-
-        console.log(this)
-
         const attackDamage = attackObject.calculateAttack(attacker);
         const defenseDamage = attackObject.calculateDefense(defender);
 
@@ -633,7 +630,6 @@ attackObject = {
 
         const wallBonus = attackObject.calcWallBonus(defender);
 
-
         const goldLoot = Math.round((defender.gold / resourceDivider) * wallBonus);
         const lumberLoot = Math.round((defender.lumber / resourceDivider) * wallBonus);
         const stoneLoot = Math.round((defender.stone / resourceDivider) * wallBonus);
@@ -643,17 +639,11 @@ attackObject = {
         stealResources(client, attacker.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
         loseResources(client, defender.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
 
-
         const attackerLosses = await attackObject.armyLosses(client, attacker, attackTroopDivider);
         const defenderLosses = await attackObject.armyLosses(client, defender, defenseTroopDivider);
 
         const wallDamage = Math.floor(Math.random() * 5);
-
-
-
         await lowerWallHealth(client, defender, wallDamage);
-
-
         const data = {
             "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "defender": defender.username, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLoot,
             "grainLoot": grainLoot, "lumberLoot": lumberLoot, "stoneLoot": stoneLoot, "ironLoot": ironLoot, "wallDamage": wallDamage

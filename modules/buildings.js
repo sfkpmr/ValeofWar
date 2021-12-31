@@ -1,4 +1,5 @@
 const { incDatabaseValue, setDatabaseValue } = require("../modules/database.js");
+const { checkIfCanAfford } = require("../modules/resources.js");
 
 const archer = { grain: 25, lumber: 50, gold: 10 };
 const spearman = { grain: 25, lumber: 50 };
@@ -107,6 +108,57 @@ buildingObject = {
         cost += swords * sword.gold;
 
         return Math.round(cost);
+    },
+    calcTotalCraftCost: function (armorOrder) {
+        let boots, bracers, helmets, lances, longbows, shields, spears, swords;
+
+        if (armorOrder.boots !== null && armorOrder.boots !== undefined) {
+            boots = armorOrder.boots;
+        } else {
+            boots = 0;
+        }
+        if (armorOrder.bracers !== null && armorOrder.bracers !== undefined) {
+            bracers = armorOrder.bracers;
+        } else {
+            bracers = 0;
+        }
+        if (armorOrder.helmets !== null && armorOrder.helmets !== undefined) {
+            helmets = armorOrder.helmets;
+        } else {
+            helmets = 0;
+        }
+        if (armorOrder.lances !== null && armorOrder.lances !== undefined) {
+            lances = armorOrder.lances;
+        } else {
+            lances = 0;
+        }
+        if (armorOrder.longbows !== null && armorOrder.longbows !== undefined) {
+            longbows = armorOrder.longbows;
+        } else {
+            longbows = 0;
+        }
+        if (armorOrder.shields !== null && armorOrder.shields !== undefined) {
+            shields = armorOrder.shields;
+        } else {
+            shields = 0;
+        }
+        if (armorOrder.spears !== null && armorOrder.spears !== undefined) {
+            spears = armorOrder.spears;
+        } else {
+            spears = 0;
+        }
+        if (armorOrder.swords !== null && armorOrder.swords !== undefined) {
+            swords = armorOrder.swords;
+        } else {
+            swords = 0;
+        }
+
+        const lumberCost = buildingObject.calcLumberCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
+        const ironCost = buildingObject.calcIronCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
+        const goldCost = buildingObject.calcGoldCraftCost(boots, bracers, helmets, lances, longbows, shields, spears, swords);
+
+        return { lumberCost: lumberCost, ironCost: ironCost, goldCost: goldCost };
+
     },
     upgradeBuilding: async function (client, username, building) {
         const updatedUser = { [building]: 1 };
@@ -356,6 +408,19 @@ buildingObject = {
         const goldCost = await buildingObject.calcBuildingGoldCost(type, buildingLevel + 1);
 
         return { lumberCost: lumberCost, stoneCost: stoneCost, ironCost: ironCost, goldCost: goldCost };
+
+    },
+    craftArmor: async function (client, user, craftingOrder) {
+        const totalCost = buildingObject.calcTotalCraftCost(craftingOrder);
+
+        console.log(totalCost)
+
+        if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0)) {
+            await troopsObject.addArmor(client, user.username, craftingOrder);
+            await resourceObject.removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0);
+        } else {
+            console.log("bbbb");
+        }
 
     }
 };

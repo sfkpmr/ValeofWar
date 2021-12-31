@@ -15,7 +15,6 @@ resourceObject = {
         const stables = user.stablesLevel;
 
         var recruitsIncome = trainingfield * 5, horseIncome = stables * 3;
-
         var farmLevels = 0, lumberLevels = 0, stoneLevels = 0, ironLevels = 0, goldLevels = 0;
 
         farms.forEach(grainCalc);
@@ -68,7 +67,6 @@ resourceObject = {
         const updatedUser = { "grain": newGrain, "lumber": newLumber, "stone": newStone, "gold": newGold, "iron": newIron, "recruits": newRecruits, "horses": newHorses };
 
         await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
-
     },
 
     checkIfCanAfford: async function (client, username, goldCost, lumberCost, stoneCost, ironCost, grainCost, recruitCost, horseCost) {
