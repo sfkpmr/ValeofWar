@@ -15,11 +15,11 @@
 
     There is no <%= title.toLowerCase() %> here yet!<br><br>
 
-        <div class="resources"> Cost to establish: <%= lumberCost %> <img src="../../static/images/wood.png"
+        <div class="resources"> Cost to establish: <%= totalCost.lumberCost %> <img src="../../static/images/wood.png"
                     height="35px" title="Lumber">
-                <%= stoneCost %> <img src="../../static/images/stone.png" height="35px" title="Stone">
-                    <%= ironCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron"> and <%=
-                            goldCost %>
+                <%= totalCost.stoneCost %> <img src="../../static/images/stone.png" height="35px" title="Stone">
+                    <%= totalCost.ironCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron">
+                        and <%= totalCost.goldCost %>
                             <img src="../../static/images/gold-ingots.png" height="35px" title="Gold"> </div><br>
 
         <form action="/land/<%= title.toLowerCase().replace(/ /g, '') %>/<%= resourceId %>/establish">

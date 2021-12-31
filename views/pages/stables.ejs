@@ -11,7 +11,7 @@
 
 <body>
 
-    <% if (stables===0){ %>
+    <% if (user.stablesLevel===0){ %>
 
         We don't have a stable yet!<br>
         <br>
@@ -31,19 +31,19 @@
 
         <% } else { %>
 
-            Stables level: <%= stables %> <br>
+            Stables level: <%= user.stablesLevel %> <br>
                 <br>
                 The stables is where you raise horses and train additional soldiers on horseback<br><br>
                 <div class="training">
                     <form action="/town/stables/train" method="POST">
                         <label for="horsemen"><img src="../static/images/horseman.png" height="35px" title="Horseman">
-                            Current: <%= horsemen %>
+                            Current: <%= user.horsemen %>
                                 Train:</label>
                         <input type="number" id="horsemen" name="horsemen" value="0" min=0> Attack damage: <output
                             id="horsemanAttackDamage">0</output> Defense damage: <output
                             id="horsemanDefenseDamage">0</output><br>
                         <label for="knights"><img src="../static/images/knight.png" height="35px" title="Knight">
-                            Current: <%= knights %>
+                            Current: <%= user.knights %>
                                 Train:</label>
                         <input type="number" id="knights" name="knights" value="0" min=0> Attack damage: <output
                             id="knightAttackDamage">0</output> Defense damage: <output
@@ -65,13 +65,13 @@
                     </form>
                 </div>
 
-                <% if (stables <=19){ %>
+                <% if (user.stablesLevel <=19){ %>
                     <div class="resources">
-                        Upgrade cost: <%= lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
-                                title="Lumber">, <%= stoneCost %> <img src="../static/images/stone.png" alt="Stone"
-                                    title="Stone">, <%= ironCost %>
+                        Upgrade cost: <%= totalCost.lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
+                                title="Lumber">, <%= totalCost.stoneCost %> <img src="../static/images/stone.png"
+                                    alt="Stone" title="Stone">, <%= totalCost.ironCost %>
                                     <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron">
-                                    and <%= goldCost %>
+                                    and <%= totalCost.goldCost %>
                                         <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div>
                     <br>
                     <form action="/town/stables/upgrade" method="POST">

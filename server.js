@@ -25,8 +25,8 @@ app.disable('x-powered-by');
 const { addTrade } = require("./modules/market.js");
 const { getAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
-const { getUser, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, setDatabaseValue, deleteTrade, getUserMessages, getMessageById, addMessage } = require("./modules/database.js");
-const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource, restoreWallHealth, convertNegativeToZero } = require("./modules/buildings.js");
+const { getUser, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage } = require("./modules/database.js");
+const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades } = require("./modules/resources.js");
 
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
@@ -275,14 +275,13 @@ app.use('/static', express.static('static'));
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
-    authenticated = req.oidc.isAuthenticated();
+    const authenticated = req.oidc.isAuthenticated();
 
     if (authenticated) {
         res.redirect("/vale")
     } else {
         res.sendFile(path.join(__dirname, '/static/index.html'));
     }
-
 });
 
 app.delete("/settings/delete", requiresAuth(), async (req, res) => {
@@ -601,74 +600,8 @@ app.get("/messages/inbox/page/:nr", requiresAuth(), async (req, res) => {
 });
 
 app.post("/market/buy/:id", requiresAuth(), async (req, res) => {
-
     const buyer = await getUserByEmail(client, req.oidc.user.email);
-    const currentBuyerGrain = buyer.grain;
-    const currentBuyerLumber = buyer.lumber;
-    const currentBuyerStone = buyer.stone;
-    const currentBuyerIron = buyer.iron;
-    const currentBuyerGold = buyer.gold;
-    const trade = await getTrade(client, req.params.id);
-    const seller = await getUser(client, trade.seller);
-    const buyResource = trade.buyResource.toString().toLowerCase();;
-    const buyAmount = trade.buyAmount;
-    const sellResource = trade.sellResource.toString().toLowerCase();
-    const sellAmount = trade.sellAmount;
-    const currentSellerGrain = seller.grain;
-    const currentSellerLumber = seller.lumber;
-    const currentSellerStone = seller.stone;
-    const currentSellerIron = seller.iron;
-    const currentSellerGold = seller.gold;
-    var sellerNewSellResourceAmount, sellerNewBuyResourceAmount, buyerNewSellResourceAmount, buyerNewBuyResourceAmount;
-    var saleIsOk = false;
-
-    if (buyResource === "grain" && currentBuyerGrain >= buyAmount) {
-        sellerNewBuyResourceAmount = currentSellerGrain + buyAmount;
-        buyerNewBuyResourceAmount = currentBuyerGrain - buyAmount;
-        saleIsOk = true; //checking that buyer can afford, need to check if seller has trade?
-    } else if (buyResource === "lumber" && currentBuyerLumber >= buyAmount) {
-        sellerNewBuyResourceAmount = currentSellerLumber + buyAmount;
-        buyerNewBuyResourceAmount = currentBuyerLumber - buyAmount;
-        saleIsOk = true;
-    } else if (buyResource === "stone" && currentBuyerStone >= buyAmount) {
-        sellerNewBuyResourceAmount = currentSellerStone + buyAmount;
-        buyerNewBuyResourceAmount = currentBuyerStone - buyAmount;
-        saleIsOk = true;
-    } else if (buyResource === "iron" && currentBuyerIron >= buyAmount) {
-        sellerNewBuyResourceAmount = currentSellerIron + buyAmount;
-        buyerNewBuyResourceAmount = currentBuyerIron - buyAmount;
-        saleIsOk = true;
-    } else if (buyResource === "gold" && currentBuyerGold >= buyAmount) {
-        sellerNewBuyResourceAmount = currentSellerGold + buyAmount;
-        buyerNewBuyResourceAmount = currentBuyerGold - buyAmount;
-        saleIsOk = true;
-    }
-
-    if (sellResource === "grain") {
-        sellerNewSellResourceAmount = currentSellerGrain - sellAmount;
-        buyerNewSellResourceAmount = currentBuyerGrain + sellAmount;
-    } else if (sellResource === "lumber") {
-        sellerNewSellResourceAmount = currentSellerLumber - sellAmount;
-        buyerNewSellResourceAmount = currentBuyerLumber + sellAmount;
-    } else if (sellResource === "stone") {
-        sellerNewSellResourceAmount = currentSellerStone - sellAmount;
-        buyerNewSellResourceAmount = currentBuyerStone + sellAmount;
-    } else if (sellResource === "iron") {
-        sellerNewSellResourceAmount = currentSellerIron - sellAmount;
-        buyerNewSellResourceAmount = currentBuyerIron + sellAmount;
-    } else if (sellResource === "gold") {
-        sellerNewSellResourceAmount = currentSellerGold - sellAmount;
-        buyerNewSellResourceAmount = currentBuyerGold + sellAmount;
-    }
-
-    const dataToSeller = { [sellResource]: sellerNewSellResourceAmount, [buyResource]: sellerNewBuyResourceAmount };
-    const dataToBuyer = { [sellResource]: buyerNewSellResourceAmount, [buyResource]: buyerNewBuyResourceAmount };
-
-    if (saleIsOk && buyer.username != seller.username) {
-        await setDatabaseValue(client, seller.username, dataToSeller);
-        await setDatabaseValue(client, buyer.username, dataToBuyer);
-        await deleteTrade(client, new ObjectId(trade._id));
-    }
+    await buyTrade(client, buyer);
 
     res.redirect('/market')
 });
@@ -678,19 +611,17 @@ app.get("/mailbox", requiresAuth(), async (req, res) => {
 });
 
 app.get("/mailbox/log", requiresAuth(), async (req, res) => {
-
     const user = await getUserByEmail(client, req.oidc.user.email);
     const result = await getInvolvedAttackLogs(client, user.username)
+
     if (result) {
         res.redirect('/mailbox/log/page/1')
     } else {
         res.send("You haven't attacked anyone yet!")
     }
-
 });
 
 app.get("/mailbox/log/:id", requiresAuth(), async (req, res) => {
-
     const user = await getUserByEmail(client, req.oidc.user.email);
     const username = user.username;
     let searchObject;
@@ -715,10 +646,10 @@ app.get("/mailbox/log/:id", requiresAuth(), async (req, res) => {
 });
 
 app.get("/mailbox/log/page/:nr", requiresAuth(), async (req, res) => {
+    //TODO use one method for both log and messages?
     const user = await getUserByEmail(client, req.oidc.user.email);
     const username = user.username;
     const result = await getInvolvedAttackLogs(client, user.username)
-
     const maxPages = Math.ceil(Object.keys(result).length / 20);
     //if check size/nr/osv, nr can't be negative etc
     //TODO error check alla URL inputs
@@ -797,50 +728,38 @@ app.get("/town", requiresAuth(), async (req, res) => {
 });
 
 app.get("/town/barracks", requiresAuth(), async (req, res) => {
-
     const user = await getUserByEmail(client, req.oidc.user.email);
-    const type = "barracks"
-    const barracksLevel = user.barracksLevel;
+    const totalCost = await calculateTotalBuildingUpgradeCost("barracks", user.barracksLevel)
 
-    const lumberCost = await calcBuildingLumberCost(type, barracksLevel + 1);
-    const stoneCost = await calcBuildingStoneCost(type, barracksLevel + 1);
-    const ironCost = await calcBuildingIronCost(type, barracksLevel + 1);
-    const goldCost = await calcBuildingGoldCost(type, barracksLevel + 1);
-
-    res.render('pages/barracks', { user, lumberCost, stoneCost, ironCost, goldCost });
+    res.render('pages/barracks', { user, totalCost });
 });
 
 app.get("/online", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
-    temp = [];
+    const temp = [];
 
-    for (var i in userMap) {
+    for (let i in userMap) {
         result = await getUserById(client, i);
         temp.push(result.username);
     }
 
-    res.render('pages/online', { user });
+    res.render('pages/online', { user, temp });
 });
 
 app.get("/town/wall", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
-    const wall = user.wallLevel;
-    const maxWallHealth = wall * 100;
-    const type = "wall"
-    const defenseBonus = wall * 10;
+    const maxWallHealth = user.wallLevel * 100;
+    const defenseBonus = user.wallLevel * 10;
 
-    var notAtMaxHealth;
+    let notAtMaxHealth;
     if (maxWallHealth === user.currentWallHealth) {
         notAtMaxHealth = true;
     } else {
         notAtMaxHealth = false;
     }
 
-    const lumberCost = await calcBuildingLumberCost(type, wall + 1);
-    const stoneCost = await calcBuildingStoneCost(type, wall + 1);
-    const ironCost = await calcBuildingIronCost(type, wall + 1);
-    const goldCost = await calcBuildingGoldCost(type, wall + 1);
-    res.render('pages/wall', { user, wall, maxWallHealth, notAtMaxHealth, lumberCost, stoneCost, ironCost, goldCost, defenseBonus })
+    const totalCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel)
+    res.render('pages/wall', { user, maxWallHealth, notAtMaxHealth, totalCost, defenseBonus })
 });
 
 app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
@@ -880,14 +799,11 @@ app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
     if (level >= 20) {
         res.redirect(`/town/${req.params.building}`);
     } else {
-        const lumberCost = await calcBuildingLumberCost(type, level + 1);
-        const stoneCost = await calcBuildingStoneCost(type, level + 1);
-        const ironCost = await calcBuildingIronCost(type, level + 1);
-        const goldCost = await calcBuildingGoldCost(type, level + 1);
+        const totalCost = await calculateTotalBuildingUpgradeCost(type, level)
 
-        if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
+        if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
             await upgradeBuilding(client, user.username, buildingName);
-            await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
+            await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
             if (type === "wall") {
                 await restoreWallHealth(client, user);
             }
@@ -899,18 +815,10 @@ app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
 });
 
 app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
-
     const user = await getUserByEmail(client, req.oidc.user.email);
-    const trainingField = user.trainingfieldLevel;
-    const type = "trainingfield"
+    const totalCost = await calculateTotalBuildingUpgradeCost("trainingfield", user.trainingfieldLevel)
 
-    const lumberCost = await calcBuildingLumberCost(type, trainingField + 1);
-    const stoneCost = await calcBuildingStoneCost(type, trainingField + 1);
-    const ironCost = await calcBuildingIronCost(type, trainingField + 1);
-    const goldCost = await calcBuildingGoldCost(type, trainingField + 1);
-
-    res.render('pages/trainingField', { trainingField, lumberCost, stoneCost, ironCost, goldCost })
-
+    res.render('pages/trainingField', { user, totalCost })
 });
 
 app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
@@ -944,15 +852,9 @@ app.get("/credits", async (req, res) => {
 
 app.get("/town/workshop", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
-    const type = "workshop"
-    const workshop = user.workshopLevel;
+    const totalCost = await calculateTotalBuildingUpgradeCost("workshop", user.workshopLevel)
 
-    const lumberCost = await calcBuildingLumberCost(type, workshop + 1);
-    const stoneCost = await calcBuildingStoneCost(type, workshop + 1);
-    const ironCost = await calcBuildingIronCost(type, workshop + 1);
-    const goldCost = await calcBuildingGoldCost(type, workshop + 1);
-
-    res.render('pages/workshop', { user, workshop, lumberCost, stoneCost, ironCost, goldCost })
+    res.render('pages/workshop', { user, totalCost })
 });
 
 app.post("/town/workshop/train", requiresAuth(), async (req, res) => {
@@ -981,34 +883,17 @@ app.post("/town/workshop/train", requiresAuth(), async (req, res) => {
 });
 
 app.get("/town/stables", requiresAuth(), async (req, res) => {
-
     const user = await getUserByEmail(client, req.oidc.user.email);
-    const type = "stables"
-    const stables = user.stablesLevel;
+    const totalCost = await calculateTotalBuildingUpgradeCost("stables", user.stablesLevel)
 
-    const lumberCost = await calcBuildingLumberCost(type, stables + 1);
-    const stoneCost = await calcBuildingStoneCost(type, stables + 1);
-    const ironCost = await calcBuildingIronCost(type, stables + 1);
-    const goldCost = await calcBuildingGoldCost(type, stables + 1);
-
-    const horsemen = user.horsemen;
-    const knights = user.knights;
-
-    res.render('pages/stables', { stables, lumberCost, stoneCost, ironCost, goldCost, horsemen, knights });
+    res.render('pages/stables', { user, totalCost });
 });
 
 app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
-
     const user = await getUserByEmail(client, req.oidc.user.email);
-    const type = "blacksmith"
-    const blacksmith = user.blacksmithLevel;
+    const totalCost = await calculateTotalBuildingUpgradeCost("blacksmith", user.blacksmithLevel)
 
-    const lumberCost = await calcBuildingLumberCost(type, blacksmith + 1);
-    const stoneCost = await calcBuildingStoneCost(type, blacksmith + 1);
-    const ironCost = await calcBuildingIronCost(type, blacksmith + 1);
-    const goldCost = await calcBuildingGoldCost(type, blacksmith + 1);
-
-    res.render('pages/blacksmith', { user, blacksmith, boots, bracers, helmets, lances, longbows, shields, spears, swords, lumberCost, stoneCost, ironCost, goldCost });
+    res.render('pages/blacksmith', { user, totalCost });
 });
 
 app.post("/town/blacksmith/craft", requiresAuth(), async (req, res) => {
@@ -1031,7 +916,6 @@ app.post("/town/blacksmith/craft", requiresAuth(), async (req, res) => {
     const updateUser = {
         "shields": shields, "swords": swords, "bracers": bracers, "longbows": longbows, "spears": spears, "lances": lances, "boots": boots, "helmets": helmets
     }
-    console.log(updateUser);
 
     if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, 0, 0, 0)) {
         await craftArmor(client, user.username, updateUser);
@@ -1170,23 +1054,20 @@ app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
     //  title = "none"
     //  resourceLevel = 0;
     //}
-    const lumberCost = await calcBuildingLumberCost(type, resourceLevel + 1);
-    const stoneCost = await calcBuildingStoneCost(type, resourceLevel + 1);
-    const ironCost = await calcBuildingIronCost(type, resourceLevel + 1);
-    const goldCost = await calcBuildingGoldCost(type, resourceLevel + 1);
+    const totalCost = await calculateTotalBuildingUpgradeCost(type, resourceLevel)
 
     if (invalidId) {
         res.redirect("/land");
     } else if (resourceLevel !== undefined) {
-        res.render('pages/resourcefield', { lumberCost, stoneCost, ironCost, goldCost });
+        //use one field for all levels, none to 20
+        res.render('pages/resourcefield', { totalCost });
     } else {
-        res.render('pages/emptyfield', { lumberCost, stoneCost, ironCost, goldCost });
+        res.render('pages/emptyfield', { totalCost });
     }
 
 });
 
 app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
-
     var type = req.params.type;
     const resourceId = parseInt(req.params.number);
     const user = await getUserByEmail(client, req.oidc.user.email);
@@ -1254,14 +1135,12 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
     if (resourceLevel >= 20) {
         res.redirect("/land");
     } else {
-        const lumberCost = await calcBuildingLumberCost(type, resourceLevel + 1);
-        const stoneCost = await calcBuildingStoneCost(type, resourceLevel + 1);
-        const ironCost = await calcBuildingIronCost(type, resourceLevel + 1);
-        const goldCost = await calcBuildingGoldCost(type, resourceLevel + 1);
 
-        if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0)) {
+        const totalCost = await calculateTotalBuildingUpgradeCost(type, resourceLevel)
+
+        if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
             await upgradeResource(client, user.username, updatedUser, resource);
-            await removeResources(client, user.username, goldCost, lumberCost, stoneCost, ironCost, 0, 0, 0);
+            await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
         } else {
             console.log("bbbb");
         }
@@ -1271,7 +1150,7 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
 });
 
 app.get("/land/:type/:number/establish", requiresAuth(), async (req, res) => {
-
+    //Same thing as upgrade?
     //TODO error check
     type = req.params.type;
     resourceId = parseInt(req.params.number);
@@ -1301,7 +1180,6 @@ app.get("/land/:type/:number/establish", requiresAuth(), async (req, res) => {
         updatedUser.push(1);
         updatedUser = { quarries: updatedUser }
     }
-
     const lumberCost = await calcBuildingLumberCost(type, 1);
     const stoneCost = await calcBuildingStoneCost(type, 1);
     const ironCost = await calcBuildingIronCost(type, 1);

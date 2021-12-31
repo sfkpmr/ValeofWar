@@ -19,12 +19,13 @@
             The <%= title.toLowerCase() %> provides additional resources for your town.
                 <br> <br>
                 <% if (resourceLevel <=19){ %>
-                    <div class="resources"> Upgrade cost: <%= lumberCost %> <img src="../../static/images/wood.png"
-                                height="35px" title="Lumber">
-                            <%= stoneCost %> <img src="../../static/images/stone.png" height="35px" title="Stone">
-                                <%= ironCost %> <img src="../../static/images/iron-ingots.png" height="35px"
+                    <div class="resources"> Upgrade cost: <%= totalCost.lumberCost %> <img
+                                src="../../static/images/wood.png" height="35px" title="Lumber">
+                            <%= totalCost.stoneCost %> <img src="../../static/images/stone.png" height="35px"
+                                    title="Stone">
+                                <%= totalCost.ironCost %> <img src="../../static/images/iron-ingots.png" height="35px"
                                         title="Iron">
-                                    and <%= goldCost %>
+                                    and <%= totalCost.goldCost %>
                                         <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
                     </div>
                     <br>

@@ -10,9 +10,9 @@
 <body>
 
     <form action="/messages/send" method="POST">
-        <label for="recipient">Name:</label>
+        <label for="recipient">Name:</label><br>
         <input type="text" id="recipient" name="recipient" value="<%=recipient%>" required><br>
-        <label for="message">Message:</label>
+        <label for="message">Message:</label><br>
         <textarea id="message" name="message" rows="4" cols="50" required></textarea><br>
         <input type="submit" value="Send">
     </form>

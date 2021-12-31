@@ -14,7 +14,7 @@
     <!-- TODO server check barrack exists and has levels-->
     <!-- TODO detect empty fields? Gives NaN crafting cost-->
 
-    <% if (blacksmith===0){ %>
+    <% if (user.blacksmithLevel===0){ %>
 
         We don't have a blacksmith yet!<br>
         <br>
@@ -32,7 +32,7 @@
 
 
         <% } else { %>
-            Blacksmith level: <%= blacksmith %> <br><br>
+            Blacksmith level: <%= user.blacksmithLevel %> <br><br>
                 At the blacksmith you can craft armor and weapons for your troops.<br>
                 <br>
                 <div class="training">
@@ -97,15 +97,15 @@
                     <br>
                 </div>
 
-                <% if (blacksmith <=19){ %>
+                <% if (user.blacksmithLevel <=19){ %>
 
 
                     <div class="resources">
-                        Upgrade cost: <%= lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
-                                title="Lumber">, <%= stoneCost %> <img src="../static/images/stone.png" alt="Stone"
-                                    title="Stone">, <%= ironCost %>
+                        Upgrade cost: <%= totalCost.lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
+                                title="Lumber">, <%= totalCost.stoneCost %> <img src="../static/images/stone.png"
+                                    alt="Stone" title="Stone">, <%= totalCost.ironCost %>
                                     <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron">
-                                    and <%= goldCost %>
+                                    and <%= totalCost.goldCost %>
                                         <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div>
                     <br>
                     <form action="/town/blacksmith/upgrade" method="POST">

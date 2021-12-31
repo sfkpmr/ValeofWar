@@ -55,7 +55,6 @@ resourceObject = {
     },
 
     removeResources: async function (client, username, gold, lumber, stone, iron, grain, recruits, horses) {
-
         const user = await getUser(client, username);
 
         const newGold = user.gold - gold;
@@ -73,7 +72,6 @@ resourceObject = {
     },
 
     checkIfCanAfford: async function (client, username, goldCost, lumberCost, stoneCost, ironCost, grainCost, recruitCost, horseCost) {
-
         const user = await getUser(client, username);
 
         console.log("User has " + user.gold + " " + user.lumber + " " + user.stone + " " + user.iron + " " + user.grain + " " + user.recruits + " " + user.horses);
@@ -113,6 +111,7 @@ resourceObject = {
         const newGrain = user.grain - grain;
 
         const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
+        console.log('User spent', updatedUser)
         await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
     },
     incomeCalc: function (type, levels) {
@@ -162,6 +161,9 @@ resourceObject = {
                 }
             }
         };
+    },
+    getIncome: async function (client, id) {
+
     }
 };
 

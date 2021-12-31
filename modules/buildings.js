@@ -30,8 +30,7 @@ const quarryBaseCost = { lumber: 500, stone: 100, iron: 100, gold: 100 };
 const ironMineBaseCost = { lumber: 750, stone: 500, iron: 100, gold: 100 };
 const goldMineBaseCost = { lumber: 1000, stone: 250, iron: 250, gold: 100 };
 
-module.exports = {
-
+buildingObject = {
     calcGoldTrainCost: function (archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers) {
         var cost = 0;
 
@@ -348,5 +347,17 @@ module.exports = {
         } else {
             return amount;
         }
+    },
+    calculateTotalBuildingUpgradeCost: async function (type, buildingLevel) {
+
+        const lumberCost = await buildingObject.calcBuildingLumberCost(type, buildingLevel + 1);
+        const stoneCost = await buildingObject.calcBuildingStoneCost(type, buildingLevel + 1);
+        const ironCost = await buildingObject.calcBuildingIronCost(type, buildingLevel + 1);
+        const goldCost = await buildingObject.calcBuildingGoldCost(type, buildingLevel + 1);
+
+        return { lumberCost: lumberCost, stoneCost: stoneCost, ironCost: ironCost, goldCost: goldCost };
+
     }
-}
+};
+
+module.exports = buildingObject;

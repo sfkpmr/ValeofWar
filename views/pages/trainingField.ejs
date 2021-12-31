@@ -13,17 +13,19 @@
 
     <!-- TODO server check barrack exists and has levels-->
 
-    Training field level: <%= trainingField %> <br>
+    Training field level: <%= user.trainingfieldLevel %> <br>
         <br>
         The training field gathers fresh recruits for your army.
         <br>
         <br>
         <div class="resources">
-            Upgrade cost: <%= lumberCost %> <img src="../static/images/wood.png" alt="Lumber" title="Lumber">, <%=
-                    stoneCost %> <img src="../static/images/stone.png" alt="Stone" title="Stone">, <%= ironCost %>
-                        <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> and <%= goldCost %>
+            Upgrade cost: <%= totalCost.lumberCost %> <img src="../static/images/wood.png" alt="Lumber" title="Lumber">,
+                <%= totalCost.stoneCost %> <img src="../static/images/stone.png" alt="Stone" title="Stone">, <%=
+                        totalCost.ironCost %>
+                        <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> and <%= totalCost.goldCost
+                            %>
                             <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div><br>
-        <% if (trainingField <=19){ %>
+        <% if (user.trainingfieldLevel <=19){ %>
             <form action="/town/trainingfield/upgrade" method="POST">
                 <input type="submit" class="submitButton" value="Upgrade">
             </form>

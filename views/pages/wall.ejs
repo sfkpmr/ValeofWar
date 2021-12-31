@@ -13,7 +13,7 @@
 
     <!-- TODO server check barrack exists and has levels-->
 
-    Wall level: <%= wall %> <br>
+    Wall level: <%= user.wallLevel %> <br>
         <br>
         Walls boosts your defenses and hides part of your resources from enemy raiders.<br><br>
 
@@ -27,14 +27,14 @@
                             <input type="submit" class="submitButton" value="Repair">
                         </form><br>
                         <%}%>
-                            <% if (wall <=19){ %>
+                            <% if (user.wallLevel <=19){ %>
                                 <div class="resources">
-                                    Upgrade cost: <%= lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
-                                            title="Lumber">,
-                                        <%= stoneCost %> <img src="../static/images/stone.png" alt="Stone"
-                                                title="Stone">, <%= ironCost %>
+                                    Upgrade cost: <%= totalCost.lumberCost %> <img src="../static/images/wood.png"
+                                            alt="Lumber" title="Lumber">,
+                                        <%= totalCost.stoneCost %> <img src="../static/images/stone.png" alt="Stone"
+                                                title="Stone">, <%= totalCost.ironCost %>
                                                 <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> and
-                                                <%= goldCost %>
+                                                <%= totalCost.goldCost %>
                                                     <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold">
                                 </div>
                                 <br>

@@ -16,7 +16,7 @@
 
     <!-- TODO remote script -->
 
-    <% if (workshop===0){ %>
+    <% if (user.workshopLevel===0){ %>
 
         We don't have a workshop yet!<br>
         <br>
@@ -36,7 +36,7 @@
 
         <% } else { %>
 
-            Workshop level: <%= workshop %> <br>
+            Workshop level: <%= user.workshopLevel %> <br>
                 <br>
                 The workshop lets you construct powerful siege weapons.
                 <br>
@@ -64,13 +64,13 @@
                     </form>
                 </div>
                 <br>
-                <% if (workshop <=19){ %>
+                <% if (user.workshopLevel <=19){ %>
                     <div class="resources">
-                        Upgrade cost: <%= lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
-                                title="Lumber">, <%= stoneCost %> <img src="../static/images/stone.png" alt="Stone"
-                                    title="Stone">, <%= ironCost %>
+                        Upgrade cost: <%= totalCost.lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
+                                title="Lumber">, <%= totalCost.stoneCost %> <img src="../static/images/stone.png"
+                                    alt="Stone" title="Stone">, <%= totalCost.ironCost %>
                                     <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron">
-                                    and <%= goldCost %>
+                                    and <%= totalCost.goldCost %>
                                         <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div><br>
                     <form action="/town/workshop/upgrade" method="POST">
                         <input type="submit" class="submitButton" value="Upgrade">
