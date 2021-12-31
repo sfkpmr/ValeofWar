@@ -116,7 +116,7 @@ resourceObject = {
     },
     incomeCalc: function (type, levels) {
 
-        var baseIncome = 0;
+        let baseIncome = 0;
 
         if (type === "grain") {
             baseIncome = baseGrainIncome;
@@ -162,8 +162,43 @@ resourceObject = {
             }
         };
     },
-    getIncome: async function (client, id) {
+    getIncome: async function (user, requestedIncome) {
+        let levels = 0, income = 0, count;
+        function calc(i) {
+            levels += i;
+        };
 
+        if (requestedIncome === "getGrainIncome") {
+            count = user.farms;
+            count.forEach(calc);
+            income = resourceObject.incomeCalc("grain", levels);
+        } else if (requestedIncome === "getLumberIncome") {
+            count = user.lumberCamps;
+            count.forEach(calc);
+            income = resourceObject.incomeCalc("lumber", levels);
+        }
+        else if (requestedIncome === "getStoneIncome") {
+            count = user.quarries;
+            count.forEach(calc);
+            income = resourceObject.incomeCalc("stone", levels);
+        }
+        else if (requestedIncome === "getIronIncome") {
+            count = user.ironMines;
+            count.forEach(calc);
+            income = resourceObject.incomeCalc("iron", levels);
+        }
+        else if (requestedIncome === "getGoldIncome") {
+            count = user.goldMines;
+            count.forEach(calc);
+            income = resourceObject.incomeCalc("gold", levels);
+        } else if (requestedIncome === "getRecruitsIncome") {
+            income = user.trainingfieldLevel * 5;
+        } else if (requestedIncome === "getHorseIncome") {
+            income = user.stablesLevel * 3;
+        } else {
+            levels = null;
+        }
+        return income;
     }
 };
 
