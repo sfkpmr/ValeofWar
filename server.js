@@ -22,11 +22,12 @@ app.use(compression());
 // Remove x-powered-by Express
 app.disable('x-powered-by');
 
-const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, armyLosses, calcResourceDivider, calcattackTroopDivider, calcdefenseTroopDivider, attackFunc } = require("./modules/attack.js");
+const { addTrade } = require("./modules/market.js");
+const { getAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
-const { getUser, getUserByEmail, getUserById, deleteUser, getAllTrades, addTrade, getTrade, setDatabaseValue, deleteTrade, hasTrades, getUserTrades, getUserMessages, getMessageById, addMessage } = require("./modules/database.js");
-const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource, restoreWallHealth, lowerWallHealth, convertNegativeToZero } = require("./modules/buildings.js");
-const { addResources, removeResources, checkIfCanAfford, stealResources, loseResources, incomeCalc, validateUserTrades } = require("./modules/resources.js");
+const { getUser, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, setDatabaseValue, deleteTrade, getUserMessages, getMessageById, addMessage } = require("./modules/database.js");
+const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource, restoreWallHealth, convertNegativeToZero } = require("./modules/buildings.js");
+const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades } = require("./modules/resources.js");
 
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
 const client = new MongoClient(uri);
@@ -446,36 +447,14 @@ app.get("/market", requiresAuth(), async (req, res) => {
 });
 
 app.post("/market/sell", requiresAuth(), async (req, res) => {
-
     const user = await getUserByEmail(client, req.oidc.user.email);
-    const currentGrain = user.grain;
-    const currentLumber = user.lumber;
-    const currentStone = user.stone;
-    const currentIron = user.iron;
-    const currentGold = user.gold;
 
     const sellAmount = parseInt(req.body.sellAmount);
     const sellResource = req.body.sellResource;
     const buyAmount = parseInt(req.body.buyAmount);
     const buyResource = req.body.buyResource;
-    var makeTrade = false;
+    await addTrade(client, user, sellAmount, sellResource, buyAmount, buyResource);
 
-    if (sellResource === "Grain" && sellAmount <= currentGrain) {
-        makeTrade = true;
-    } else if (sellResource === "Lumber" && sellAmount <= currentLumber) {
-        makeTrade = true;
-    } else if (sellResource === "Stone" && sellAmount <= currentStone) {
-        makeTrade = true;
-    } else if (sellResource === "Iron" && sellAmount <= currentIron) {
-        makeTrade = true;
-    } else if (sellResource === "Gold" && sellAmount <= currentGold) {
-        makeTrade = true;
-    }
-
-    if (sellResource !== buyResource && makeTrade) {
-        data = { seller: user.username, sellAmount: sellAmount, sellResource: sellResource, buyAmount: buyAmount, buyResource: buyResource }
-        addTrade(client, data);
-    }
     res.redirect("/market");
 });
 
