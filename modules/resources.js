@@ -2,7 +2,7 @@ const { getUser, incDatabaseValue, getUserById, hasTrades, getUserTrades, delete
 
 const baseGrainIncome = 7, baseLumberIncome = 6, baseStoneIncome = 3, baseIronIncome = 2, baseGoldIncome = 1;
 
-myObj = {
+resourceObject = {
     addResources: async function (client, username) {
         const user = await getUser(client, username);
 
@@ -40,11 +40,11 @@ myObj = {
             goldLevels += i;
         };
 
-        const grainIncome = myObj.incomeCalc("grain", farmLevels);
-        const lumberIncome = myObj.incomeCalc("lumber", lumberLevels);
-        const stoneIncome = myObj.incomeCalc("stone", stoneLevels);
-        const ironIncome = myObj.incomeCalc("iron", ironLevels);
-        const goldIncome = myObj.incomeCalc("gold", goldLevels);
+        const grainIncome = resourceObject.incomeCalc("grain", farmLevels);
+        const lumberIncome = resourceObject.incomeCalc("lumber", lumberLevels);
+        const stoneIncome = resourceObject.incomeCalc("stone", stoneLevels);
+        const ironIncome = resourceObject.incomeCalc("iron", ironLevels);
+        const goldIncome = resourceObject.incomeCalc("gold", goldLevels);
 
         // console.log(`Giving ${grainIncome} grain, ${lumberIncome} lumber, ${goldIncome} gold, ${stoneIncome} stone, ${ironIncome} iron, ${recruitsIncome} recruits and ${horseIncome} horses to ${username}.`);
 
@@ -165,4 +165,4 @@ myObj = {
     }
 };
 
-module.exports = myObj;
+module.exports = resourceObject;

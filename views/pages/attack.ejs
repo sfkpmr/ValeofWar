@@ -23,11 +23,11 @@
     <br>
     <br>
     <% if (log.attacker === username) {%>
-        <form action=<%=attackUrl%> >
+        <form action=<%=attackUrl%> method="post">
 <input type="submit" value="Attack again!">
     </form>
         <% } else { %>
-            <form action=<%=attackUrl%>>
+            <form action=<%=attackUrl%> method="post">
             <input type="submit" value="Attack back!">
         </form>
         <%}%>

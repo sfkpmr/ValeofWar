@@ -1,6 +1,8 @@
 const e = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 const { setDatabaseValue } = require("../modules/database.js");
+const { stealResources, loseResources } = require("../modules/resources.js");
+const { lowerWallHealth } = require("../modules/buildings.js");
 
 archer = { attackDamage: 10, defenseDamage: 10 };
 spearman = { attackDamage: 10, defenseDamage: 10 };
@@ -19,8 +21,7 @@ shield = { attackDamage: 10, defenseDamage: 20 };
 spear = { attackDamage: 10, defenseDamage: 25 };
 sword = { attackDamage: 10, defenseDamage: 10 };
 
-module.exports = {
-
+attackObject = {
     getAttackLog: async function (client, ObjectId) {
         const result = await client.db("gamedb").collection("attacks").findOne({ "_id": ObjectId });
         if (result === null) {
@@ -41,7 +42,7 @@ module.exports = {
         }
         return result;
     },
-    calculateAttack: async function (attacker) {
+    calculateAttack: function (attacker) {
 
         //todo rename variable to user?
         const archers = attacker.archers;
@@ -248,7 +249,7 @@ module.exports = {
         return archerDamage + spearmenDamage + horsemenDamage + knightsDamage + swordsmenDamage + batteringramDamage + siegetowerDamage;
     },
 
-    calculateDefense: async function (defender) {
+    calculateDefense: function (defender) {
 
         //todo losing armor
         const archers = defender.archers;
@@ -558,7 +559,118 @@ module.exports = {
         await setDatabaseValue(client, username.username, data);
 
         return battleLosses;
+    },
+    calcResourceDivider: function (closeness) {
+        let value;
+        if (closeness <= 0.1) {
+            value = 100;
+        } else if (closeness <= 0.2) {
+            value = 80;
+        } else if (closeness <= 0.4) {
+            value = 20;
+        } else if (closeness <= 0.6) {
+            value = 5;
+        } else if (closeness <= 0.8) {
+            value = 20;
+        } else if (closeness <= 0.9) {
+            value = 10;
+        } else {
+            value = 100;
+        }
+        return value;
+    },
+    calcattackTroopDivider: function (closeness) {
+        let value;
+        if (closeness <= 0.1) {
+            value = 5;
+        } else if (closeness <= 0.2) {
+            value = 7;
+        } else if (closeness <= 0.4) {
+            value = 10;
+        } else if (closeness <= 0.6) {
+            value = 5;
+        } else if (closeness <= 0.8) {
+            value = 20;
+        } else if (closeness <= 0.9) {
+            value = 30;
+        } else {
+            value = 50;
+        }
+        return value;
+    },
+    calcdefenseTroopDivider: function (closeness) {
+        let value;
+        if (closeness <= 0.1) {
+            value = 100;
+        } else if (closeness <= 0.2) {
+            value = 80;
+        } else if (closeness <= 0.4) {
+            value = 60;
+        } else if (closeness <= 0.6) {
+            value = 5;
+        } else if (closeness <= 0.8) {
+            value = 10;
+        } else if (closeness <= 0.9) {
+            value = 10;
+        } else {
+            value = 20;
+        }
+        return value;
+    },
+    attackFunc: async function (client, attacker, defender) {
 
+        console.log(this)
+
+        const attackDamage = attackObject.calculateAttack(attacker);
+        const defenseDamage = attackObject.calculateDefense(defender);
+
+        console.log("Total defense: " + defenseDamage + " Total attack: " + attackDamage);
+
+        const closeness = attackObject.calcCloseness(attackDamage, defenseDamage);
+        const resourceDivider = attackObject.calcResourceDivider(closeness);
+        const attackTroopDivider = attackObject.calcattackTroopDivider(closeness);
+        const defenseTroopDivider = attackObject.calcdefenseTroopDivider(closeness);
+
+        const wallBonus = attackObject.calcWallBonus(defender);
+
+
+        const goldLoot = Math.round((defender.gold / resourceDivider) * wallBonus);
+        const lumberLoot = Math.round((defender.lumber / resourceDivider) * wallBonus);
+        const stoneLoot = Math.round((defender.stone / resourceDivider) * wallBonus);
+        const grainLoot = Math.round((defender.grain / resourceDivider) * wallBonus);
+        const ironLoot = Math.round((defender.iron / resourceDivider) * wallBonus);
+
+        stealResources(client, attacker.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
+        loseResources(client, defender.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
+
+
+        const attackerLosses = await attackObject.armyLosses(client, attacker, attackTroopDivider);
+        const defenderLosses = await attackObject.armyLosses(client, defender, defenseTroopDivider);
+
+        const wallDamage = Math.floor(Math.random() * 5);
+
+
+
+        await lowerWallHealth(client, defender, wallDamage);
+
+
+        const data = {
+            "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "defender": defender.username, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLoot,
+            "grainLoot": grainLoot, "lumberLoot": lumberLoot, "stoneLoot": stoneLoot, "ironLoot": ironLoot, "wallDamage": wallDamage
+        };
+
+        const result = await attackObject.createAttackLog(client, data);
+
+        return result;
+
+    },
+    calcCloseness: function (attackDamage, defenseDamage) {
+        return attackDamage / (attackDamage + defenseDamage);
+    },
+    calcWallBonus: function (defender) {
+        return 1 - ((defender.wallLevel * 2.5) * 0.01);
     }
+};
 
-}
+module.exports = attackObject;
+

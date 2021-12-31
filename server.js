@@ -22,7 +22,7 @@ app.use(compression());
 // Remove x-powered-by Express
 app.disable('x-powered-by');
 
-const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, armyLosses } = require("./modules/attack.js");
+const { getAttackLog, createAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, armyLosses, calcResourceDivider, calcattackTroopDivider, calcdefenseTroopDivider, attackFunc } = require("./modules/attack.js");
 const { trainTroops, craftArmor } = require("./modules/troops.js");
 const { getUser, getUserByEmail, getUserById, deleteUser, getAllTrades, addTrade, getTrade, setDatabaseValue, deleteTrade, hasTrades, getUserTrades, getUserMessages, getMessageById, addMessage } = require("./modules/database.js");
 const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost, upgradeBuilding, calcLumberCraftCost, calcIronCraftCost, calcGoldCraftCost, calcBuildingLumberCost, calcBuildingStoneCost, calcBuildingIronCost, calcBuildingGoldCost, upgradeResource, restoreWallHealth, lowerWallHealth, convertNegativeToZero } = require("./modules/buildings.js");
@@ -1005,7 +1005,6 @@ app.get("/town/stables", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
     const type = "stables"
-
     const stables = user.stablesLevel;
 
     const lumberCost = await calcBuildingLumberCost(type, stables + 1);
@@ -1022,25 +1021,15 @@ app.get("/town/stables", requiresAuth(), async (req, res) => {
 app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
 
     const user = await getUserByEmail(client, req.oidc.user.email);
-
     const type = "blacksmith"
     const blacksmith = user.blacksmithLevel;
-
-    const boots = user.boots;
-    const bracers = user.bracers;
-    const helmets = user.helmets;
-    const lances = user.lances;
-    const longbows = user.longbows;
-    const shields = user.shields;
-    const spears = user.spears;
-    const swords = user.swords;
 
     const lumberCost = await calcBuildingLumberCost(type, blacksmith + 1);
     const stoneCost = await calcBuildingStoneCost(type, blacksmith + 1);
     const ironCost = await calcBuildingIronCost(type, blacksmith + 1);
     const goldCost = await calcBuildingGoldCost(type, blacksmith + 1);
 
-    res.render('pages/blacksmith', { blacksmith, boots, bracers, helmets, lances, longbows, shields, spears, swords, lumberCost, stoneCost, ironCost, goldCost });
+    res.render('pages/blacksmith', { user, blacksmith, boots, bracers, helmets, lances, longbows, shields, spears, swords, lumberCost, stoneCost, ironCost, goldCost });
 });
 
 app.post("/town/blacksmith/craft", requiresAuth(), async (req, res) => {
@@ -1081,9 +1070,7 @@ app.get("/land", requiresAuth(), async (req, res) => {
 });
 
 app.post("/town/stables/train", requiresAuth(), async (req, res) => {
-
     const user = await getUserByEmail(client, req.oidc.user.email);
-
     const horsemen = convertNegativeToZero(parseInt(req.body.horsemen));
     const knights = convertNegativeToZero(parseInt(req.body.knights));
 
@@ -1141,9 +1128,7 @@ app.post("/town/barracks/train", requiresAuth(), async (req, res) => {
 
 });
 
-app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
-
-    //TODO Make POST
+app.post("/profile/:username/attack", requiresAuth(), async (req, res) => {
     //TODO attack limiter //reset all at midnight? //losses
     //TODO validate db input
 
@@ -1152,75 +1137,10 @@ app.get("/profile/:username/attack", requiresAuth(), async (req, res) => {
     if (defender === false) {
         res.send("No such user");
     } else {
-
         console.log(attacker.username + " tries to attack " + defender.username);
-
-        var attackDamage = await calculateAttack(attacker);
-        var defenseDamage = await calculateDefense(defender);
-
-        console.log("Total defense: " + defenseDamage + " Total attack: " + attackDamage);
-
-        const closeness = attackDamage / (attackDamage + defenseDamage);
-        var resourceDivider, attackTroopDivider, defenseTroopDivider;
-
-        if (closeness <= 0.1) {
-            resourceDivider = 100;
-            attackTroopDivider = 5;
-            defenseTroopDivider = 100;
-        } else if (closeness <= 0.2) {
-            resourceDivider = 80;
-            attackTroopDivider = 7;
-            defenseTroopDivider = 80;
-        } else if (closeness <= 0.4) {
-            resourceDivider = 20;
-            attackTroopDivider = 10;
-            defenseTroopDivider = 60;
-        } else if (closeness <= 0.6) {
-            resourceDivider = 5;
-            attackTroopDivider = 5;
-            defenseTroopDivider = 5;
-        } else if (closeness <= 0.8) {
-            resourceDivider = 20;
-            attackTroopDivider = 20;
-            defenseTroopDivider = 10;
-        } else if (closeness <= 0.9) {
-            resourceDivider = 10;
-            attackTroopDivider = 30;
-            defenseTroopDivider = 10;
-        } else {
-            resourceDivider = 100;
-            attackTroopDivider = 50;
-            defenseTroopDivider = 20;
-        }
-
-        const wallBonus = 1 - ((defender.wallLevel * 2.5) * 0.01);
-
-        const goldLoot = Math.round((defender.gold / resourceDivider) * wallBonus);
-        const lumberLoot = Math.round((defender.lumber / resourceDivider) * wallBonus);
-        const stoneLoot = Math.round((defender.stone / resourceDivider) * wallBonus);
-        const grainLoot = Math.round((defender.grain / resourceDivider) * wallBonus);
-        const ironLoot = Math.round((defender.iron / resourceDivider) * wallBonus);
-
-        stealResources(client, attacker.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
-        loseResources(client, defender.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
-
-        const attackerLosses = await armyLosses(client, attacker, attackTroopDivider);
-        const defenderLosses = await armyLosses(client, defender, defenseTroopDivider);
-
-        const wallDamage = Math.floor(Math.random() * 5);
-
-        await lowerWallHealth(client, defender, wallDamage);
-
-        const data = {
-            "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "defender": defender.username, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLoot,
-            "grainLoot": grainLoot, "lumberLoot": lumberLoot, "stoneLoot": stoneLoot, "ironLoot": ironLoot, "wallDamage": wallDamage
-        };
-
-        const result = await createAttackLog(client, data);
-
+        result = await attackFunc(client, attacker, defender);
         res.redirect(`/mailbox/log/${result}`);
     }
-
 });
 
 app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
@@ -1414,7 +1334,6 @@ app.get("/land/:type/:number/establish", requiresAuth(), async (req, res) => {
     }
 
     res.redirect("/land");
-
 });
 
 async function checkAll() {
