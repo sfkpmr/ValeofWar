@@ -5,10 +5,22 @@ const swordsman = { grain: 50, iron: 50, gold: 25, attackDamage: 20, defenseDama
 function barracksTrainCost() {
     let grainCost = 0, lumberCost = 0, ironCost = 0, goldCost = 0;
 
-    archers = document.getElementById("archers").value;
-    spearmen = document.getElementById("spearmen").value;
-    swordsmen = document.getElementById("swordsmen").value;
+    let archers = parseInt(document.getElementById("archers").value);
+    let spearmen = parseInt(document.getElementById("spearmen").value);
+    let swordsmen = parseInt(document.getElementById("swordsmen").value);
 
+    if (archers < 0 || isNaN(archers)) {
+        archers = 0;
+        document.getElementById('archers').value = 0;
+    }
+    if (spearmen < 0 || isNaN(spearmen)) {
+        spearmen = 0;
+        document.getElementById('spearmen').value = 0;
+    }
+    if (swordsmen < 0 || isNaN(swordsmen)) {
+        swordsmen = 0;
+        document.getElementById('swordsmen').value = 0;
+    }
 
     grainCost += archers * archer.grain;
     grainCost += spearmen * spearman.grain;
@@ -26,7 +38,7 @@ function barracksTrainCost() {
     document.getElementById("lumber").innerText = lumberCost;
     document.getElementById("iron").innerText = ironCost;
     document.getElementById("gold").innerText = goldCost;
-    document.getElementById("recruits").innerText = parseInt(archers) + parseInt(spearmen) + parseInt(swordsmen);
+    document.getElementById("recruits").innerText = archers + spearmen + swordsmen;
 }
 
 document.getElementById("archers").addEventListener("input", barracksTrainCost);

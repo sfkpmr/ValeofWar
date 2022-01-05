@@ -320,7 +320,7 @@ app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
 });
 
 app.get("/api/:getIncome", requiresAuth(), urlencodedParser, [
-    check('getIncome').isAlpha().isLength({ min: 13, max: 15 })
+    check('getIncome').exists().isAlpha().isLength({ min: 13, max: 15 })
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
@@ -417,6 +417,8 @@ app.get("/profile/:username", requiresAuth(), urlencodedParser, [
                 res.render('pages/publicprofile', { username });
             }
         }
+    } else {
+        res.status(400).render('pages/400');
     }
 
 });
@@ -428,26 +430,29 @@ app.get("/market", requiresAuth(), async (req, res) => {
     res.render('pages/market', { user, trades });
 });
 
-app.post("/market/sell", requiresAuth(), urlencodedParser, [
-    check('sellAmount', 'Must be between 100 and 9999').exists().isNumeric().isLength({ min: 3, max: 4 }),
+app.post("/market/sell", requiresAuth(), urlencodedParser, [ //TODO set max nr of trades
+    check('sellAmount', 'Must be between 100 and 9999').exists().isNumeric({ no_symbols: true }).isLength({ min: 3, max: 4 }),
     check('sellResource').exists(), //TOOD check equals defined resources
-    check('buyAmount', 'Must be between 100 and 9999').exists().isNumeric().isLength({ min: 3, max: 4 }),
+    check('buyAmount', 'Must be between 100 and 9999').exists().isNumeric({ no_symbols: true }).isLength({ min: 3, max: 4 }),
     check('buyResource').exists()
 ], async (req, res) => {
     const errors = validationResult(req)
-    if (errors.isEmpty()) {
+    const sellAmount = parseInt(req.body.sellAmount);
+    const sellResource = req.body.sellResource;
+    const buyAmount = parseInt(req.body.buyAmount);
+    const buyResource = req.body.buyResource;
+    const resources = ['Grain', 'Lumber', 'Stone', 'Iron', 'Gold'];
+    if (errors.isEmpty() && resources.includes(sellResource) && resources.includes(buyResource)) {
         const user = await getUserByEmail(client, req.oidc.user.email);
 
-        const sellAmount = parseInt(req.body.sellAmount);
-        const sellResource = req.body.sellResource;
-        const buyAmount = parseInt(req.body.buyAmount);
-        const buyResource = req.body.buyResource;
         await addTrade(client, user, sellAmount, sellResource, buyAmount, buyResource);
+        res.redirect("/market");
+    } else {
+        res.status(400).render('pages/400');
     }
-    res.redirect("/market");
 });
 
-app.post("/market/cancel/:id", requiresAuth(), urlencodedParser, [
+app.post("/market/cancel/:id", requiresAuth(), urlencodedParser, [//change to delete request
     check('id').exists().isMongoId()
 ], async (req, res) => {
     const errors = validationResult(req)
@@ -460,6 +465,8 @@ app.post("/market/cancel/:id", requiresAuth(), urlencodedParser, [
         }
 
         res.redirect('/market')
+    } else {
+        res.status(400).render('pages/400');
     }
 
 });
@@ -487,6 +494,8 @@ app.get("/messages/new/:username", requiresAuth(), urlencodedParser, [
     if (errors.isEmpty()) {
         const recipient = req.params.username;
         res.render("pages/writeMessage", { recipient })
+    } else {
+        res.status(400).render('pages/400');
     }
 });
 
@@ -504,12 +513,14 @@ app.get("/messages/inbox/:id", requiresAuth(), urlencodedParser, [
         } else {
             res.send("No such message!")
         }
+    } else {
+        res.status(400).render('pages/400');
     }
 });
 
 app.post("/messages/send", requiresAuth(), urlencodedParser, [
     check('recipient').exists().isAlphanumeric().isLength({ min: 5, max: 15 }),
-    check('message').exists().isAlphanumeric().isLength({ max: 1000 }),
+    check('message').exists().isLength({ max: 1000 })//TODO handle ?!#%  ????
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
@@ -524,6 +535,8 @@ app.post("/messages/send", requiresAuth(), urlencodedParser, [
         } else {
             res.send("No such user")
         }
+    } else {
+        res.status(400).render('pages/400');
     }
 
 });
@@ -551,73 +564,73 @@ app.post("/messages/send", requiresAuth(), urlencodedParser, [
 // });
 
 app.get("/messages/inbox/page/:nr", requiresAuth(), urlencodedParser, [
-    check('nr').exists().isNumeric().isLength({ max: 4 })
-],
-    async (req, res) => {
-        const errors = validationResult(req)
-        if (errors.isEmpty()) {
-            const user = await getUserByEmail(client, req.oidc.user.email);
-            const username = user.username;
-            const result = await getUserMessages(client, user.username)
+    check('nr').exists().isNumeric({ no_symbols: true }).isLength({ max: 4 })
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        const username = user.username;
+        const result = await getUserMessages(client, user.username)
 
-            const maxPages = Math.ceil(Object.keys(result).length / 20);
-            //TODO error check alla URL inputs
+        const maxPages = Math.ceil(Object.keys(result).length / 20);
+        //TODO error check alla URL inputs
 
-            const nr = parseInt(req.params.nr);
+        const nr = parseInt(req.params.nr);
 
-            if (nr < 1 || nr > maxPages || isNaN(nr)) {
-                //todo detect % and #
-                res.redirect('/messages/inbox/page/1')
-            } else {
+        if (nr < 1 || nr > maxPages || isNaN(nr)) {
+            //todo detect % and #
+            res.redirect('/messages/inbox/page/1')
+        } else {
 
-                if (result.length === 0) {
-                    res.render('pages/inbox')
-                }
-
-                const currentPage = parseInt(req.params.nr);
-
-                let startPoint = 0;
-                if (currentPage == 1) {
-                    startPoint = 0
-                } else {
-                    startPoint = (currentPage - 1) * 20;
-                }
-
-                const objectToArray2 = result => {
-                    const keys = Object.keys(result);
-                    const res = [];
-                    for (let i = 0; i < keys.length; i++) {
-                        res.push(result[keys[i]]);
-                    };
-                    return res;
-                };
-
-                const tempArray = objectToArray2(result);
-                const reverseArray = [];
-
-                for (i = tempArray.length - 1; i >= 0; i--) {
-                    reverseArray.push(tempArray[i]);
-                }
-
-                const objectToArray = reverseArray => {
-                    const keys = Object.keys(reverseArray);
-                    const res = [];
-                    for (let i = startPoint; i < startPoint + 20; i++) {
-                        res.push(reverseArray[keys[i]]);
-                        if (reverseArray[keys[i + 1]] === null || reverseArray[keys[i + 1]] === undefined) {
-                            i = Number.MAX_SAFE_INTEGER;
-                        }
-                    };
-                    return res;
-                };
-                const filteredResult = objectToArray(reverseArray);
-
-                res.render('pages/inbox', { username, result, currentPage, maxPages, filteredResult })
+            if (result.length === 0) {
+                res.render('pages/inbox')
             }
+
+            const currentPage = parseInt(req.params.nr);
+
+            let startPoint = 0;
+            if (currentPage == 1) {
+                startPoint = 0
+            } else {
+                startPoint = (currentPage - 1) * 20;
+            }
+
+            const objectToArray2 = result => {
+                const keys = Object.keys(result);
+                const res = [];
+                for (let i = 0; i < keys.length; i++) {
+                    res.push(result[keys[i]]);
+                };
+                return res;
+            };
+
+            const tempArray = objectToArray2(result);
+            const reverseArray = [];
+
+            for (i = tempArray.length - 1; i >= 0; i--) {
+                reverseArray.push(tempArray[i]);
+            }
+
+            const objectToArray = reverseArray => {
+                const keys = Object.keys(reverseArray);
+                const res = [];
+                for (let i = startPoint; i < startPoint + 20; i++) {
+                    res.push(reverseArray[keys[i]]);
+                    if (reverseArray[keys[i + 1]] === null || reverseArray[keys[i + 1]] === undefined) {
+                        i = Number.MAX_SAFE_INTEGER;
+                    }
+                };
+                return res;
+            };
+            const filteredResult = objectToArray(reverseArray);
+
+            res.render('pages/inbox', { username, result, currentPage, maxPages, filteredResult })
         }
+    } else {
+        res.status(400).render('pages/400');
+    }
 
-
-    });
+});
 
 app.post("/market/buy/:id", requiresAuth(), urlencodedParser, [
     check('id').exists().isMongoId()
@@ -628,6 +641,8 @@ app.post("/market/buy/:id", requiresAuth(), urlencodedParser, [
         await buyTrade(client, buyer, req.params.id);
 
         res.redirect('/market')
+    } else {
+        res.status(400).render('pages/400');
     }
 });
 
@@ -673,12 +688,14 @@ app.get("/mailbox/log/:id", requiresAuth(), urlencodedParser, [
         } else {
             res.send("No such log!")
         }
+    } else {
+        res.status(400).render('pages/400');
     }
 
 });
 
 app.get("/mailbox/log/page/:nr", requiresAuth(), urlencodedParser, [
-    check('nr').isNumeric().isLength({ max: 4 }),
+    check('nr').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
@@ -742,8 +759,9 @@ app.get("/mailbox/log/page/:nr", requiresAuth(), urlencodedParser, [
 
             res.render('pages/log', { username, result, currentPage, maxPages, filteredResult })
         }
+    } else {
+        res.status(400).render('pages/400');
     }
-
 });
 
 app.post("/search", requiresAuth(), urlencodedParser, [
@@ -751,7 +769,9 @@ app.post("/search", requiresAuth(), urlencodedParser, [
 ], (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
-        res.redirect(`/profile/${req.body.name}`)
+        res.redirect(`/profile/${req.body.searchName}`)
+    } else {
+        res.status(400).render('pages/400');
     }
 });
 
@@ -809,9 +829,10 @@ app.post("/town/:building/upgrade", requiresAuth(), urlencodedParser, [
     check('building').exists().isAlpha().isLength({ min: 4, max: 13 })
 ], async (req, res) => {
     const errors = validationResult(req)
-    if (errors.isEmpty()) {
+    buildings = ['barracks', 'blacksmith', 'stables', 'trainingfield', 'wall', 'workshop'];
+    const type = req.params.building;
+    if (errors.isEmpty() && buildings.includes(type)) {
         const user = await getUserByEmail(client, req.oidc.user.email);
-        const type = req.params.building;
         var buildingName, level;
 
         switch (type) {
@@ -855,10 +876,12 @@ app.post("/town/:building/upgrade", requiresAuth(), urlencodedParser, [
                     await restoreWallHealth(client, user);
                 }
             } else {
-                console.log("bbbb");
+                console.log("bbb-2");
             }
             res.redirect(`/town/${req.params.building}`);
         }
+    } else {
+        res.status(400).render('pages/400');
     }
 });
 
@@ -881,7 +904,7 @@ app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
             await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
             restoreWallHealth(client, user); //await?
         } else {
-            console.log("bbbb");
+            console.log("bbb-3");
         }
     } else {
         console.log("Already at max HP");
@@ -901,22 +924,18 @@ app.get("/town/workshop", requiresAuth(), async (req, res) => {
 });
 
 app.post("/town/workshop/train", requiresAuth(), urlencodedParser, [
-    check('batteringram').isNumeric().isLength({ max: 4 }),
-    check('siegetower').isNumeric().isLength({ max: 4 })
+    check('batteringram').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('siegetower').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
-    const errors = validationResult(req)
+    const errors = validationResult(req);
     if (errors.isEmpty()) {
         const user = await getUserByEmail(client, req.oidc.user.email);
         const batteringrams = convertNegativeToZero(parseInt(req.body.batteringram));
         const siegetowers = convertNegativeToZero(parseInt(req.body.siegetower));
-        const trainees = { batteringrams: batteringrams, siegetowers: siegetowers };
+        const trainees = { batteringrams: batteringrams, siegetowers: siegetowers }; //[siegetowers]
         await trainTroops(client, user, trainees);
-
-        res.redirect('/town/workshop');
-    } else {
-        res.send('aaa')
     }
-
+    res.redirect('/town/workshop');
 });
 
 app.get("/town/stables", requiresAuth(), async (req, res) => {
@@ -932,32 +951,32 @@ app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
 });
 
 app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
-    check('boots').isNumeric().isLength({ max: 4 }),
-    check('bracers').isNumeric().isLength({ max: 4 }),
-    check('helmets').isNumeric().isLength({ max: 4 }),
-    check('lances').isNumeric().isLength({ max: 4 }),
-    check('longbows').isNumeric().isLength({ max: 4 }),
-    check('shields').isNumeric().isLength({ max: 4 }),
-    check('spears').isNumeric().isLength({ max: 4 }),
-    check('swords').isNumeric().isLength({ max: 4 }),
+    check('boots').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('bracers').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('helmet').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('lance').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('longbow').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('shield').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('spear').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('sword').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const errors = validationResult(req);
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
 
-    const boots = convertNegativeToZero(parseInt(req.body.boots));
-    const bracers = convertNegativeToZero(parseInt(req.body.bracers));
-    const helmets = convertNegativeToZero(parseInt(req.body.helmet));
-    const lances = convertNegativeToZero(parseInt(req.body.lance));
-    const longbows = convertNegativeToZero(parseInt(req.body.longbow));
-    const shields = convertNegativeToZero(parseInt(req.body.shield));
-    const spears = convertNegativeToZero(parseInt(req.body.spear));
-    const swords = convertNegativeToZero(parseInt(req.body.sword));
+        const boots = convertNegativeToZero(parseInt(req.body.boots));
+        const bracers = convertNegativeToZero(parseInt(req.body.bracers));
+        const helmets = convertNegativeToZero(parseInt(req.body.helmet));
+        const lances = convertNegativeToZero(parseInt(req.body.lance));
+        const longbows = convertNegativeToZero(parseInt(req.body.longbow));
+        const shields = convertNegativeToZero(parseInt(req.body.shield));
+        const spears = convertNegativeToZero(parseInt(req.body.spear));
+        const swords = convertNegativeToZero(parseInt(req.body.sword));
 
-    const craftingOrder = { boots: boots, bracers: bracers, helmets: helmets, lances: lances, longbows: longbows, shields: shields, spears: spears, swords: swords };
-    await craftArmor(client, user, craftingOrder);
-
-    //error check?
+        const craftingOrder = { boots: boots, bracers: bracers, helmets: helmets, lances: lances, longbows: longbows, shields: shields, spears: spears, swords: swords };
+        await craftArmor(client, user, craftingOrder);
+    }
     res.redirect('/town/blacksmith');
-
 });
 
 app.get("/land", requiresAuth(), async (req, res) => {
@@ -965,8 +984,8 @@ app.get("/land", requiresAuth(), async (req, res) => {
 });
 
 app.post("/town/stables/train", requiresAuth(), urlencodedParser, [
-    check('horsemen').isNumeric().isLength({ max: 4 }),
-    check('knights').isNumeric().isLength({ max: 4 })
+    check('horsemen').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('knights').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
@@ -976,25 +995,17 @@ app.post("/town/stables/train", requiresAuth(), urlencodedParser, [
         const trainees = { horsemen: horsemen, knights: knights };
 
         await trainTroops(client, user, trainees);
-        //error check?
-        res.redirect('/town/stables');
     }
-
+    res.redirect('/town/stables');
 });
 
 app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
     //escape?
-    check('archers').isNumeric().isLength({ max: 4 }),
-    check('spearmen').isNumeric().isLength({ max: 4 }),
-    check('swordsmen').isNumeric().isLength({ max: 4 })
+    check('archers').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('spearmen').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('swordsmen').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
-
     // if (typeof req.query.archers === 'string' || req.query.archers instanceof String) {
-    //     console.log(req.query.archers)
-    // } else {
-    //     console.log("good")
-    // }
-
     const errors = validationResult(req)
     if (errors.isEmpty()) {
         const user = await getUserByEmail(client, req.oidc.user.email);
@@ -1005,15 +1016,12 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
         const trainees = { archers: archers, spearmen: spearmen, swordsmen: swordsmen };
 
         await trainTroops(client, user, trainees);
-
-        res.redirect('/town/barracks');
     }
-
-
-
+    res.redirect('/town/barracks');
 });
 
 app.post("/profile/:username/attack", requiresAuth(), async (req, res) => {
+    //TODO validate
     //TODO attack limiter //reset all at midnight? //lose armor
     //TODO validate db input
 
@@ -1026,72 +1034,83 @@ app.post("/profile/:username/attack", requiresAuth(), async (req, res) => {
         result = await attackFunc(client, attacker, defender);
         res.redirect(`/mailbox/log/${result}`);
     }
+
 });
 
-app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
+app.get("/land/:type/:number", requiresAuth(), urlencodedParser, [
+    check('type').exists().isAlpha().isLength({ min: 4, max: 10 }),
+    check('number').exists().isNumeric({ no_symbols: true }).isLength({ min: 1, max: 1 })
+], async (req, res) => {
+    const errors = validationResult(req)
     type = req.params.type;
     resourceId = parseInt(req.params.number);
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    var invalidId;
+    resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
+    if (errors.isEmpty() && resources.includes(type)) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        var invalidId;
 
-    if (type === "farm") {
-        if (resourceId >= 0 && resourceId <= maxFarms - 1) {
-            title = "Farm";
-            resourceLevel = user.farms[resourceId];
-        } else {
-            invalidId = true;
+        if (type === "farm") {
+            if (resourceId >= 0 && resourceId <= maxFarms - 1) {
+                title = "Farm";
+                resourceLevel = user.farms[resourceId];
+            } else {
+                invalidId = true;
+            }
+        } else if (type === "goldMine") {
+            if (resourceId >= 0 && resourceId <= maxGoldMines - 1) {
+                title = "Gold mine";
+                resourceLevel = user.goldMines[resourceId];
+            } else {
+                invalidId = true;
+            }
+        } else if (type === "ironMine") {
+            if (resourceId >= 0 && resourceId <= maxIronMines - 1) {
+                title = "Iron mine";
+                resourceLevel = user.ironMines[resourceId];
+            } else {
+                invalidId = true;
+            }
         }
-    } else if (type === "goldMine") {
-        if (resourceId >= 0 && resourceId <= maxGoldMines - 1) {
-            title = "Gold mine";
-            resourceLevel = user.goldMines[resourceId];
-        } else {
-            invalidId = true;
+        else if (type === "lumbercamp") {
+            if (resourceId >= 0 && resourceId <= maxLumberCamps - 1) {
+                title = "Lumber camp";
+                resourceLevel = user.lumberCamps[resourceId];
+            } else {
+                invalidId = true;
+            }
         }
-    } else if (type === "ironMine") {
-        if (resourceId >= 0 && resourceId <= maxIronMines - 1) {
-            title = "Iron mine";
-            resourceLevel = user.ironMines[resourceId];
-        } else {
-            invalidId = true;
+        else if (type === "quarry") {
+            if (resourceId >= 0 && resourceId <= maxQuarries - 1) {
+                title = "Quarry";
+                resourceLevel = user.quarries[resourceId];
+            } else {
+                invalidId = true;
+            }
         }
-    }
-    else if (type === "lumbercamp") {
-        if (resourceId >= 0 && resourceId <= maxLumberCamps - 1) {
-            title = "Lumber camp";
-            resourceLevel = user.lumberCamps[resourceId];
-        } else {
-            invalidId = true;
-        }
-    }
-    else if (type === "quarry") {
-        if (resourceId >= 0 && resourceId <= maxQuarries - 1) {
-            title = "Quarry";
-            resourceLevel = user.quarries[resourceId];
-        } else {
-            invalidId = true;
-        }
-    }
-    const totalCost = await calculateTotalBuildingUpgradeCost(type, resourceLevel)
+        const totalCost = await calculateTotalBuildingUpgradeCost(type, resourceLevel)
 
-    if (invalidId) {
-        res.redirect("/land");
-    } else if (resourceLevel !== undefined) {
-        //use one field for all levels, none to 20
-        res.render('pages/resourcefield', { totalCost });
+        if (invalidId) {
+            res.redirect("/land");
+        } else if (resourceLevel !== undefined) {
+            //use one field for all levels, none to 20
+            res.render('pages/resourcefield', { totalCost });
+        } else {
+            res.render('pages/emptyfield', { totalCost });
+        }
     } else {
-        res.render('pages/emptyfield', { totalCost });
+        res.status(400).render('pages/400');
     }
 
 });
 
 app.get("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
     check('type').exists().isAlpha().isLength({ min: 4, max: 10 }),
-    check('number').exists().isNumeric().isLength({ min: 1, max: 1 })
+    check('number').exists().isNumeric({ no_symbols: true }).isLength({ min: 1, max: 1 })
 ], async (req, res) => {
     const errors = validationResult(req)
-    if (errors.isEmpty()) {
-        var type = req.params.type;
+    let type = req.params.type;
+    resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
+    if (errors.isEmpty() && resources.includes(type)) {
         const resourceId = parseInt(req.params.number);
         const user = await getUserByEmail(client, req.oidc.user.email);
         var updatedUser, resourceLevel, resource;
@@ -1165,23 +1184,25 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
                 await upgradeResource(client, user.username, updatedUser, resource);
                 await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
             } else {
-                console.log("bbbb");
+                console.log("bbb-1");
             }
             res.redirect(`/land/${type}/${resourceId}`);
         }
+    } else {
+        res.status(400).render('pages/400');
     }
 
 });
 
 app.get("/land/:type/:number/establish", requiresAuth(), urlencodedParser, [
     check('type').exists().isAlpha().isLength({ min: 4, max: 10 }),
-    check('number').exists().isNumeric().isLength({ min: 1, max: 1 })
+    check('number').exists().isNumeric({ no_symbols: true }).isLength({ min: 1, max: 1 })
 ], async (req, res) => {
     const errors = validationResult(req)
-    if (errors.isEmpty()) {
+    type = req.params.type;
+    resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
+    if (errors.isEmpty() && resources.includes(type)) {
         //Same thing as upgrade?
-        //TODO error check
-        type = req.params.type;
         resourceId = parseInt(req.params.number);
         const user = await getUserByEmail(client, req.oidc.user.email);
         var updatedUser;
@@ -1218,6 +1239,8 @@ app.get("/land/:type/:number/establish", requiresAuth(), urlencodedParser, [
         }
 
         res.redirect("/land");
+    } else {
+        res.status(400).render('pages/400');
     }
 
 });

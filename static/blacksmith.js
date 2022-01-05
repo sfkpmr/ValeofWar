@@ -10,14 +10,47 @@ const sword = { iron: 50, gold: 15, attackDamage: 10, defenseDamage: 10 };
 function craftingCost(val) {
     let lumberCost = 0, ironCost = 0, goldCost = 0;
 
-    boots = document.getElementById('boots').value;
-    bracers = document.getElementById('bracers').value;
-    helmets = document.getElementById('helmet').value;
-    lances = document.getElementById('lance').value;
-    longbows = document.getElementById('longbow').value;
-    shields = document.getElementById('shield').value;
-    spears = document.getElementById('spear').value;
-    swords = document.getElementById('sword').value;
+    let boots = parseInt(document.getElementById('boots').value);
+    let bracers = parseInt(document.getElementById('bracers').value);
+    let helmets = parseInt(document.getElementById('helmet').value);
+    let lances = parseInt(document.getElementById('lance').value);
+    let longbows = parseInt(document.getElementById('longbow').value);
+    let shields = parseInt(document.getElementById('shield').value);
+    let spears = parseInt(document.getElementById('spear').value);
+    let swords = parseInt(document.getElementById('sword').value);
+
+    if (boots < 0 || isNaN(boots)) {
+        boots = 0;
+        document.getElementById('boots').value = 0;
+    }
+    if (bracers < 0 || isNaN(bracers)) {
+        bracers = 0;
+        document.getElementById('bracers').value = 0;
+    }
+    if (helmets < 0 || isNaN(helmets)) {
+        helmets = 0;
+        document.getElementById('helmet').value = 0;
+    }
+    if (lances < 0 || isNaN(lances)) {
+        lances = 0;
+        document.getElementById('lance').value = 0;
+    }
+    if (longbows < 0 || isNaN(longbows)) {
+        longbows = 0;
+        document.getElementById('longbow').value = 0;
+    }
+    if (shields < 0 || isNaN(shields)) {
+        shields = 0;
+        document.getElementById('shield').value = 0;
+    }
+    if (spears < 0 || isNaN(spears)) {
+        spears = 0;
+        document.getElementById('spear').value = 0;
+    }
+    if (swords < 0 || isNaN(swords)) {
+        swords = 0;
+        document.getElementById('sword').value = 0;
+    }
 
     lumberCost += lances * lance.lumber;
     lumberCost += longbows * longbow.lumber;

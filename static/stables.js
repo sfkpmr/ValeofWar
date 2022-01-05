@@ -4,8 +4,17 @@ const knight = { grain: 100, iron: 100, gold: 50, attackDamage: 20, defenseDamag
 function stablesTrainCost(val) {
     let grainCost = 0, lumberCost = 0, ironCost = 0, goldCost = 0;
 
-    horsemen = document.getElementById('horsemen').value;
-    knights = document.getElementById('knights').value;
+    let horsemen = parseInt(document.getElementById('horsemen').value);
+    let knights = parseInt(document.getElementById('knights').value);
+
+    if (horsemen < 0 || isNaN(horsemen)) {
+        horsemen = 0;
+        document.getElementById('horsemen').value = 0;
+    }
+    if (knights < 0 || isNaN(knights)) {
+        knights = 0;
+        document.getElementById('knights').value = 0;
+    }
 
     grainCost += horsemen * horseman.grain;
     grainCost += knights * knight.grain;
@@ -18,8 +27,8 @@ function stablesTrainCost(val) {
     document.getElementById("grain").innerText = grainCost;
     document.getElementById("iron").innerText = ironCost;
     document.getElementById("gold").innerText = goldCost;
-    document.getElementById("recruits").innerText = parseInt(horsemen) + parseInt(knights);
-    document.getElementById("horses").innerText = parseInt(horsemen) + parseInt(knights);
+    document.getElementById("recruits").innerText = horsemen + knights;
+    document.getElementById("horses").innerText = horsemen + knights;
 }
 
 document.getElementById("horsemen").addEventListener("input", stablesTrainCost);

@@ -1,6 +1,7 @@
 const { setDatabaseValue } = require("../modules/database.js");
 const { stealResources, loseResources } = require("../modules/resources.js");
 const { lowerWallHealth } = require("../modules/buildings.js");
+const { ObjectId } = require('mongodb');
 
 archer = { attackDamage: 10, defenseDamage: 10 };
 spearman = { attackDamage: 10, defenseDamage: 10 };
