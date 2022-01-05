@@ -1103,13 +1103,13 @@ app.get("/land/:type/:number", requiresAuth(), urlencodedParser, [
 
 });
 
-app.get("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
+app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
     check('type').exists().isAlpha().isLength({ min: 4, max: 10 }),
     check('number').exists().isNumeric({ no_symbols: true }).isLength({ min: 1, max: 1 })
 ], async (req, res) => {
     const errors = validationResult(req)
     let type = req.params.type;
-    resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
+    resources = ['farm', 'lumbercamp', 'quarry', 'ironmine', 'goldmine'];
     if (errors.isEmpty() && resources.includes(type)) {
         const resourceId = parseInt(req.params.number);
         const user = await getUserByEmail(client, req.oidc.user.email);
@@ -1189,6 +1189,7 @@ app.get("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
             res.redirect(`/land/${type}/${resourceId}`);
         }
     } else {
+        console.log(validationResult(req))
         res.status(400).render('pages/400');
     }
 
@@ -1240,6 +1241,7 @@ app.get("/land/:type/:number/establish", requiresAuth(), urlencodedParser, [
 
         res.redirect("/land");
     } else {
+        console.log(errors)
         res.status(400).render('pages/400');
     }
 

@@ -13,4 +13,3 @@ function deleteUser() {
 }
 
 document.getElementById("delete").addEventListener("click", deleteUser);
-
