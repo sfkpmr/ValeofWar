@@ -669,13 +669,8 @@ app.get("/mailbox/log/:id", requiresAuth(), urlencodedParser, [
     if (errors.isEmpty()) {
         const user = await getUserByEmail(client, req.oidc.user.email);
         const username = user.username;
-        let searchObject;
 
-        try {
-            searchObject = new ObjectId(req.params.id);
-        } catch (e) {
-        }
-        const log = await getAttackLog(client, searchObject);
+        const log = await getAttackLog(client, new ObjectId(req.params.id));
 
         if (user.username === log.attacker) {
             attackUrl = `/profile/${log.defender}/attack`
