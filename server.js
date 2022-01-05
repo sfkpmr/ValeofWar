@@ -71,10 +71,6 @@ io.on('connection', (socket) => {
 
     io.to(socket.id).emit("sync"); //sends user info to server
 
-    socket.on('getUser', (msg) => { //pointless?
-        console.log(msg)
-    });
-
     socket.on('disconnect', () => {
         date = new Date();
         console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " " + socket.id + " disconnected.")
@@ -318,7 +314,6 @@ app.get("/api/:getIncome", requiresAuth(), urlencodedParser, [
     if (errors.isEmpty()) {
         const user = await getUserByEmail(client, req.oidc.user.email);
         const income = await getIncome(user, req.params.getIncome);
-
         res.send(JSON.stringify(income))
     }
 });
