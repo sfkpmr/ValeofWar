@@ -112,8 +112,6 @@ async function main() {
                     //https://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
                     const user = next.updateDescription.updatedFields;
 
-                    console.log(user)
-
                     const grain = JSON.stringify(user.grain);
                     const lumber = JSON.stringify(user.lumber);
                     const stone = JSON.stringify(user.stone);
@@ -266,9 +264,6 @@ async function main() {
                     if (checkTrades) {
                         validateUserTrades(client, i);
                     }
-
-                } else {
-                    //console.log('fel')
                 }
             }
         })
@@ -280,7 +275,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
     const authenticated = req.oidc.isAuthenticated();
-
     if (authenticated) {
         res.redirect("/vale")
     } else {
@@ -308,14 +302,12 @@ app.delete("/settings/delete", requiresAuth(), async (req, res) => {
 app.get("/api/getAttackPower", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const result = await calculateAttack(user);
-
     res.send(JSON.stringify(result))
 });
 
 app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const result = await calculateDefense(user);
-
     res.send(JSON.stringify(result))
 });
 
@@ -339,7 +331,7 @@ app.get("/settings", requiresAuth(), async (req, res) => {
 });
 
 app.get("/api/getUser/:id", requiresAuth(), urlencodedParser, [
-    check('id').exists().isAlphanumeric().isLength({ min: 20, max: 20 })
+    check('id').exists().isLength({ min: 20, max: 20 })
 ], async (req, res) => {
 
     const errors = validationResult(req)
@@ -432,7 +424,7 @@ app.get("/market", requiresAuth(), async (req, res) => {
 
 app.post("/market/sell", requiresAuth(), urlencodedParser, [ //TODO set max nr of trades
     check('sellAmount', 'Must be between 100 and 9999').exists().isNumeric({ no_symbols: true }).isLength({ min: 3, max: 4 }),
-    check('sellResource').exists(), //TOOD check equals defined resources
+    check('sellResource').exists(),
     check('buyAmount', 'Must be between 100 and 9999').exists().isNumeric({ no_symbols: true }).isLength({ min: 3, max: 4 }),
     check('buyResource').exists()
 ], async (req, res) => {
@@ -797,7 +789,7 @@ app.get("/online", requiresAuth(), async (req, res) => {
     const temp = [];
 
     for (let i in userMap) {
-        result = await getUserById(client, i); //let?
+        let result = await getUserById(client, i);
         temp.push(result.username);
     }
 
@@ -883,12 +875,10 @@ app.post("/town/:building/upgrade", requiresAuth(), urlencodedParser, [
 app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("trainingfield", user.trainingfieldLevel)
-
     res.render('pages/trainingField', { user, totalCost })
 });
 
 app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
-
     const user = await getUserByEmail(client, req.oidc.user.email);
     const maxWallHealth = user.wallLevel * 100;
 
@@ -914,7 +904,6 @@ app.get("/credits", async (req, res) => {
 app.get("/town/workshop", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("workshop", user.workshopLevel)
-
     res.render('pages/workshop', { user, totalCost })
 });
 
@@ -1016,10 +1005,7 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
 });
 
 app.post("/profile/:username/attack", requiresAuth(), async (req, res) => {
-    //TODO validate
-    //TODO attack limiter //reset all at midnight? //lose armor
-    //TODO validate db input
-
+    //TODO validate //TODO attack limiter //reset all at midnight? //lose armor //TODO validate db input
     const attacker = await getUserByEmail(client, req.oidc.user.email);
     const defender = await getUserByUsername(client, req.params.username);
     if (defender === false) {
@@ -1029,7 +1015,6 @@ app.post("/profile/:username/attack", requiresAuth(), async (req, res) => {
         result = await attackFunc(client, attacker, defender);
         res.redirect(`/mailbox/log/${result}`);
     }
-
 });
 
 app.get("/land/:type/:number", requiresAuth(), urlencodedParser, [
@@ -1184,7 +1169,6 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
             res.redirect(`/land/${type}/${resourceId}`);
         }
     } else {
-        console.log(validationResult(req))
         res.status(400).render('pages/400');
     }
 
@@ -1236,7 +1220,6 @@ app.get("/land/:type/:number/establish", requiresAuth(), urlencodedParser, [
 
         res.redirect("/land");
     } else {
-        console.log(errors)
         res.status(400).render('pages/400');
     }
 
@@ -1248,8 +1231,7 @@ async function checkAll() {
     });
 }
 
-//måste köra för alla så folk kan anfalla folk som är afk
-//ev kör när någon interagerar med afk folk
+//måste köra för alla så folk kan anfalla folk som är afk //ev kör när någon interagerar med afk folk
 var minutes = 15, the_interval = minutes * 60 * 1000;
 setInterval(function () {
     const date = new Date();
