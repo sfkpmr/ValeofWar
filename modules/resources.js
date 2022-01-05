@@ -1,10 +1,10 @@
-const { getUser, incDatabaseValue, getUserById, hasTrades, getUserTrades, deleteTrade } = require("../modules/database.js");
+const { getUserByUsername, incDatabaseValue, getUserById, hasTrades, getUserTrades, deleteTrade } = require("../modules/database.js");
 
 const baseGrainIncome = 7, baseLumberIncome = 6, baseStoneIncome = 3, baseIronIncome = 2, baseGoldIncome = 1;
 
 resourceObject = {
     addResources: async function (client, username) {
-        const user = await getUser(client, username);
+        const user = await getUserByUsername(client, username);
 
         const farms = user.farms;
         const lumberCamps = user.lumberCamps;
@@ -45,8 +45,6 @@ resourceObject = {
         const ironIncome = resourceObject.incomeCalc("iron", ironLevels);
         const goldIncome = resourceObject.incomeCalc("gold", goldLevels);
 
-        // console.log(`Giving ${grainIncome} grain, ${lumberIncome} lumber, ${goldIncome} gold, ${stoneIncome} stone, ${ironIncome} iron, ${recruitsIncome} recruits and ${horseIncome} horses to ${username}.`);
-
         const updatedUser = { "grain": grainIncome, "lumber": lumberIncome, "stone": stoneIncome, "gold": goldIncome, "iron": ironIncome, "recruits": recruitsIncome, "horses": horseIncome };
 
         await incDatabaseValue(client, username, updatedUser);
@@ -54,7 +52,7 @@ resourceObject = {
     },
 
     removeResources: async function (client, username, gold, lumber, stone, iron, grain, recruits, horses) {
-        const user = await getUser(client, username);
+        const user = await getUserByUsername(client, username);
 
         const newGold = user.gold - gold;
         const newLumber = user.lumber - lumber;
@@ -70,7 +68,7 @@ resourceObject = {
     },
 
     checkIfCanAfford: async function (client, username, goldCost, lumberCost, stoneCost, ironCost, grainCost, recruitCost, horseCost) {
-        const user = await getUser(client, username);
+        const user = await getUserByUsername(client, username);
 
         console.log("User has " + user.gold + " " + user.lumber + " " + user.stone + " " + user.iron + " " + user.grain + " " + user.recruits + " " + user.horses);
         console.log("User wants to use " + goldCost + " gold, " + lumberCost + " lumber, " + stoneCost + " stone, " + ironCost + " iron, " + grainCost + " grain, " + recruitCost + " " + horseCost);
@@ -84,7 +82,7 @@ resourceObject = {
     stealResources: async function (client, username, gold, lumber, stone, iron, grain) {
 
         //  console.log(username + " is stealing resources");
-        const user = await getUser(client, username);
+        const user = await getUserByUsername(client, username);
 
         const newGold = Math.round(user.gold + gold);
         const newLumber = Math.round(user.lumber + lumber);
@@ -100,7 +98,7 @@ resourceObject = {
     loseResources: async function (client, username, gold, lumber, stone, iron, grain) {
 
         //  console.log(username + " is losing resources");
-        const user = await getUser(client, username);
+        const user = await getUserByUsername(client, username);
 
         const newGold = user.gold - gold;
         const newLumber = user.lumber - lumber;

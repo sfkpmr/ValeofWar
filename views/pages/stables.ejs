@@ -39,13 +39,13 @@
                         <label for="horsemen"><img src="../static/images/horseman.png" height="35px" title="Horseman">
                             Current: <%= user.horsemen %>
                                 Train:</label>
-                        <input type="number" id="horsemen" name="horsemen" value="0" min=0> Attack damage: <output
+                        <input type="number" id="horsemen" name="horsemen" value="0" min=0 max=1000> Attack damage: <output
                             id="horsemanAttackDamage">0</output> Defense damage: <output
                             id="horsemanDefenseDamage">0</output><br>
                         <label for="knights"><img src="../static/images/knight.png" height="35px" title="Knight">
                             Current: <%= user.knights %>
                                 Train:</label>
-                        <input type="number" id="knights" name="knights" value="0" min=0> Attack damage: <output
+                        <input type="number" id="knights" name="knights" value="0" min=0 max=1000> Attack damage: <output
                             id="knightAttackDamage">0</output> Defense damage: <output
                             id="knightDefenseDamage">0</output><br><br>
                         <div class="resources">Training cost: <output id="grain">0</output> <img

@@ -22,19 +22,19 @@ function barracksTrainCost() {
     goldCost += archers * archer.gold;
     goldCost += swordsmen * swordsman.gold;
 
-    document.getElementById("grain").innerHTML = grainCost;
-    document.getElementById("lumber").innerHTML = lumberCost;
-    document.getElementById("iron").innerHTML = ironCost;
-    document.getElementById("gold").innerHTML = goldCost;
-    document.getElementById("recruits").innerHTML = parseInt(archers) + parseInt(spearmen) + parseInt(swordsmen);
+    document.getElementById("grain").innerText = grainCost;
+    document.getElementById("lumber").innerText = lumberCost;
+    document.getElementById("iron").innerText = ironCost;
+    document.getElementById("gold").innerText = goldCost;
+    document.getElementById("recruits").innerText = parseInt(archers) + parseInt(spearmen) + parseInt(swordsmen);
 }
 
 document.getElementById("archers").addEventListener("input", barracksTrainCost);
 document.getElementById("spearmen").addEventListener("input", barracksTrainCost);
 document.getElementById("swordsmen").addEventListener("input", barracksTrainCost);
-document.getElementById("archerAttackDamage").innerHTML = archer.attackDamage;
-document.getElementById("archerDefenseDamage").innerHTML = archer.defenseDamage;
-document.getElementById("spearmanAttackDamage").innerHTML = spearman.attackDamage;
-document.getElementById("spearmanDefenseDamage").innerHTML = spearman.defenseDamage;
-document.getElementById("swordsmanAttackDamage").innerHTML = swordsman.attackDamage;
-document.getElementById("swordsmanDefenseDamage").innerHTML = swordsman.defenseDamage;
+document.getElementById("archerAttackDamage").innerText = archer.attackDamage;
+document.getElementById("archerDefenseDamage").innerText = archer.defenseDamage;
+document.getElementById("spearmanAttackDamage").innerText = spearman.attackDamage;
+document.getElementById("spearmanDefenseDamage").innerText = spearman.defenseDamage;
+document.getElementById("swordsmanAttackDamage").innerText = swordsman.attackDamage;
+document.getElementById("swordsmanDefenseDamage").innerText = swordsman.defenseDamage;

@@ -3,10 +3,7 @@ const { checkIfCanAfford, removeResources } = require("../modules/resources.js")
 const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost } = require("../modules/buildings.js");
 
 troopsObject = {
-    addTroops: async function (client, username, data) {
-        await incDatabaseValue(client, username, data);
-    },
-    addArmor: async function (client, username, data) {
+    addToDb: async function (client, username, data) {
         await incDatabaseValue(client, username, data);
     },
     trainTroops: async function (client, user, trainees) {
@@ -64,7 +61,7 @@ troopsObject = {
         const data = { archers: archers, spearmen: spearmen, swordsmen: swordsmen, horsemen: horsemen, knights: knights, "batteringrams": batteringrams, "siegetowers": siegetowers };
 
         if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, 0)) {
-            await troopsObject.addTroops(client, user.username, data);
+            await troopsObject.addToDb(client, user.username, data);
             await removeResources(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, 0);
         } else {
             console.log("bbbb");

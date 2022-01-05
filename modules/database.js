@@ -8,7 +8,7 @@ module.exports = {
     setDatabaseValue: async function (client, username, data) {
         await client.db("gamedb").collection("players").updateOne({ "username": username }, { $set: data });
     },
-    getUser: async function (client, username) {
+    getUserByUsername: async function (client, username) {
         result = await client.db("gamedb").collection("players").findOne({ "username": username });
         if (result === null) {
             return false;

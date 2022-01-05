@@ -1,5 +1,3 @@
-const e = require('express');
-const { MongoClient, ObjectId } = require('mongodb');
 const { setDatabaseValue } = require("../modules/database.js");
 const { stealResources, loseResources } = require("../modules/resources.js");
 const { lowerWallHealth } = require("../modules/buildings.js");

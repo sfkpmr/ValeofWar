@@ -32,8 +32,6 @@
             <input type="submit" class="submitButton" value="Construct">
         </form>
 
-
-
         <% } else { %>
 
             Workshop level: <%= user.workshopLevel %> <br>
@@ -46,12 +44,12 @@
                         <label for="batteringram"><img src="../static/images/batteringram.png" height="35px"
                                 title="Battering ram">
                             Current: <%= user.batteringrams %> Train:</label>
-                        <input type="number" id="batteringram" name="batteringram" value="0" min=0> Attack damage:
+                        <input type="number" id="batteringram" name="batteringram" value="0" min=0 max=1000> Attack damage:
                         <output id="batteringramAttackDamage">0</output><br>
                         <label for="siegetower"><img src="../static/images/siegetower.png" height="35px"
                                 title="Siege tower">
                             Current: <%= user.siegetowers %> Train:</label>
-                        <input type="number" id="siegetower" name="siegetower" value="0" min=0> Attack damage: <output
+                        <input type="number" id="siegetower" name="siegetower" value="0" min=0 max=1000> Attack damage: <output
                             id="siegetowerAttackDamage">0</output><br><br>
                         <div class="resources">Build cost: <output id="lumber">0</output> <img
                                 src="../static/images/wood.png" alt="Lumber" title="Lumber">, <output

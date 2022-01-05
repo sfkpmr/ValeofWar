@@ -17,13 +17,13 @@ function workshopBuildCost() {
     goldCost += batteringRams * batteringRam.gold;
     goldCost += siegeTowers * siegeTower.gold;
 
-    document.getElementById("lumber").innerHTML = lumberCost;
-    document.getElementById("iron").innerHTML = ironCost;
-    document.getElementById("gold").innerHTML = goldCost;
+    document.getElementById("lumber").innerText = lumberCost;
+    document.getElementById("iron").innerText = ironCost;
+    document.getElementById("gold").innerText = goldCost;
 
 }
 
 document.getElementById("batteringram").addEventListener("input", workshopBuildCost);
 document.getElementById("siegetower").addEventListener("input", workshopBuildCost);
-document.getElementById("batteringramAttackDamage").innerHTML = batteringRam.attackDamage;
-document.getElementById("siegetowerAttackDamage").innerHTML = siegeTower.attackDamage;
+document.getElementById("batteringramAttackDamage").innerText = batteringRam.attackDamage;
+document.getElementById("siegetowerAttackDamage").innerText = siegeTower.attackDamage;

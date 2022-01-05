@@ -21,25 +21,27 @@ var compression = require('compression');
 app.use(compression());
 // Remove x-powered-by Express
 app.disable('x-powered-by');
+const bodyParser = require('body-parser');
+const { check, validationResult } = require('express-validator')
+const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
-const { addTrade } = require("./modules/market.js");
-const { getAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
-const { trainTroops } = require("./modules/troops.js");
-const { getUser, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage } = require("./modules/database.js");
-const { upgradeBuilding, craftArmor, upgradeResource, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost } = require("./modules/buildings.js");
-const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getIncome } = require("./modules/resources.js");
+const { Server } = require("socket.io");
+const io = new Server(server);
+const req = require("express/lib/request");
+const { filter } = require("compression");
+const { get } = require("express/lib/response");
 
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
 const client = new MongoClient(uri);
 
-const maxFarms = 4, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 4;
+const { addTrade, buyTrade } = require("./modules/market.js");
+const { getAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
+const { trainTroops } = require("./modules/troops.js");
+const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage } = require("./modules/database.js");
+const { upgradeBuilding, craftArmor, upgradeResource, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost } = require("./modules/buildings.js");
+const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getIncome } = require("./modules/resources.js");
 
-const { Server } = require("socket.io");
-const attack = require("./modules/attack.js");
-const req = require("express/lib/request");
-const { filter } = require("compression");
-const { get } = require("express/lib/response");
-const io = new Server(server);
+const maxFarms = 4, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 4;
 
 app.use(
     auth({
@@ -67,9 +69,9 @@ io.on('connection', (socket) => {
     date = new Date();
     console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " " + socket.id + " connected.")
 
-    io.to(socket.id).emit("sync");
+    io.to(socket.id).emit("sync"); //sends user info to server
 
-    socket.on('getUser', (msg) => {
+    socket.on('getUser', (msg) => { //pointless?
         console.log(msg)
     });
 
@@ -109,6 +111,8 @@ async function main() {
                 if (i === next.documentKey._id && next.operationType != "delete") {
                     //https://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
                     const user = next.updateDescription.updatedFields;
+
+                    console.log(user)
 
                     const grain = JSON.stringify(user.grain);
                     const lumber = JSON.stringify(user.lumber);
@@ -315,24 +319,35 @@ app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
     res.send(JSON.stringify(result))
 });
 
-app.get("/api/:getIncome", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const income = await getIncome(user, req.params.getIncome);
+app.get("/api/:getIncome", requiresAuth(), urlencodedParser, [
+    check('getIncome').isAlpha().isLength({ min: 13, max: 15 })
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        const income = await getIncome(user, req.params.getIncome);
 
-    res.send(JSON.stringify(income))
+        res.send(JSON.stringify(income))
+    }
 });
 
 app.get("/settings", requiresAuth(), async (req, res) => {
     //res.send(JSON.stringify(req.oidc.user));
     //Test user: johanna@test.com, saodhgi-9486y-(WYTH
-    const user = await getUserByEmail(client, req.oidc.user.email)
-    res.render("pages/settings", { user })
+    const profileUser = await getUserByEmail(client, req.oidc.user.email)
+    res.render("pages/settings", { profileUser })
 });
 
-app.get("/api/getUser/:id", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    userMap[user._id] = req.params.id
-    res.status(200).end();
+app.get("/api/getUser/:id", requiresAuth(), urlencodedParser, [
+    check('id').exists().isAlphanumeric().isLength({ min: 20, max: 20 })
+], async (req, res) => {
+
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        userMap[user._id] = req.params.id
+        res.status(200).end();
+    }
 });
 
 app.get("/vale", requiresAuth(), async (req, res) => {
@@ -384,21 +399,26 @@ app.get("/vale", requiresAuth(), async (req, res) => {
     res.render("pages/vale", { user, grainIncome, lumberIncome, stoneIncome, ironIncome, goldIncome, recruitsIncome, horseIncome, attackValue, defenseValue })
 });
 
-app.get("/profile/:username", requiresAuth(), async (req, res) => {
-    const currentUser = req.oidc.user.email;
-    const profileUser = await getUser(client, req.params.username);
+app.get("/profile/:username", requiresAuth(), urlencodedParser, [
+    check('username').isAlphanumeric().isLength({ min: 5, max: 15 })
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const currentUser = req.oidc.user.email;
+        const profileUser = await getUserByUsername(client, req.params.username);
 
-    if (profileUser === false) {
-        res.send("No such user");
-    } else {
-        const username = req.params.username;
-
-        if (currentUser === profileUser.email) {
-            res.render('pages/settings');
+        if (profileUser === false) {
+            res.send("No such user");
         } else {
-            res.render('pages/publicprofile', { username });
+            const username = req.params.username;
+            if (currentUser === profileUser.email) {
+                res.render('pages/settings', { profileUser });
+            } else {
+                res.render('pages/publicprofile', { username });
+            }
         }
     }
+
 });
 
 app.get("/market", requiresAuth(), async (req, res) => {
@@ -408,27 +428,40 @@ app.get("/market", requiresAuth(), async (req, res) => {
     res.render('pages/market', { user, trades });
 });
 
-app.post("/market/sell", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
+app.post("/market/sell", requiresAuth(), urlencodedParser, [
+    check('sellAmount', 'Must be between 100 and 9999').exists().isNumeric().isLength({ min: 3, max: 4 }),
+    check('sellResource').exists(), //TOOD check equals defined resources
+    check('buyAmount', 'Must be between 100 and 9999').exists().isNumeric().isLength({ min: 3, max: 4 }),
+    check('buyResource').exists()
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
 
-    const sellAmount = parseInt(req.body.sellAmount);
-    const sellResource = req.body.sellResource;
-    const buyAmount = parseInt(req.body.buyAmount);
-    const buyResource = req.body.buyResource;
-    await addTrade(client, user, sellAmount, sellResource, buyAmount, buyResource);
-
+        const sellAmount = parseInt(req.body.sellAmount);
+        const sellResource = req.body.sellResource;
+        const buyAmount = parseInt(req.body.buyAmount);
+        const buyResource = req.body.buyResource;
+        await addTrade(client, user, sellAmount, sellResource, buyAmount, buyResource);
+    }
     res.redirect("/market");
 });
 
-app.post("/market/cancel/:id", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const trade = await getTrade(client, req.params.id);
+app.post("/market/cancel/:id", requiresAuth(), urlencodedParser, [
+    check('id').exists().isMongoId()
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        const trade = await getTrade(client, req.params.id);
 
-    if (user.username === trade.seller) {
-        await deleteTrade(client, new ObjectId(trade._id));
+        if (user.username === trade.seller) {
+            await deleteTrade(client, new ObjectId(trade._id));
+        }
+
+        res.redirect('/market')
     }
 
-    res.redirect('/market')
 });
 
 app.get("/messages/inbox", requiresAuth(), async (req, res) => {
@@ -447,126 +480,155 @@ app.get("/messages/new", requiresAuth(), async (req, res) => {
     res.render("pages/writeMessage", { recipient })
 });
 
-app.get("/messages/new/:username", requiresAuth(), async (req, res) => {
-    const recipient = req.params.username;
-    res.render("pages/writeMessage", { recipient })
-});
-
-app.get("/messages/inbox/:id", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const username = user.username;
-    let searchObject;
-
-    try {
-        searchObject = new ObjectId(req.params.id);
-    }
-    catch (e) {
-    }
-
-    const message = await getMessageById(client, searchObject);
-
-    if (message && (username === message.sentBy || username === message.sentTo)) {
-        res.render('pages/message', { username, message })
-    } else {
-        res.send("No such message!")
+app.get("/messages/new/:username", requiresAuth(), urlencodedParser, [
+    check('username').exists().isAlphanumeric().isLength({ min: 5, max: 15 })
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const recipient = req.params.username;
+        res.render("pages/writeMessage", { recipient })
     }
 });
 
-app.post("/messages/send", requiresAuth(), async (req, res) => {
-    const sender = await getUserByEmail(client, req.oidc.user.email);
-    const receiver = await getUser(client, req.body.recipient);
-    const message = req.body.message;
+app.get("/messages/inbox/:id", requiresAuth(), urlencodedParser, [
+    check('id').exists().isMongoId()
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
 
-    if (receiver) {
-        const data = { sentTo: receiver.username, sentBy: sender.username, message: message, time: new Date() };
-        const result = await addMessage(client, data);
-        res.redirect(`/messages/inbox/${result}`);
-    } else {
-        res.send("No such user")
-    }
-});
+        const message = await getMessageById(client, new ObjectId(req.params.id));
 
-app.post("/messages/send/:username", requiresAuth(), async (req, res) => {
-    const sender = await getUserByEmail(client, req.oidc.user.email);
-    const receiver = await getUser(client, req.params.username);
-    const message = req.body.message;
-
-    if (receiver) {
-        const data = { sentTo: receiver.username, sentBy: sender.username, message: message, time: new Date() };
-        const result = await addMessage(client, data);
-        res.redirect(`/messages/inbox/${result}`);
-    } else {
-        res.send("No such user")
-    }
-});
-
-app.get("/messages/inbox/page/:nr", requiresAuth(), async (req, res) => {
-
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const username = user.username;
-    const result = await getUserMessages(client, user.username)
-
-    const maxPages = Math.ceil(Object.keys(result).length / 20);
-    //TODO error check alla URL inputs
-
-    const nr = parseInt(req.params.nr);
-
-    if (nr < 1 || nr > maxPages || isNaN(nr)) {
-        //todo detect % and #
-        res.redirect('/messages/inbox/page/1')
-    } else {
-
-        if (result.length === 0) {
-            res.render('pages/inbox')
-        }
-
-        const currentPage = parseInt(req.params.nr);
-
-        let startPoint = 0;
-        if (currentPage == 1) {
-            startPoint = 0
+        if (message && (user.username === message.sentBy || user.username === message.sentTo)) {
+            res.render('pages/message', { user, message })
         } else {
-            startPoint = (currentPage - 1) * 20;
+            res.send("No such message!")
         }
-
-        const objectToArray2 = result => {
-            const keys = Object.keys(result);
-            const res = [];
-            for (let i = 0; i < keys.length; i++) {
-                res.push(result[keys[i]]);
-            };
-            return res;
-        };
-
-        const tempArray = objectToArray2(result);
-        const reverseArray = [];
-
-        for (i = tempArray.length - 1; i >= 0; i--) {
-            reverseArray.push(tempArray[i]);
-        }
-
-        const objectToArray = reverseArray => {
-            const keys = Object.keys(reverseArray);
-            const res = [];
-            for (let i = startPoint; i < startPoint + 20; i++) {
-                res.push(reverseArray[keys[i]]);
-                if (reverseArray[keys[i + 1]] === null || reverseArray[keys[i + 1]] === undefined) {
-                    i = Number.MAX_SAFE_INTEGER;
-                }
-            };
-            return res;
-        };
-        const filteredResult = objectToArray(reverseArray);
-
-        res.render('pages/inbox', { username, result, currentPage, maxPages, filteredResult })
     }
 });
 
-app.post("/market/buy/:id", requiresAuth(), async (req, res) => {
-    const buyer = await getUserByEmail(client, req.oidc.user.email);
-    await buyTrade(client, buyer);
+app.post("/messages/send", requiresAuth(), urlencodedParser, [
+    check('recipient').exists().isAlphanumeric().isLength({ min: 5, max: 15 }),
+    check('message').exists().isAlphanumeric().isLength({ max: 1000 }),
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const sender = await getUserByEmail(client, req.oidc.user.email);
+        const receiver = await getUserByUsername(client, req.body.recipient);
+        const message = req.body.message;
 
-    res.redirect('/market')
+        if (receiver) {
+            const data = { sentTo: receiver.username, sentBy: sender.username, message: message, time: new Date() };
+            const result = await addMessage(client, data);
+            res.redirect(`/messages/inbox/${result}`);
+        } else {
+            res.send("No such user")
+        }
+    }
+
+});
+
+// app.post("/messages/send/:username", requiresAuth(), urlencodedParser, [
+//     check('username').exists().isAlphanumeric().isLength({ min: 5, max: 15 }),
+//     check('recipient').exists().isAlphanumeric().isLength({ min: 5, max: 5 }),
+//     check('message').exists().isAlphanumeric().isLength({ min: 10, max: 1000 }),
+// ], async (req, res) => {
+//     const errors = validationResult(req)
+//     if (errors.isEmpty()) {
+//         const sender = await getUserByEmail(client, req.oidc.user.email);
+//         const receiver = await getUserByUsername(client, req.params.username);
+//         const message = req.body.message;
+
+//         if (receiver) {
+//             const data = { sentTo: receiver.username, sentBy: sender.username, message: message, time: new Date() };
+//             const result = await addMessage(client, data);
+//             res.redirect(`/messages/inbox/${result}`);
+//         } else {
+//             res.send("No such user")
+//         }
+//     }
+
+// });
+
+app.get("/messages/inbox/page/:nr", requiresAuth(), urlencodedParser, [
+    check('nr').exists().isNumeric().isLength({ max: 4 })
+],
+    async (req, res) => {
+        const errors = validationResult(req)
+        if (errors.isEmpty()) {
+            const user = await getUserByEmail(client, req.oidc.user.email);
+            const username = user.username;
+            const result = await getUserMessages(client, user.username)
+
+            const maxPages = Math.ceil(Object.keys(result).length / 20);
+            //TODO error check alla URL inputs
+
+            const nr = parseInt(req.params.nr);
+
+            if (nr < 1 || nr > maxPages || isNaN(nr)) {
+                //todo detect % and #
+                res.redirect('/messages/inbox/page/1')
+            } else {
+
+                if (result.length === 0) {
+                    res.render('pages/inbox')
+                }
+
+                const currentPage = parseInt(req.params.nr);
+
+                let startPoint = 0;
+                if (currentPage == 1) {
+                    startPoint = 0
+                } else {
+                    startPoint = (currentPage - 1) * 20;
+                }
+
+                const objectToArray2 = result => {
+                    const keys = Object.keys(result);
+                    const res = [];
+                    for (let i = 0; i < keys.length; i++) {
+                        res.push(result[keys[i]]);
+                    };
+                    return res;
+                };
+
+                const tempArray = objectToArray2(result);
+                const reverseArray = [];
+
+                for (i = tempArray.length - 1; i >= 0; i--) {
+                    reverseArray.push(tempArray[i]);
+                }
+
+                const objectToArray = reverseArray => {
+                    const keys = Object.keys(reverseArray);
+                    const res = [];
+                    for (let i = startPoint; i < startPoint + 20; i++) {
+                        res.push(reverseArray[keys[i]]);
+                        if (reverseArray[keys[i + 1]] === null || reverseArray[keys[i + 1]] === undefined) {
+                            i = Number.MAX_SAFE_INTEGER;
+                        }
+                    };
+                    return res;
+                };
+                const filteredResult = objectToArray(reverseArray);
+
+                res.render('pages/inbox', { username, result, currentPage, maxPages, filteredResult })
+            }
+        }
+
+
+    });
+
+app.post("/market/buy/:id", requiresAuth(), urlencodedParser, [
+    check('id').exists().isMongoId()
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const buyer = await getUserByEmail(client, req.oidc.user.email);
+        await buyTrade(client, buyer, req.params.id);
+
+        res.redirect('/market')
+    }
 });
 
 app.get("/mailbox", requiresAuth(), async (req, res) => {
@@ -584,95 +646,113 @@ app.get("/mailbox/log", requiresAuth(), async (req, res) => {
     }
 });
 
-app.get("/mailbox/log/:id", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const username = user.username;
-    let searchObject;
+app.get("/mailbox/log/:id", requiresAuth(), urlencodedParser, [
+    check('id').exists().isMongoId(),
+], async (req, res) => {
 
-    try {
-        searchObject = new ObjectId(req.params.id);
-    } catch (e) {
-    }
-    const log = await getAttackLog(client, searchObject);
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        const username = user.username;
+        let searchObject;
 
-    if (user.username === log.attacker) {
-        attackUrl = `/profile/${log.defender}/attack`
-    } else {
-        attackUrl = `/profile/${log.attacker}/attack`
-    }
-
-    if (log && (username === log.attacker || username === log.defender)) {
-        res.render('pages/attack', { username, log })
-    } else {
-        res.send("No such log!")
-    }
-});
-
-app.get("/mailbox/log/page/:nr", requiresAuth(), async (req, res) => {
-    //TODO use one method for both log and messages?
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const username = user.username;
-    const result = await getInvolvedAttackLogs(client, user.username)
-    const maxPages = Math.ceil(Object.keys(result).length / 20);
-    //if check size/nr/osv, nr can't be negative etc
-    //TODO error check alla URL inputs
-
-    const nr = parseInt(req.params.nr);
-
-    if (nr < 1 || nr > maxPages || isNaN(nr)) {
-        //todo detect % and #
-        res.redirect('/mailbox/log/page/1')
-    } else {
-
-        if (result.length === 0) {
-            res.render('pages/log')
+        try {
+            searchObject = new ObjectId(req.params.id);
+        } catch (e) {
         }
+        const log = await getAttackLog(client, searchObject);
 
-        const currentPage = parseInt(req.params.nr);
-
-        let startPoint = 0;
-        if (currentPage == 1) {
-            startPoint = 0
+        if (user.username === log.attacker) {
+            attackUrl = `/profile/${log.defender}/attack`
         } else {
-            startPoint = (currentPage - 1) * 20;
+            attackUrl = `/profile/${log.attacker}/attack`
         }
 
-        const objectToArray2 = result => {
-            const keys = Object.keys(result);
-            const res = [];
-            for (let i = 0; i < keys.length; i++) {
-                res.push(result[keys[i]]);
-            };
-            return res;
-        };
-
-        const tempArray = objectToArray2(result);
-        let reverseArray = [];
-
-        for (i = tempArray.length - 1; i >= 0; i--) {
-            reverseArray.push(tempArray[i]);
-            //   console.log(i)
+        if (log && (username === log.attacker || username === log.defender)) {
+            res.render('pages/attack', { username, log })
+        } else {
+            res.send("No such log!")
         }
-
-        const objectToArray = reverseArray => {
-            const keys = Object.keys(reverseArray);
-            const res = [];
-            for (let i = startPoint; i < startPoint + 20; i++) {
-                res.push(reverseArray[keys[i]]);
-                if (reverseArray[keys[i + 1]] === null || reverseArray[keys[i + 1]] === undefined) {
-                    i = Number.MAX_SAFE_INTEGER;
-                }
-            };
-            return res;
-        };
-        const filteredResult = objectToArray(reverseArray);
-
-        res.render('pages/log', { username, result, currentPage, maxPages, filteredResult })
     }
+
 });
 
-app.post("/search", requiresAuth(), (req, res) => {
-    res.redirect(`/profile/${req.body.name}`)
+app.get("/mailbox/log/page/:nr", requiresAuth(), urlencodedParser, [
+    check('nr').isNumeric().isLength({ max: 4 }),
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        //TODO use one method for both log and messages?
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        const username = user.username;
+        const result = await getInvolvedAttackLogs(client, user.username)
+        const maxPages = Math.ceil(Object.keys(result).length / 20);
+        //if check size/nr/osv, nr can't be negative etc
+        //TODO error check alla URL inputs
+
+        const nr = parseInt(req.params.nr);
+
+        if (nr < 1 || nr > maxPages || isNaN(nr)) {
+            //todo detect % and #
+            res.redirect('/mailbox/log/page/1')
+        } else {
+
+            if (result.length === 0) {
+                res.render('pages/log')
+            }
+
+            const currentPage = parseInt(req.params.nr);
+
+            let startPoint = 0;
+            if (currentPage == 1) {
+                startPoint = 0
+            } else {
+                startPoint = (currentPage - 1) * 20;
+            }
+
+            const objectToArray2 = result => {
+                const keys = Object.keys(result);
+                const res = [];
+                for (let i = 0; i < keys.length; i++) {
+                    res.push(result[keys[i]]);
+                };
+                return res;
+            };
+
+            const tempArray = objectToArray2(result);
+            let reverseArray = [];
+
+            for (i = tempArray.length - 1; i >= 0; i--) {
+                reverseArray.push(tempArray[i]);
+                //   console.log(i)
+            }
+
+            const objectToArray = reverseArray => {
+                const keys = Object.keys(reverseArray);
+                const res = [];
+                for (let i = startPoint; i < startPoint + 20; i++) {
+                    res.push(reverseArray[keys[i]]);
+                    if (reverseArray[keys[i + 1]] === null || reverseArray[keys[i + 1]] === undefined) {
+                        i = Number.MAX_SAFE_INTEGER;
+                    }
+                };
+                return res;
+            };
+            const filteredResult = objectToArray(reverseArray);
+
+            res.render('pages/log', { username, result, currentPage, maxPages, filteredResult })
+        }
+    }
+
+});
+
+app.post("/search", requiresAuth(), urlencodedParser, [
+    check('searchName').exists().isAlphanumeric().isLength({ min: 5, max: 15 })
+], (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        res.redirect(`/profile/${req.body.name}`)
+    }
 });
 
 app.get("/search/random", requiresAuth(), async (req, res) => {
@@ -702,7 +782,7 @@ app.get("/online", requiresAuth(), async (req, res) => {
     const temp = [];
 
     for (let i in userMap) {
-        result = await getUserById(client, i);
+        result = await getUserById(client, i); //let?
         temp.push(result.username);
     }
 
@@ -725,55 +805,60 @@ app.get("/town/wall", requiresAuth(), async (req, res) => {
     res.render('pages/wall', { user, maxWallHealth, notAtMaxHealth, totalCost, defenseBonus })
 });
 
-app.post("/town/:building/upgrade", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const type = req.params.building;
-    var buildingName, level;
+app.post("/town/:building/upgrade", requiresAuth(), urlencodedParser, [
+    check('building').exists().isAlpha().isLength({ min: 4, max: 13 })
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        const type = req.params.building;
+        var buildingName, level;
 
-    switch (type) {
-        case "barracks":
-            level = user.barracksLevel;
-            buildingName = "barracksLevel";
-            break;
-        case "blacksmith":
-            level = user.blacksmithLevel;
-            buildingName = "blacksmithLevel";
-            break;
-        case "stables":
-            level = user.stablesLevel;
-            buildingName = "stablesLevel";
-            break;
-        case "trainingfield":
-            level = user.trainingfieldLevel;
-            buildingName = "trainingfieldLevel";
-            break;
-        case "wall":
-            level = user.wallLevel;
-            buildingName = "wallLevel";
-            break;
-        case "workshop":
-            level = user.workshopLevel;
-            buildingName = "workshopLevel";
-            break;
-        default:
-            console.log("error")
-    }
-
-    if (level >= 20) {
-        res.redirect(`/town/${req.params.building}`);
-    } else {
-        const totalCost = await calculateTotalBuildingUpgradeCost(type, level)
-
-        if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
-            await upgradeBuilding(client, user.username, buildingName);
-            await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
-            if (type === "wall") {
-                await restoreWallHealth(client, user);
-            }
-        } else {
-            console.log("bbbb");
+        switch (type) {
+            case "barracks":
+                level = user.barracksLevel;
+                buildingName = "barracksLevel";
+                break;
+            case "blacksmith":
+                level = user.blacksmithLevel;
+                buildingName = "blacksmithLevel";
+                break;
+            case "stables":
+                level = user.stablesLevel;
+                buildingName = "stablesLevel";
+                break;
+            case "trainingfield":
+                level = user.trainingfieldLevel;
+                buildingName = "trainingfieldLevel";
+                break;
+            case "wall":
+                level = user.wallLevel;
+                buildingName = "wallLevel";
+                break;
+            case "workshop":
+                level = user.workshopLevel;
+                buildingName = "workshopLevel";
+                break;
+            default:
+                console.log("error")
         }
-        res.redirect(`/town/${req.params.building}`);
+
+        if (level >= 20) {
+            res.redirect(`/town/${req.params.building}`);
+        } else {
+            const totalCost = await calculateTotalBuildingUpgradeCost(type, level)
+
+            if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
+                await upgradeBuilding(client, user.username, buildingName);
+                await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
+                if (type === "wall") {
+                    await restoreWallHealth(client, user);
+                }
+            } else {
+                console.log("bbbb");
+            }
+            res.redirect(`/town/${req.params.building}`);
+        }
     }
 });
 
@@ -815,14 +900,23 @@ app.get("/town/workshop", requiresAuth(), async (req, res) => {
     res.render('pages/workshop', { user, totalCost })
 });
 
-app.post("/town/workshop/train", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const batteringrams = convertNegativeToZero(parseInt(req.body.batteringram));
-    const siegetowers = convertNegativeToZero(parseInt(req.body.siegetower));
-    const trainees = { batteringrams: batteringrams, siegetowers: siegetowers };
-    await trainTroops(client, user, trainees);
+app.post("/town/workshop/train", requiresAuth(), urlencodedParser, [
+    check('batteringram').isNumeric().isLength({ max: 4 }),
+    check('siegetower').isNumeric().isLength({ max: 4 })
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        const batteringrams = convertNegativeToZero(parseInt(req.body.batteringram));
+        const siegetowers = convertNegativeToZero(parseInt(req.body.siegetower));
+        const trainees = { batteringrams: batteringrams, siegetowers: siegetowers };
+        await trainTroops(client, user, trainees);
 
-    res.redirect('/town/workshop');
+        res.redirect('/town/workshop');
+    } else {
+        res.send('aaa')
+    }
+
 });
 
 app.get("/town/stables", requiresAuth(), async (req, res) => {
@@ -837,7 +931,16 @@ app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
     res.render('pages/blacksmith', { user, totalCost });
 });
 
-app.post("/town/blacksmith/craft", requiresAuth(), async (req, res) => {
+app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
+    check('boots').isNumeric().isLength({ max: 4 }),
+    check('bracers').isNumeric().isLength({ max: 4 }),
+    check('helmets').isNumeric().isLength({ max: 4 }),
+    check('lances').isNumeric().isLength({ max: 4 }),
+    check('longbows').isNumeric().isLength({ max: 4 }),
+    check('shields').isNumeric().isLength({ max: 4 }),
+    check('spears').isNumeric().isLength({ max: 4 }),
+    check('swords').isNumeric().isLength({ max: 4 }),
+], async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
 
     const boots = convertNegativeToZero(parseInt(req.body.boots));
@@ -861,18 +964,30 @@ app.get("/land", requiresAuth(), async (req, res) => {
     res.render('pages/land');
 });
 
-app.post("/town/stables/train", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const horsemen = convertNegativeToZero(parseInt(req.body.horsemen));
-    const knights = convertNegativeToZero(parseInt(req.body.knights));
-    const trainees = { horsemen: horsemen, knights: knights };
+app.post("/town/stables/train", requiresAuth(), urlencodedParser, [
+    check('horsemen').isNumeric().isLength({ max: 4 }),
+    check('knights').isNumeric().isLength({ max: 4 })
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        const horsemen = convertNegativeToZero(parseInt(req.body.horsemen));
+        const knights = convertNegativeToZero(parseInt(req.body.knights));
+        const trainees = { horsemen: horsemen, knights: knights };
 
-    await trainTroops(client, user, trainees);
-    //error check?
-    res.redirect('/town/stables');
+        await trainTroops(client, user, trainees);
+        //error check?
+        res.redirect('/town/stables');
+    }
+
 });
 
-app.post("/town/barracks/train", requiresAuth(), async (req, res) => {
+app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
+    //escape?
+    check('archers').isNumeric().isLength({ max: 4 }),
+    check('spearmen').isNumeric().isLength({ max: 4 }),
+    check('swordsmen').isNumeric().isLength({ max: 4 })
+], async (req, res) => {
 
     // if (typeof req.query.archers === 'string' || req.query.archers instanceof String) {
     //     console.log(req.query.archers)
@@ -880,16 +995,21 @@ app.post("/town/barracks/train", requiresAuth(), async (req, res) => {
     //     console.log("good")
     // }
 
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const archers = convertNegativeToZero(parseInt(req.body.archers));
-    const spearmen = convertNegativeToZero(parseInt(req.body.spearmen));
-    const swordsmen = convertNegativeToZero(parseInt(req.body.swordsmen));
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        const archers = convertNegativeToZero(parseInt(req.body.archers));
+        const spearmen = convertNegativeToZero(parseInt(req.body.spearmen));
+        const swordsmen = convertNegativeToZero(parseInt(req.body.swordsmen));
 
-    const trainees = { archers: archers, spearmen: spearmen, swordsmen: swordsmen };
+        const trainees = { archers: archers, spearmen: spearmen, swordsmen: swordsmen };
 
-    await trainTroops(client, user, trainees);
+        await trainTroops(client, user, trainees);
 
-    res.redirect('/town/barracks');
+        res.redirect('/town/barracks');
+    }
+
+
 
 });
 
@@ -898,7 +1018,7 @@ app.post("/profile/:username/attack", requiresAuth(), async (req, res) => {
     //TODO validate db input
 
     const attacker = await getUserByEmail(client, req.oidc.user.email);
-    const defender = await getUser(client, req.params.username);
+    const defender = await getUserByUsername(client, req.params.username);
     if (defender === false) {
         res.send("No such user");
     } else {
@@ -965,128 +1085,141 @@ app.get("/land/:type/:number", requiresAuth(), async (req, res) => {
 
 });
 
-app.get("/land/:type/:number/upgrade", requiresAuth(), async (req, res) => {
-    var type = req.params.type;
-    const resourceId = parseInt(req.params.number);
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    var updatedUser, resourceLevel, resource;
+app.get("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
+    check('type').exists().isAlpha().isLength({ min: 4, max: 10 }),
+    check('number').exists().isNumeric().isLength({ min: 1, max: 1 })
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        var type = req.params.type;
+        const resourceId = parseInt(req.params.number);
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        var updatedUser, resourceLevel, resource;
 
-    if (type === "farm") {
-        if (resourceId >= 0 && resourceId <= maxFarms) {
-            resource = "farms"
-            updatedUser = user.farms;
-            resourceLevel = updatedUser[resourceId]
-            updatedUser[resourceId]++;
-            updatedUser = { farms: updatedUser }
-        } else {
+        if (type === "farm") {
+            if (resourceId >= 0 && resourceId <= maxFarms) {
+                resource = "farms"
+                updatedUser = user.farms;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+                updatedUser = { farms: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        } else if (type === "goldmine") {
+            if (resourceId >= 0 && resourceId <= maxGoldMines) {
+                type = "goldMine";
+                resource = "goldMines";
+                updatedUser = user.goldMines;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+
+                updatedUser = { goldMines: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        } else if (type === "ironmine") {
+            if (resourceId >= 0 && resourceId <= maxIronMines) {
+                type = "ironMine";
+                resource = "ironMines";
+                updatedUser = user.ironMines;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+
+                updatedUser = { ironMines: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        }
+        else if (type === "lumbercamp") {
+            if (resourceId >= 0 && resourceId <= maxLumberCamps) {
+                resource = "lumberCamp"
+                updatedUser = user.lumberCamps;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+
+                updatedUser = { lumberCamps: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        } else if (type === "quarry") {
+            if (resourceId >= 0 && resourceId <= maxQuarries) {
+                resource = "quarry"
+                updatedUser = user.quarries;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+
+                updatedUser = { quarries: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        }
+
+        if (resourceLevel >= 20) {
             res.redirect("/land");
-        }
-    } else if (type === "goldmine") {
-        if (resourceId >= 0 && resourceId <= maxGoldMines) {
-            type = "goldMine";
-            resource = "goldMines";
-            updatedUser = user.goldMines;
-            resourceLevel = updatedUser[resourceId]
-            updatedUser[resourceId]++;
-
-            updatedUser = { goldMines: updatedUser }
         } else {
-            res.redirect("/land");
+
+            const totalCost = await calculateTotalBuildingUpgradeCost(type, resourceLevel)
+
+            if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
+                await upgradeResource(client, user.username, updatedUser, resource);
+                await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
+            } else {
+                console.log("bbbb");
+            }
+            res.redirect(`/land/${type}/${resourceId}`);
         }
-    } else if (type === "ironmine") {
-        if (resourceId >= 0 && resourceId <= maxIronMines) {
-            type = "ironMine";
-            resource = "ironMines";
-            updatedUser = user.ironMines;
-            resourceLevel = updatedUser[resourceId]
-            updatedUser[resourceId]++;
-
-            updatedUser = { ironMines: updatedUser }
-        } else {
-            res.redirect("/land");
-        }
-    }
-    else if (type === "lumbercamp") {
-        if (resourceId >= 0 && resourceId <= maxLumberCamps) {
-            resource = "lumberCamp"
-            updatedUser = user.lumberCamps;
-            resourceLevel = updatedUser[resourceId]
-            updatedUser[resourceId]++;
-
-            updatedUser = { lumberCamps: updatedUser }
-        } else {
-            res.redirect("/land");
-        }
-    } else if (type === "quarry") {
-        if (resourceId >= 0 && resourceId <= maxQuarries) {
-            resource = "quarry"
-            updatedUser = user.quarries;
-            resourceLevel = updatedUser[resourceId]
-            updatedUser[resourceId]++;
-
-            updatedUser = { quarries: updatedUser }
-        } else {
-            res.redirect("/land");
-        }
-    }
-
-    if (resourceLevel >= 20) {
-        res.redirect("/land");
-    } else {
-
-        const totalCost = await calculateTotalBuildingUpgradeCost(type, resourceLevel)
-
-        if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
-            await upgradeResource(client, user.username, updatedUser, resource);
-            await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
-        } else {
-            console.log("bbbb");
-        }
-        res.redirect(`/land/${type}/${resourceId}`);
     }
 
 });
 
-app.get("/land/:type/:number/establish", requiresAuth(), async (req, res) => {
-    //Same thing as upgrade?
-    //TODO error check
-    type = req.params.type;
-    resourceId = parseInt(req.params.number);
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    var updatedUser;
+app.get("/land/:type/:number/establish", requiresAuth(), urlencodedParser, [
+    check('type').exists().isAlpha().isLength({ min: 4, max: 10 }),
+    check('number').exists().isNumeric().isLength({ min: 1, max: 1 })
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        //Same thing as upgrade?
+        //TODO error check
+        type = req.params.type;
+        resourceId = parseInt(req.params.number);
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        var updatedUser;
 
-    if (type === "farm") {
-        updatedUser = user.farms;
-        updatedUser.push(1);
-        updatedUser = { farms: updatedUser }
-    } else if (type === "goldmine") {
-        type = "goldMine";
-        updatedUser = user.goldMines;
-        updatedUser.push(1);
-        updatedUser = { goldMines: updatedUser }
-    } else if (type === "ironmine") {
-        type = "ironMine";
-        updatedUser = user.ironMines;
-        updatedUser.push(1);
-        updatedUser = { ironMines: updatedUser }
-    } else if (type === "lumbercamp") {
-        updatedUser = user.lumberCamps;
-        updatedUser.push(1);
-        updatedUser = { lumberCamps: updatedUser }
-    } else if (type === "quarry") {
-        updatedUser = user.quarries;
-        updatedUser.push(1);
-        updatedUser = { quarries: updatedUser }
+        if (type === "farm") {
+            updatedUser = user.farms;
+            updatedUser.push(1);
+            updatedUser = { farms: updatedUser }
+        } else if (type === "goldmine") {
+            type = "goldMine";
+            updatedUser = user.goldMines;
+            updatedUser.push(1);
+            updatedUser = { goldMines: updatedUser }
+        } else if (type === "ironmine") {
+            type = "ironMine";
+            updatedUser = user.ironMines;
+            updatedUser.push(1);
+            updatedUser = { ironMines: updatedUser }
+        } else if (type === "lumbercamp") {
+            updatedUser = user.lumberCamps;
+            updatedUser.push(1);
+            updatedUser = { lumberCamps: updatedUser }
+        } else if (type === "quarry") {
+            updatedUser = user.quarries;
+            updatedUser.push(1);
+            updatedUser = { quarries: updatedUser }
+        }
+
+        const totalCost = await calculateTotalBuildingUpgradeCost(type, 0)
+
+        if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
+            await upgradeResource(client, user.username, updatedUser, type);
+            await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
+        }
+
+        res.redirect("/land");
     }
 
-    const totalCost = await calculateTotalBuildingUpgradeCost(type, 0)
-
-    if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
-        await upgradeResource(client, user.username, updatedUser, type);
-        await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
-    }
-
-    res.redirect("/land");
 });
 
 async function checkAll() {

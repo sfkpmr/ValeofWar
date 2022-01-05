@@ -36,9 +36,9 @@ function craftingCost(val) {
     goldCost += lances * lance.gold;
     goldCost += swords * sword.gold;
 
-    document.getElementById("lumber").innerHTML = lumberCost;
-    document.getElementById("iron").innerHTML = ironCost;
-    document.getElementById("gold").innerHTML = goldCost;
+    document.getElementById("lumber").innerText = lumberCost;
+    document.getElementById("iron").innerText = ironCost;
+    document.getElementById("gold").innerText = goldCost;
 
 }
 
@@ -50,19 +50,19 @@ document.getElementById("longbow").addEventListener("input", craftingCost);
 document.getElementById("shield").addEventListener("input", craftingCost);
 document.getElementById("spear").addEventListener("input", craftingCost);
 document.getElementById("sword").addEventListener("input", craftingCost);
-document.getElementById("bootAttackDamage").innerHTML = boot.attackDamage;
-document.getElementById("bootDefenseDamage").innerHTML = boot.defenseDamage;
-document.getElementById("bracerAttackDamage").innerHTML = bracer.attackDamage;
-document.getElementById("bracerDefenseDamage").innerHTML = bracer.defenseDamage;
-document.getElementById("helmetAttackDamage").innerHTML = helmet.attackDamage;
-document.getElementById("helmetDefenseDamage").innerHTML = helmet.defenseDamage;
-document.getElementById("lanceAttackDamage").innerHTML = lance.attackDamage;
-document.getElementById("lanceDefenseDamage").innerHTML = lance.defenseDamage;
-document.getElementById("longbowAttackDamage").innerHTML = longbow.attackDamage;
-document.getElementById("longbowDefenseDamage").innerHTML = longbow.defenseDamage;
-document.getElementById("shieldAttackDamage").innerHTML = shield.attackDamage;
-document.getElementById("shieldDefenseDamage").innerHTML = shield.defenseDamage;
-document.getElementById("spearAttackDamage").innerHTML = spear.attackDamage;
-document.getElementById("spearDefenseDamage").innerHTML = spear.defenseDamage;
-document.getElementById("swordAttackDamage").innerHTML = sword.attackDamage;
-document.getElementById("swordDefenseDamage").innerHTML = sword.defenseDamage;
+document.getElementById("bootAttackDamage").innerText = boot.attackDamage;
+document.getElementById("bootDefenseDamage").innerText = boot.defenseDamage;
+document.getElementById("bracerAttackDamage").innerText = bracer.attackDamage;
+document.getElementById("bracerDefenseDamage").innerText = bracer.defenseDamage;
+document.getElementById("helmetAttackDamage").innerText = helmet.attackDamage;
+document.getElementById("helmetDefenseDamage").innerText = helmet.defenseDamage;
+document.getElementById("lanceAttackDamage").innerText = lance.attackDamage;
+document.getElementById("lanceDefenseDamage").innerText = lance.defenseDamage;
+document.getElementById("longbowAttackDamage").innerText = longbow.attackDamage;
+document.getElementById("longbowDefenseDamage").innerText = longbow.defenseDamage;
+document.getElementById("shieldAttackDamage").innerText = shield.attackDamage;
+document.getElementById("shieldDefenseDamage").innerText = shield.defenseDamage;
+document.getElementById("spearAttackDamage").innerText = spear.attackDamage;
+document.getElementById("spearDefenseDamage").innerText = spear.defenseDamage;
+document.getElementById("swordAttackDamage").innerText = sword.attackDamage;
+document.getElementById("swordDefenseDamage").innerText = sword.defenseDamage;

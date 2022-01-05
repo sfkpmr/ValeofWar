@@ -1,4 +1,5 @@
-const { addTrade, getTrade, getUser, hasTrades, getUserTrades, deleteTrade } = require("../modules/database.js");
+const { addTrade, getTrade, getUserByUsername, hasTrades, getUserTrades, deleteTrade, setDatabaseValue } = require("../modules/database.js");
+const { ObjectId } = require('mongodb');
 
 resourceObject = {
     addTrade: async function (client, user, sellAmount, sellResource, buyAmount, buyResource) {
@@ -29,15 +30,14 @@ resourceObject = {
         }
 
     },
-    buyTrade: async function (client, buyer) {
-
+    buyTrade: async function (client, buyer, id) {
         const currentBuyerGrain = buyer.grain;
         const currentBuyerLumber = buyer.lumber;
         const currentBuyerStone = buyer.stone;
         const currentBuyerIron = buyer.iron;
         const currentBuyerGold = buyer.gold;
-        const trade = await getTrade(client, req.params.id);
-        const seller = await getUser(client, trade.seller);
+        const trade = await getTrade(client, id);
+        const seller = await getUserByUsername(client, trade.seller);
         const buyResource = trade.buyResource.toString().toLowerCase();;
         const buyAmount = trade.buyAmount;
         const sellResource = trade.sellResource.toString().toLowerCase();
@@ -95,7 +95,7 @@ resourceObject = {
         if (saleIsOk && buyer.username != seller.username) {
             await setDatabaseValue(client, seller.username, dataToSeller);
             await setDatabaseValue(client, buyer.username, dataToBuyer);
-            await deleteTrade(client, new ObjectId(trade._id));
+            await deleteTrade(client, new ObjectId(id));
         }
     }
 };

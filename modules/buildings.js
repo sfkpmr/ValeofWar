@@ -416,7 +416,7 @@ buildingObject = {
         console.log(totalCost)
 
         if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0)) {
-            await troopsObject.addArmor(client, user.username, craftingOrder);
+            await troopsObject.addToDb(client, user.username, craftingOrder);
             await resourceObject.removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0);
         } else {
             console.log("bbbb");

@@ -15,16 +15,16 @@ function stablesTrainCost(val) {
 
     goldCost += knights * knight.gold;
 
-    document.getElementById("grain").innerHTML = grainCost;
-    document.getElementById("iron").innerHTML = ironCost;
-    document.getElementById("gold").innerHTML = goldCost;
-    document.getElementById("recruits").innerHTML = parseInt(horsemen) + parseInt(knights);
-    document.getElementById("horses").innerHTML = parseInt(horsemen) + parseInt(knights);
+    document.getElementById("grain").innerText = grainCost;
+    document.getElementById("iron").innerText = ironCost;
+    document.getElementById("gold").innerText = goldCost;
+    document.getElementById("recruits").innerText = parseInt(horsemen) + parseInt(knights);
+    document.getElementById("horses").innerText = parseInt(horsemen) + parseInt(knights);
 }
 
 document.getElementById("horsemen").addEventListener("input", stablesTrainCost);
 document.getElementById("knights").addEventListener("input", stablesTrainCost);
-document.getElementById("horsemanAttackDamage").innerHTML = horseman.attackDamage;
-document.getElementById("horsemanDefenseDamage").innerHTML = horseman.defenseDamage;
-document.getElementById("knightAttackDamage").innerHTML = knight.attackDamage;
-document.getElementById("knightDefenseDamage").innerHTML = knight.defenseDamage;
+document.getElementById("horsemanAttackDamage").innerText = horseman.attackDamage;
+document.getElementById("horsemanDefenseDamage").innerText = horseman.defenseDamage;
+document.getElementById("knightAttackDamage").innerText = knight.attackDamage;
+document.getElementById("knightDefenseDamage").innerText = knight.defenseDamage;
