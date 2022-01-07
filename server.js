@@ -80,7 +80,6 @@ io.on('connection', (socket) => {
                 delete userMap[i]
             }
         }
-
     });
 });
 
@@ -410,10 +409,10 @@ app.get("/profile/:username", requiresAuth(), urlencodedParser, [
 
 });
 
+//verifiera att alla säljare har tillräckligt mycket resurser för att sälja, annars avbryt trade -- skicka meddelande om försäljning avbryts
 app.get("/market", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const trades = await getAllTrades(client);
-
     res.render('pages/market', { user, trades });
 });
 
@@ -455,7 +454,6 @@ app.post("/market/cancel/:id", requiresAuth(), urlencodedParser, [//change to de
     } else {
         res.status(400).render('pages/400');
     }
-
 });
 
 app.get("/messages/inbox", requiresAuth(), async (req, res) => {
@@ -492,7 +490,6 @@ app.get("/messages/inbox/:id", requiresAuth(), urlencodedParser, [
     const errors = validationResult(req)
     if (errors.isEmpty()) {
         const user = await getUserByEmail(client, req.oidc.user.email);
-
         const message = await getMessageById(client, new ObjectId(req.params.id));
 
         if (message && (user.username === message.sentBy || user.username === message.sentTo)) {
@@ -528,28 +525,7 @@ app.post("/messages/send", requiresAuth(), urlencodedParser, [
 
 });
 
-// app.post("/messages/send/:username", requiresAuth(), urlencodedParser, [
-//     check('username').exists().isAlphanumeric().isLength({ min: 5, max: 15 }),
-//     check('recipient').exists().isAlphanumeric().isLength({ min: 5, max: 5 }),
-//     check('message').exists().isAlphanumeric().isLength({ min: 10, max: 1000 }),
-// ], async (req, res) => {
-//     const errors = validationResult(req)
-//     if (errors.isEmpty()) {
-//         const sender = await getUserByEmail(client, req.oidc.user.email);
-//         const receiver = await getUserByUsername(client, req.params.username);
-//         const message = req.body.message;
-
-//         if (receiver) {
-//             const data = { sentTo: receiver.username, sentBy: sender.username, message: message, time: new Date() };
-//             const result = await addMessage(client, data);
-//             res.redirect(`/messages/inbox/${result}`);
-//         } else {
-//             res.send("No such user")
-//         }
-//     }
-
-// });
-
+//TODO error check alla URL inputs
 app.get("/messages/inbox/page/:nr", requiresAuth(), urlencodedParser, [
     check('nr').exists().isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
@@ -558,10 +534,7 @@ app.get("/messages/inbox/page/:nr", requiresAuth(), urlencodedParser, [
         const user = await getUserByEmail(client, req.oidc.user.email);
         const username = user.username;
         const result = await getUserMessages(client, user.username)
-
         const maxPages = Math.ceil(Object.keys(result).length / 20);
-        //TODO error check alla URL inputs
-
         const nr = parseInt(req.params.nr);
 
         if (nr < 1 || nr > maxPages || isNaN(nr)) {
@@ -640,7 +613,6 @@ app.get("/mailbox", requiresAuth(), async (req, res) => {
 app.get("/mailbox/log", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const result = await getInvolvedAttackLogs(client, user.username)
-
     if (result) {
         res.redirect('/mailbox/log/page/1')
     } else {
@@ -651,12 +623,10 @@ app.get("/mailbox/log", requiresAuth(), async (req, res) => {
 app.get("/mailbox/log/:id", requiresAuth(), urlencodedParser, [
     check('id').exists().isMongoId(),
 ], async (req, res) => {
-
     const errors = validationResult(req)
     if (errors.isEmpty()) {
         const user = await getUserByEmail(client, req.oidc.user.email);
         const username = user.username;
-
         const log = await getAttackLog(client, new ObjectId(req.params.id));
 
         if (user.username === log.attacker) {
@@ -673,9 +643,9 @@ app.get("/mailbox/log/:id", requiresAuth(), urlencodedParser, [
     } else {
         res.status(400).render('pages/400');
     }
-
 });
 
+//TODO error check alla URL inputs
 app.get("/mailbox/log/page/:nr", requiresAuth(), urlencodedParser, [
     check('nr').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
 ], async (req, res) => {
@@ -686,9 +656,6 @@ app.get("/mailbox/log/page/:nr", requiresAuth(), urlencodedParser, [
         const username = user.username;
         const result = await getInvolvedAttackLogs(client, user.username)
         const maxPages = Math.ceil(Object.keys(result).length / 20);
-        //if check size/nr/osv, nr can't be negative etc
-        //TODO error check alla URL inputs
-
         const nr = parseInt(req.params.nr);
 
         if (nr < 1 || nr > maxPages || isNaN(nr)) {
@@ -775,7 +742,6 @@ app.get("/town", requiresAuth(), async (req, res) => {
 app.get("/town/barracks", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("barracks", user.barracksLevel)
-
     res.render('pages/barracks', { user, totalCost });
 });
 
@@ -787,7 +753,6 @@ app.get("/online", requiresAuth(), async (req, res) => {
         let result = await getUserById(client, i);
         temp.push(result.username);
     }
-
     res.render('pages/online', { user, temp });
 });
 
@@ -991,9 +956,7 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
         const archers = convertNegativeToZero(parseInt(req.body.archers));
         const spearmen = convertNegativeToZero(parseInt(req.body.spearmen));
         const swordsmen = convertNegativeToZero(parseInt(req.body.swordsmen));
-
         const trainees = { archers: archers, spearmen: spearmen, swordsmen: swordsmen };
-
         await trainTroops(client, user, trainees);
     }
     res.redirect('/town/barracks');
@@ -1075,7 +1038,6 @@ app.get("/land/:type/:number", requiresAuth(), urlencodedParser, [
     } else {
         res.status(400).render('pages/400');
     }
-
 });
 
 app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
@@ -1166,7 +1128,6 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
     } else {
         res.status(400).render('pages/400');
     }
-
 });
 
 app.get("/land/:type/:number/establish", requiresAuth(), urlencodedParser, [
@@ -1212,7 +1173,6 @@ app.get("/land/:type/:number/establish", requiresAuth(), urlencodedParser, [
             await upgradeResource(client, user.username, updatedUser, type);
             await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
         }
-
         res.redirect("/land");
     } else {
         res.status(400).render('pages/400');
