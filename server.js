@@ -309,11 +309,14 @@ app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
 app.get("/api/:getIncome", requiresAuth(), urlencodedParser, [
     check('getIncome').exists().isAlpha().isLength({ min: 13, max: 15 })
 ], async (req, res) => {
+    const incomeTypes = ['getGrainIncome', 'getLumberIncome', 'getStoneIncome', 'getIronIncome', 'getGoldIncome'];
     const errors = validationResult(req)
-    if (errors.isEmpty()) {
+    if (errors.isEmpty() && incomeTypes.includes(req.params.getIncome)) {
         const user = await getUserByEmail(client, req.oidc.user.email);
         const income = await getIncome(user, req.params.getIncome);
         res.send(JSON.stringify(income))
+    } else {
+        res.status(400).render('pages/400');
     }
 });
 
@@ -325,14 +328,15 @@ app.get("/settings", requiresAuth(), async (req, res) => {
 });
 
 app.get("/api/getUser/:id", requiresAuth(), urlencodedParser, [
-    check('id').exists().isLength({ min: 20, max: 20 })
+    check('id').exists().isLength({ min: 20, max: 20 }) //format check
 ], async (req, res) => {
-
     const errors = validationResult(req)
     if (errors.isEmpty()) {
         const user = await getUserByEmail(client, req.oidc.user.email);
         userMap[user._id] = req.params.id
         res.status(200).end();
+    } else {
+        res.status(400).render('pages/400');
     }
 });
 
@@ -386,7 +390,7 @@ app.get("/vale", requiresAuth(), async (req, res) => {
 });
 
 app.get("/profile/:username", requiresAuth(), urlencodedParser, [
-    check('username').isAlphanumeric().isLength({ min: 5, max: 15 })
+    check('username').isAlphanumeric().isLength({ min: 5, max: 15 })//auth0 currently allowing special characters in usernames
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
@@ -522,10 +526,8 @@ app.post("/messages/send", requiresAuth(), urlencodedParser, [
     } else {
         res.status(400).render('pages/400');
     }
-
 });
 
-//TODO error check alla URL inputs
 app.get("/messages/inbox/page/:nr", requiresAuth(), urlencodedParser, [
     check('nr').exists().isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
@@ -538,7 +540,6 @@ app.get("/messages/inbox/page/:nr", requiresAuth(), urlencodedParser, [
         const nr = parseInt(req.params.nr);
 
         if (nr < 1 || nr > maxPages || isNaN(nr)) {
-            //todo detect % and #
             res.redirect('/messages/inbox/page/1')
         } else {
 
@@ -589,7 +590,6 @@ app.get("/messages/inbox/page/:nr", requiresAuth(), urlencodedParser, [
     } else {
         res.status(400).render('pages/400');
     }
-
 });
 
 app.post("/market/buy/:id", requiresAuth(), urlencodedParser, [
