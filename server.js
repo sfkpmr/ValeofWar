@@ -63,7 +63,7 @@ var management = new ManagementClient({
     scope: process.env.MANAGEMENT_SCOPE,
 });
 
-let userMap = new Map();
+const userMap = new Map();
 
 io.on('connection', (socket) => {
     date = new Date();
@@ -277,69 +277,6 @@ app.get("/", (req, res) => {
     }
 });
 
-app.delete("/settings/delete", requiresAuth(), async (req, res) => {
-    //Accept prompt remains after first click, needs to click twice? Causes 'TypeError: Cannot read property '_id' of null'
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const id = `auth0|${user._id}`
-
-    await deleteUser(client, user._id);
-
-    management.deleteUser({ id: id }, function (err) {
-        if (err) {
-            console.log(err);
-        }
-        console.log(id + " was deleted from auth0.");
-    });
-
-    res.status(200).end();
-});
-
-app.get("/api/getAttackPower", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const result = await calculateAttack(user);
-    res.send(JSON.stringify(result))
-});
-
-app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const result = await calculateDefense(user);
-    res.send(JSON.stringify(result))
-});
-
-app.get("/api/:getIncome", requiresAuth(), urlencodedParser, [
-    check('getIncome').exists().isAlpha().isLength({ min: 13, max: 15 })
-], async (req, res) => {
-    const incomeTypes = ['getGrainIncome', 'getLumberIncome', 'getStoneIncome', 'getIronIncome', 'getGoldIncome'];
-    const errors = validationResult(req)
-    if (errors.isEmpty() && incomeTypes.includes(req.params.getIncome)) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const income = await getIncome(user, req.params.getIncome);
-        res.send(JSON.stringify(income))
-    } else {
-        res.status(400).render('pages/400');
-    }
-});
-
-app.get("/settings", requiresAuth(), async (req, res) => {
-    //res.send(JSON.stringify(req.oidc.user));
-    //Test user: johanna@test.com, saodhgi-9486y-(WYTH
-    const profileUser = await getUserByEmail(client, req.oidc.user.email)
-    res.render("pages/settings", { profileUser })
-});
-
-app.get("/api/getUser/:id", requiresAuth(), urlencodedParser, [
-    check('id').exists().isLength({ min: 20, max: 20 }) //format check
-], async (req, res) => {
-    const errors = validationResult(req)
-    if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        userMap[user._id] = req.params.id
-        res.status(200).end();
-    } else {
-        res.status(400).render('pages/400');
-    }
-});
-
 app.get("/vale", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
 
@@ -360,24 +297,19 @@ app.get("/vale", requiresAuth(), async (req, res) => {
         goldLevels += i;
     };
 
-    const farms = user.farms;
-    farms.forEach(grainCalc);
+    user.farms.forEach(grainCalc);
     grainIncome = incomeCalc("grain", grainLevels);
 
-    const lumberCamps = user.lumberCamps;
-    lumberCamps.forEach(lumberCalc);
+    user.lumberCamps.forEach(lumberCalc);
     lumberIncome = incomeCalc("lumber", lumberLevels);
 
-    const quarries = user.quarries;
-    quarries.forEach(stoneCalc);
+    user.quarries.forEach(stoneCalc);
     stoneIncome = incomeCalc("stone", stoneLevels);
 
-    const ironMines = user.ironMines;
-    ironMines.forEach(ironCalc);
+    user.ironMines.forEach(ironCalc);
     ironIncome = incomeCalc("iron", ironLevels);
 
-    const goldMines = user.goldMines;
-    goldMines.forEach(goldCalc);
+    user.goldMines.forEach(goldCalc);
     goldIncome = incomeCalc("gold", goldLevels);
 
     const recruitsIncome = user.trainingfieldLevel * 5;
@@ -389,8 +321,32 @@ app.get("/vale", requiresAuth(), async (req, res) => {
     res.render("pages/vale", { user, grainIncome, lumberIncome, stoneIncome, ironIncome, goldIncome, recruitsIncome, horseIncome, attackValue, defenseValue })
 });
 
+app.get("/settings", requiresAuth(), async (req, res) => {
+    //res.send(JSON.stringify(req.oidc.user));
+    //Test user: johanna@test.com, saodhgi-9486y-(WYTH
+    const profileUser = await getUserByEmail(client, req.oidc.user.email)
+    res.render("pages/settings", { profileUser })
+});
+
+app.delete("/settings/delete", requiresAuth(), async (req, res) => {
+    //Accept prompt remains after first click, needs to click twice? Causes 'TypeError: Cannot read property '_id' of null'
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const id = `auth0|${user._id}`
+
+    await deleteUser(client, user._id);
+
+    management.deleteUser({ id: id }, function (err) {
+        if (err) {
+            console.log(err);
+        }
+        console.log(id + " was deleted from auth0.");
+    });
+
+    res.status(200).end();
+});
+
 app.get("/profile/:username", requiresAuth(), urlencodedParser, [
-    check('username').isAlphanumeric().isLength({ min: 5, max: 15 })//auth0 currently allowing special characters in usernames
+    check('username').isLength({ min: 5, max: 15 })//auth0 currently allowing special characters in usernames
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
@@ -410,7 +366,6 @@ app.get("/profile/:username", requiresAuth(), urlencodedParser, [
     } else {
         res.status(400).render('pages/400');
     }
-
 });
 
 //verifiera att alla säljare har tillräckligt mycket resurser för att sälja, annars avbryt trade -- skicka meddelande om försäljning avbryts
@@ -709,7 +664,6 @@ app.post("/town/:building/upgrade", requiresAuth(), urlencodedParser, [
             res.redirect(`/town/${req.params.building}`);
         } else {
             const totalCost = await calculateTotalBuildingUpgradeCost(type, level)
-
             if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
                 await upgradeBuilding(client, user.username, buildingName);
                 await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
@@ -735,10 +689,8 @@ app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
 app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const maxWallHealth = user.wallLevel * 100;
-
     if (user.currentWallHealth < maxWallHealth) {
         const totalCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel - 1)
-
         if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
             await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
             restoreWallHealth(client, user); //await?
@@ -770,7 +722,7 @@ app.post("/town/workshop/train", requiresAuth(), urlencodedParser, [
         const user = await getUserByEmail(client, req.oidc.user.email);
         const batteringrams = convertNegativeToZero(parseInt(req.body.batteringram));
         const siegetowers = convertNegativeToZero(parseInt(req.body.siegetower));
-        const trainees = { batteringrams: batteringrams, siegetowers: siegetowers }; //[siegetowers]
+        const trainees = { batteringrams: batteringrams, siegetowers: siegetowers };
         await trainTroops(client, user, trainees);
     }
     res.redirect('/town/workshop');
@@ -801,7 +753,6 @@ app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
     const errors = validationResult(req);
     if (errors.isEmpty()) {
         const user = await getUserByEmail(client, req.oidc.user.email);
-
         const boots = convertNegativeToZero(parseInt(req.body.boots));
         const bracers = convertNegativeToZero(parseInt(req.body.bracers));
         const helmets = convertNegativeToZero(parseInt(req.body.helmet));
@@ -810,7 +761,6 @@ app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
         const shields = convertNegativeToZero(parseInt(req.body.shield));
         const spears = convertNegativeToZero(parseInt(req.body.spear));
         const swords = convertNegativeToZero(parseInt(req.body.sword));
-
         const craftingOrder = { boots: boots, bracers: bracers, helmets: helmets, lances: lances, longbows: longbows, shields: shields, spears: spears, swords: swords };
         await craftArmor(client, user, craftingOrder);
     }
@@ -831,19 +781,16 @@ app.post("/town/stables/train", requiresAuth(), urlencodedParser, [
         const horsemen = convertNegativeToZero(parseInt(req.body.horsemen));
         const knights = convertNegativeToZero(parseInt(req.body.knights));
         const trainees = { horsemen: horsemen, knights: knights };
-
         await trainTroops(client, user, trainees);
     }
     res.redirect('/town/stables');
 });
 
 app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
-    //escape?
     check('archers').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
     check('spearmen').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
     check('swordsmen').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
-    // if (typeof req.query.archers === 'string' || req.query.archers instanceof String) {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
         const user = await getUserByEmail(client, req.oidc.user.email);
@@ -856,8 +803,10 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
     res.redirect('/town/barracks');
 });
 
-app.post("/profile/:username/attack", requiresAuth(), async (req, res) => {
-    //TODO validate //TODO attack limiter //reset all at midnight? //lose armor //TODO validate db input
+app.post("/profile/:username/attack", requiresAuth(), urlencodedParser, [
+    check('username').isLength({ min: 5, max: 15 }),
+], async (req, res) => {
+    //TODO validate //TODO attack limiter? //reset all at midnight? //lose armor //TODO validate db input
     const attacker = await getUserByEmail(client, req.oidc.user.email);
     const defender = await getUserByUsername(client, req.params.username);
     if (defender === false) {
@@ -1071,7 +1020,6 @@ app.get("/land/:type/:number/establish", requiresAuth(), urlencodedParser, [
     } else {
         res.status(400).render('pages/400');
     }
-
 });
 
 async function checkAll() {
@@ -1079,6 +1027,45 @@ async function checkAll() {
         addResources(client, user.username);
     });
 }
+
+app.get("/api/getAttackPower", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const result = await calculateAttack(user);
+    res.send(JSON.stringify(result))
+});
+
+app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const result = await calculateDefense(user);
+    res.send(JSON.stringify(result))
+});
+
+app.get("/api/:getIncome", requiresAuth(), urlencodedParser, [
+    check('getIncome').exists().isAlpha().isLength({ min: 13, max: 15 })
+], async (req, res) => {
+    const incomeTypes = ['getGrainIncome', 'getLumberIncome', 'getStoneIncome', 'getIronIncome', 'getGoldIncome'];
+    const errors = validationResult(req)
+    if (errors.isEmpty() && incomeTypes.includes(req.params.getIncome)) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        const income = await getIncome(user, req.params.getIncome);
+        res.send(JSON.stringify(income))
+    } else {
+        res.status(400).render('pages/400');
+    }
+});
+
+app.get("/api/getUser/:id", requiresAuth(), urlencodedParser, [
+    check('id').exists().isLength({ min: 20, max: 20 }) //format check
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        userMap[user._id] = req.params.id
+        res.status(200).end();
+    } else {
+        res.status(400).render('pages/400');
+    }
+});
 
 //måste köra för alla så folk kan anfalla folk som är afk //ev kör när någon interagerar med afk folk
 var minutes = 15, the_interval = minutes * 60 * 1000;
@@ -1095,14 +1082,14 @@ server.listen(port, () => {
 });
 
 app.use(express.static(path.join(__dirname, 'pages')));
-// Handle 404
+// Handle HTTP 404
 app.use(function (req, res) {
     const date = new Date();
     console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " Bad URL: " + req.path);
     res.status(404).render('pages/404');
 });
 
-// Handle 500
+// Handle HTTP 500
 app.use(function (error, req, res, next) {
     const date = new Date();
     console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " " + error + " " + req.path);
