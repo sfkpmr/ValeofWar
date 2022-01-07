@@ -8,61 +8,69 @@
 
 <body>
 
-    <% if (result.length> 0 ){ %>
-        <% for (var i=0; i < filteredResult.length; i++ ) { %>
-            <a href="/mailbox/log/<%= filteredResult[i]._id %>">
+    <% if (messages.result.length> 0 ){ %>
+        <% for (var i=0; i < messages.filteredResult.length; i++ ) { %>
+            <a href="/mailbox/log/<%= messages.filteredResult[i]._id %>">
 
-                <% if (filteredResult[i].attacker===username) { %>
-                    We attacked <%=filteredResult[i].defender%><% } else { %>
-                            <%=filteredResult[i].attacker %> attacked
-                                us<%}%></a> at <%= filteredResult[i].time.toLocaleDateString() %>
-                <%= filteredResult[i].time.toLocaleTimeString() %><br>
+                <% if (messages.filteredResult[i].attacker===user.username) { %>
+                    We attacked <%=messages.filteredResult[i].defender%>
+                        <% } else { %>
+                            <%=messages.filteredResult[i].attacker %> attacked
+                                us<%}%>
+            </a> at <%= messages.filteredResult[i].time.toLocaleDateString() %>
+                <%= messages.filteredResult[i].time.toLocaleTimeString() %><br>
                     <% } %>
 
                         <div class="pagination">
 
-                            <% if ( currentPage> 4){%>
-                                <a href="/mailbox/log/page/<%= currentPage -4%>">&laquo;</a>
+                            <% if ( messages.currentPage> 4){%>
+                                <a href="/mailbox/log/page/<%= messages.currentPage -4%>">&laquo;</a>
                                 <%}%>
-                                    <% if (currentPage> 3) {%>
-                                        <a href="/mailbox/log/page/<%= currentPage -3%>">
-                                            <%= currentPage -3 %>
+                                    <% if (messages.currentPage> 3) {%>
+                                        <a href="/mailbox/log/page/<%= messages.currentPage -3%>">
+                                            <%= messages.currentPage -3 %>
                                         </a>
                                         <%}%>
-                                            <% if (currentPage> 2) {%>
-                                                <a href="/mailbox/log/page/<%= currentPage -2%>">
-                                                    <%= currentPage -2 %>
+                                            <% if (messages.currentPage> 2) {%>
+                                                <a href="/mailbox/log/page/<%= messages.currentPage -2%>">
+                                                    <%= messages.currentPage -2 %>
                                                 </a>
                                                 <%}%>
-                                                    <% if (currentPage> 1) {%>
-                                                        <a href="/mailbox/log/page/<%= currentPage -1%>">
-                                                            <%= currentPage -1 %>
+                                                    <% if (messages.currentPage> 1) {%>
+                                                        <a href="/mailbox/log/page/<%= messages.currentPage -1%>">
+                                                            <%= messages.currentPage -1 %>
                                                         </a>
                                                         <%}%>
                                                             <a href="#" class="active">
-                                                                <%= currentPage %>
+                                                                <%= messages.currentPage %>
                                                             </a>
 
-                                                            <% if (currentPage<maxPages ) {%>
-                                                                <a href="/mailbox/log/page/<%= currentPage +1%>">
-                                                                    <%= currentPage +1%>
+                                                            <% if (messages.currentPage<messages.maxPages ) {%>
+                                                                <a
+                                                                    href="/mailbox/log/page/<%= messages.currentPage +1%>">
+                                                                    <%= messages.currentPage +1%>
                                                                 </a>
                                                                 <%}%>
-                                                                    <% if (currentPage+1<maxPages ) {%>
+                                                                    <% if (messages.currentPage+1<messages.maxPages )
+                                                                        {%>
                                                                         <a
-                                                                            href="/mailbox/log/page/<%= currentPage +2%>">
-                                                                            <%= currentPage +2%>
+                                                                            href="/mailbox/log/page/<%= messages.currentPage +2%>">
+                                                                            <%= messages.currentPage +2%>
                                                                         </a>
                                                                         <%}%>
-                                                                            <% if (currentPage+2<maxPages ) {%>
+                                                                            <% if
+                                                                                (messages.currentPage+2<messages.maxPages
+                                                                                ) {%>
                                                                                 <a
-                                                                                    href="/mailbox/log/page/<%= currentPage +3%>">
-                                                                                    <%= currentPage +3%>
+                                                                                    href="/mailbox/log/page/<%= messages.currentPage +3%>">
+                                                                                    <%= messages.currentPage +3%>
                                                                                 </a>
                                                                                 <%}%>
-                                                                                    <% if (currentPage+3<maxPages ) {%>
+                                                                                    <% if
+                                                                                        (messages.currentPage+3<messages.maxPages
+                                                                                        ) {%>
                                                                                         <a
-                                                                                            href="/mailbox/log/page/<%= currentPage +4%>">&raquo;</a>
+                                                                                            href="/mailbox/log/page/<%= messages.currentPage +4%>">&raquo;</a>
                                                                                         <%}%>
                                                                                             <%} else {%>
                                                                                                 No attacks made

@@ -35,9 +35,9 @@ const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PAS
 const client = new MongoClient(uri);
 
 const { addTrade, buyTrade } = require("./modules/market.js");
-const { getAttackLog, getInvolvedAttackLogs, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
+const { getAttackLog, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
 const { trainTroops } = require("./modules/troops.js");
-const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage } = require("./modules/database.js");
+const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs } = require("./modules/database.js");
 const { upgradeBuilding, craftArmor, upgradeResource, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getIncome } = require("./modules/resources.js");
 
@@ -463,7 +463,6 @@ app.post("/market/cancel/:id", requiresAuth(), urlencodedParser, [//change to de
 app.get("/messages/inbox", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const messages = await getUserMessages(client, user.username);
-
     if (messages) {
         res.redirect('/messages/inbox/page/1')
     } else {
@@ -534,59 +533,8 @@ app.get("/messages/inbox/page/:nr", requiresAuth(), urlencodedParser, [
     const errors = validationResult(req)
     if (errors.isEmpty()) {
         const user = await getUserByEmail(client, req.oidc.user.email);
-        const username = user.username;
-        const result = await getUserMessages(client, user.username)
-        const maxPages = Math.ceil(Object.keys(result).length / 20);
-        const nr = parseInt(req.params.nr);
-
-        if (nr < 1 || nr > maxPages || isNaN(nr)) {
-            res.redirect('/messages/inbox/page/1')
-        } else {
-
-            if (result.length === 0) {
-                res.render('pages/inbox')
-            }
-
-            const currentPage = parseInt(req.params.nr);
-
-            let startPoint = 0;
-            if (currentPage == 1) {
-                startPoint = 0
-            } else {
-                startPoint = (currentPage - 1) * 20;
-            }
-
-            const objectToArray2 = result => {
-                const keys = Object.keys(result);
-                const res = [];
-                for (let i = 0; i < keys.length; i++) {
-                    res.push(result[keys[i]]);
-                };
-                return res;
-            };
-
-            const tempArray = objectToArray2(result);
-            const reverseArray = [];
-
-            for (i = tempArray.length - 1; i >= 0; i--) {
-                reverseArray.push(tempArray[i]);
-            }
-
-            const objectToArray = reverseArray => {
-                const keys = Object.keys(reverseArray);
-                const res = [];
-                for (let i = startPoint; i < startPoint + 20; i++) {
-                    res.push(reverseArray[keys[i]]);
-                    if (reverseArray[keys[i + 1]] === null || reverseArray[keys[i + 1]] === undefined) {
-                        i = Number.MAX_SAFE_INTEGER;
-                    }
-                };
-                return res;
-            };
-            const filteredResult = objectToArray(reverseArray);
-
-            res.render('pages/inbox', { username, result, currentPage, maxPages, filteredResult })
-        }
+        const messages = await prepareMessagesOrLogs(client, user, parseInt(req.params.nr), "message");
+        res.render('pages/inbox', { user, messages })
     } else {
         res.status(400).render('pages/400');
     }
@@ -651,63 +599,9 @@ app.get("/mailbox/log/page/:nr", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
-        //TODO use one method for both log and messages?
         const user = await getUserByEmail(client, req.oidc.user.email);
-        const username = user.username;
-        const result = await getInvolvedAttackLogs(client, user.username)
-        const maxPages = Math.ceil(Object.keys(result).length / 20);
-        const nr = parseInt(req.params.nr);
-
-        if (nr < 1 || nr > maxPages || isNaN(nr)) {
-            //todo detect % and #
-            res.redirect('/mailbox/log/page/1')
-        } else {
-
-            if (result.length === 0) {
-                res.render('pages/log')
-            }
-
-            const currentPage = parseInt(req.params.nr);
-
-            let startPoint = 0;
-            if (currentPage == 1) {
-                startPoint = 0
-            } else {
-                startPoint = (currentPage - 1) * 20;
-            }
-
-            const objectToArray2 = result => {
-                const keys = Object.keys(result);
-                const res = [];
-                for (let i = 0; i < keys.length; i++) {
-                    res.push(result[keys[i]]);
-                };
-                return res;
-            };
-
-            const tempArray = objectToArray2(result);
-            let reverseArray = [];
-
-            for (i = tempArray.length - 1; i >= 0; i--) {
-                reverseArray.push(tempArray[i]);
-                //   console.log(i)
-            }
-
-            const objectToArray = reverseArray => {
-                const keys = Object.keys(reverseArray);
-                const res = [];
-                for (let i = startPoint; i < startPoint + 20; i++) {
-                    res.push(reverseArray[keys[i]]);
-                    if (reverseArray[keys[i + 1]] === null || reverseArray[keys[i + 1]] === undefined) {
-                        i = Number.MAX_SAFE_INTEGER;
-                    }
-                };
-                return res;
-            };
-            const filteredResult = objectToArray(reverseArray);
-
-            res.render('pages/log', { username, result, currentPage, maxPages, filteredResult })
-        }
+        const messages = await prepareMessagesOrLogs(client, user, parseInt(req.params.nr), "log");
+        res.render('pages/log', { user, messages })
     } else {
         res.status(400).render('pages/400');
     }
