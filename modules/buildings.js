@@ -550,6 +550,52 @@ buildingObject = {
             }
         }
 
+    },
+    getResourceFieldData: async function (user, type, resourceId) {
+        let invalidId, resourceLevel, title;
+
+        if (type === "farm") {
+            if (resourceId >= 0 && resourceId <= maxFarms - 1) {
+                title = "Farm";
+                resourceLevel = user.farms[resourceId];
+            } else {
+                invalidId = true;
+            }
+        } else if (type === "goldMine") {
+            if (resourceId >= 0 && resourceId <= maxGoldMines - 1) {
+                title = "Gold mine";
+                resourceLevel = user.goldMines[resourceId];
+            } else {
+                invalidId = true;
+            }
+        } else if (type === "ironMine") {
+            if (resourceId >= 0 && resourceId <= maxIronMines - 1) {
+                title = "Iron mine";
+                resourceLevel = user.ironMines[resourceId];
+            } else {
+                invalidId = true;
+            }
+        }
+        else if (type === "lumbercamp") {
+            if (resourceId >= 0 && resourceId <= maxLumberCamps - 1) {
+                title = "Lumber camp";
+                resourceLevel = user.lumberCamps[resourceId];
+            } else {
+                invalidId = true;
+            }
+        }
+        else if (type === "quarry") {
+            if (resourceId >= 0 && resourceId <= maxQuarries - 1) {
+                title = "Quarry";
+                resourceLevel = user.quarries[resourceId];
+            } else {
+                invalidId = true;
+            }
+        }
+        const totalCost = await buildingObject.calculateTotalBuildingUpgradeCost(type, resourceLevel);
+
+        return { totalCost: totalCost, resourceLevel: resourceLevel, invalidId: invalidId, title: title };
+
     }
 };
 

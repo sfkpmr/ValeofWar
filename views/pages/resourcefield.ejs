@@ -3,7 +3,7 @@
 
 <head>
     <title>
-        <%= title %> - Level: <%= resourceLevel %>
+        <%= resourceData.title %> - Level: <%= resourceData.resourceLevel %>
     </title>
     <link rel="stylesheet" type="text/css" href="../../static/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,19 +13,19 @@
 
 <body>
 
-    <%= title %> level: <%= resourceLevel %>
+    <%= resourceData.title %> level: <%= resourceData.resourceLevel %>
             <br>
             <br>
-            The <%= title.toLowerCase() %> provides additional resources for your town.
+            The <%= resourceData.title.toLowerCase() %> provides additional resources for your town.
                 <br> <br>
-                <% if (resourceLevel <=19){ %>
-                    <div class="resources"> Upgrade cost: <%= totalCost.lumberCost %> <img
+                <% if (resourceData.resourceLevel <=19){ %>
+                    <div class="resources"> Upgrade cost: <%= resourceData.totalCost.lumberCost %> <img
                                 src="../../static/images/wood.png" height="35px" title="Lumber">
-                            <%= totalCost.stoneCost %> <img src="../../static/images/stone.png" height="35px"
-                                    title="Stone">
-                                <%= totalCost.ironCost %> <img src="../../static/images/iron-ingots.png" height="35px"
-                                        title="Iron">
-                                    and <%= totalCost.goldCost %>
+                            <%= resourceData.totalCost.stoneCost %> <img src="../../static/images/stone.png"
+                                    height="35px" title="Stone">
+                                <%= resourceData.totalCost.ironCost %> <img src="../../static/images/iron-ingots.png"
+                                        height="35px" title="Iron">
+                                    and <%= resourceData.totalCost.goldCost %>
                                         <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
                     </div>
                     <br>
@@ -35,7 +35,7 @@
                     </form>
 
                     <% } else { %>
-                        The <%= title.toLowerCase() %> is already at max level!
+                        The <%= resourceData.title.toLowerCase() %> is already at max level!
                             <% } %>
 
 </body>

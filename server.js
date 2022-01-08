@@ -38,7 +38,7 @@ const { addTrade, buyTrade } = require("./modules/market.js");
 const { getAttackLog, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
 const { trainTroops } = require("./modules/troops.js");
 const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs } = require("./modules/database.js");
-const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField } = require("./modules/buildings.js");
+const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getIncome } = require("./modules/resources.js");
 
 const maxFarms = 4, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 4;
@@ -349,13 +349,12 @@ app.get("/profile/:username", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
-        const currentUser = req.oidc.user.email;
         const profileUser = await getUserByUsername(client, req.params.username);
 
         if (profileUser === false) {
             res.send("No such user");
         } else {
-            if (currentUser === profileUser.email) {
+            if (req.oidc.user.email === profileUser.email) {
                 res.render('pages/settings', { profileUser });
             } else {
                 res.render('pages/publicprofile', { profileUser });
@@ -529,6 +528,7 @@ app.get("/mailbox/log/:id", requiresAuth(), urlencodedParser, [
         const user = await getUserByEmail(client, req.oidc.user.email);
         const username = user.username;
         const log = await getAttackLog(client, new ObjectId(req.params.id));
+        let attackUrl;
 
         if (user.username === log.attacker) {
             attackUrl = `/profile/${log.defender}/attack`
@@ -537,7 +537,7 @@ app.get("/mailbox/log/:id", requiresAuth(), urlencodedParser, [
         }
 
         if (log && (username === log.attacker || username === log.defender)) {
-            res.render('pages/attack', { username, log })
+            res.render('pages/attack', { username, log, attackUrl })
         } else {
             res.send("No such log!")
         }
@@ -782,56 +782,15 @@ app.get("/land/:type/:number", requiresAuth(), urlencodedParser, [
     const resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
     if (errors.isEmpty() && resources.includes(type)) {
         const user = await getUserByEmail(client, req.oidc.user.email);
-        let invalidId;
-        let resourceLevel;
+        const resourceData = await getResourceFieldData(user, type, resourceId);
 
-        if (type === "farm") {
-            if (resourceId >= 0 && resourceId <= maxFarms - 1) {
-                title = "Farm";
-                resourceLevel = user.farms[resourceId];
-            } else {
-                invalidId = true;
-            }
-        } else if (type === "goldMine") {
-            if (resourceId >= 0 && resourceId <= maxGoldMines - 1) {
-                title = "Gold mine";
-                resourceLevel = user.goldMines[resourceId];
-            } else {
-                invalidId = true;
-            }
-        } else if (type === "ironMine") {
-            if (resourceId >= 0 && resourceId <= maxIronMines - 1) {
-                title = "Iron mine";
-                resourceLevel = user.ironMines[resourceId];
-            } else {
-                invalidId = true;
-            }
-        }
-        else if (type === "lumbercamp") {
-            if (resourceId >= 0 && resourceId <= maxLumberCamps - 1) {
-                title = "Lumber camp";
-                resourceLevel = user.lumberCamps[resourceId];
-            } else {
-                invalidId = true;
-            }
-        }
-        else if (type === "quarry") {
-            if (resourceId >= 0 && resourceId <= maxQuarries - 1) {
-                title = "Quarry";
-                resourceLevel = user.quarries[resourceId];
-            } else {
-                invalidId = true;
-            }
-        }
-        const totalCost = await calculateTotalBuildingUpgradeCost(type, resourceLevel)
-
-        if (invalidId) {
+        if (resourceData.invalidId) {
             res.redirect("/land");
-        } else if (resourceLevel !== undefined && resourceLevel > 0) {
+        } else if (resourceData.resourceLevel !== undefined && resourceData.resourceLevel > 0) {
             //use one field for all levels, none to 20
-            res.render('pages/resourcefield', { totalCost, resourceId, resourceLevel, type });
+            res.render('pages/resourcefield', { resourceData, resourceId, type });
         } else {
-            res.render('pages/emptyfield', { totalCost, resourceId, type });
+            res.render('pages/emptyfield', { resourceData, resourceId, type });
         }
     } else {
         res.status(400).render('pages/400');

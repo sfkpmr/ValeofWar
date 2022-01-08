@@ -3,7 +3,7 @@
 
 <head>
     <title>
-        Empty <%= title.toLowerCase() %>
+        Empty <%= resourceData.title.toLowerCase() %>
     </title>
     <link rel="stylesheet" type="text/css" href="../../static/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,13 +13,15 @@
 
 <body>
 
-    There is no <%= title.toLowerCase() %> here yet!<br><br>
+    There is no <%= resourceData.title.toLowerCase() %> here yet!<br><br>
 
-        <div class="resources"> Cost to establish: <%= totalCost.lumberCost %> <img src="../../static/images/wood.png"
-                    height="35px" title="Lumber">
-                <%= totalCost.stoneCost %> <img src="../../static/images/stone.png" height="35px" title="Stone">
-                    <%= totalCost.ironCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron">
-                        and <%= totalCost.goldCost %>
+        <div class="resources"> Cost to establish: <%= resourceData.totalCost.lumberCost %> <img
+                    src="../../static/images/wood.png" height="35px" title="Lumber">
+                <%= resourceData.totalCost.stoneCost %> <img src="../../static/images/stone.png" height="35px"
+                        title="Stone">
+                    <%= resourceData.totalCost.ironCost %> <img src="../../static/images/iron-ingots.png" height="35px"
+                            title="Iron">
+                        and <%= resourceData.totalCost.goldCost %>
                             <img src="../../static/images/gold-ingots.png" height="35px" title="Gold"> </div><br>
 
         <form action="/land/<%= type %>/<%= resourceId %>/upgrade" method="post">
