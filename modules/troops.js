@@ -50,19 +50,21 @@ troopsObject = {
         const ironCost = calcIronTrainCost(archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers);
 
         let recruitsCost;
+        let horseCost;
         if (archers > 0 || spearmen > 0 || swordsmen > 0) {
             recruitsCost = archers + spearmen + swordsmen;
         } else if (horsemen > 0 || knights > 0) {
             recruitsCost = horsemen + knights;
+            horseCost = recruitsCost;
         } else {
             recruitsCost = (batteringrams + siegetowers) * 2;
         }
 
         const data = { archers: archers, spearmen: spearmen, swordsmen: swordsmen, horsemen: horsemen, knights: knights, "batteringrams": batteringrams, "siegetowers": siegetowers };
 
-        if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, 0)) {
+        if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost)) {
             await troopsObject.addToDb(client, user.username, data);
-            await removeResources(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, 0);
+            await removeResources(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost);
         } else {
             console.log("bbbb");
         }
