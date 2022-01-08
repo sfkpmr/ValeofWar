@@ -1,5 +1,5 @@
 const { incDatabaseValue, setDatabaseValue } = require("../modules/database.js");
-const { checkIfCanAfford } = require("../modules/resources.js");
+const { checkIfCanAfford, removeResources } = require("../modules/resources.js");
 
 const archer = { grain: 25, lumber: 50, gold: 10 };
 const spearman = { grain: 25, lumber: 50 };
@@ -30,6 +30,8 @@ const lumberCampBaseCost = { lumber: 500, stone: 100, iron: 5, gold: 5 };
 const quarryBaseCost = { lumber: 500, stone: 100, iron: 100, gold: 100 };
 const ironMineBaseCost = { lumber: 750, stone: 500, iron: 100, gold: 100 };
 const goldMineBaseCost = { lumber: 1000, stone: 250, iron: 250, gold: 100 };
+
+const maxFarms = 4, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 4;
 
 buildingObject = {
     calcGoldTrainCost: function (archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers) {
@@ -422,6 +424,82 @@ buildingObject = {
             console.log("bbbb");
         }
 
+    },
+    upgradeResourceField: async function (client, user, type, resourceId) {
+        let updatedUser, resourceLevel, resource;
+
+        if (type === "farm") {
+            if (resourceId >= 0 && resourceId <= maxFarms) {
+                resource = "farms"
+                updatedUser = user.farms;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+                updatedUser = { farms: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        } else if (type === "goldMine") {
+            if (resourceId >= 0 && resourceId <= maxGoldMines) {
+                resource = "goldMines";
+                updatedUser = user.goldMines;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+
+                updatedUser = { goldMines: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        } else if (type === "ironMine") {
+            if (resourceId >= 0 && resourceId <= maxIronMines) {
+                resource = "ironMines";
+                updatedUser = user.ironMines;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+
+                updatedUser = { ironMines: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        }
+        else if (type === "lumbercamp") {
+            if (resourceId >= 0 && resourceId <= maxLumberCamps) {
+                resource = "lumberCamp"
+                updatedUser = user.lumberCamps;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+
+                updatedUser = { lumberCamps: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        } else if (type === "quarry") {
+            if (resourceId >= 0 && resourceId <= maxQuarries) {
+                resource = "quarry"
+                updatedUser = user.quarries;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+
+                updatedUser = { quarries: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        } else {
+            console.debug(type, 'Error')
+        }
+
+        if (resourceLevel >= 20) {
+            res.redirect("/land");
+        } else {
+            const totalCost = await buildingObject.calculateTotalBuildingUpgradeCost(type, resourceLevel)
+
+            if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
+                await buildingObject.upgradeResource(client, user.username, updatedUser, resource);
+                await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
+            } else {
+                console.debug("bbb-1");
+                return false;
+            }
+        }
     }
 };
 

@@ -38,7 +38,7 @@ const { addTrade, buyTrade } = require("./modules/market.js");
 const { getAttackLog, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
 const { trainTroops } = require("./modules/troops.js");
 const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs } = require("./modules/database.js");
-const { upgradeBuilding, craftArmor, upgradeResource, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost } = require("./modules/buildings.js");
+const { upgradeBuilding, craftArmor, upgradeResource, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getIncome } = require("./modules/resources.js");
 
 const maxFarms = 4, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 4;
@@ -892,80 +892,8 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
     if (errors.isEmpty() && resources.includes(type)) {
         const resourceId = parseInt(req.params.number);
         const user = await getUserByEmail(client, req.oidc.user.email);
-        var updatedUser, resourceLevel, resource;
-
-        if (type === "farm") {
-            if (resourceId >= 0 && resourceId <= maxFarms) {
-                resource = "farms"
-                updatedUser = user.farms;
-                resourceLevel = updatedUser[resourceId]
-                updatedUser[resourceId]++;
-                updatedUser = { farms: updatedUser }
-            } else {
-                res.redirect("/land");
-            }
-        } else if (type === "goldMine") {
-            if (resourceId >= 0 && resourceId <= maxGoldMines) {
-                resource = "goldMines";
-                updatedUser = user.goldMines;
-                resourceLevel = updatedUser[resourceId]
-                updatedUser[resourceId]++;
-
-                updatedUser = { goldMines: updatedUser }
-            } else {
-                res.redirect("/land");
-            }
-        } else if (type === "ironMine") {
-            if (resourceId >= 0 && resourceId <= maxIronMines) {
-                resource = "ironMines";
-                updatedUser = user.ironMines;
-                resourceLevel = updatedUser[resourceId]
-                updatedUser[resourceId]++;
-
-                updatedUser = { ironMines: updatedUser }
-            } else {
-                res.redirect("/land");
-            }
-        }
-        else if (type === "lumbercamp") {
-            if (resourceId >= 0 && resourceId <= maxLumberCamps) {
-                resource = "lumberCamp"
-                updatedUser = user.lumberCamps;
-                resourceLevel = updatedUser[resourceId]
-                updatedUser[resourceId]++;
-
-                updatedUser = { lumberCamps: updatedUser }
-            } else {
-                res.redirect("/land");
-            }
-        } else if (type === "quarry") {
-            if (resourceId >= 0 && resourceId <= maxQuarries) {
-                resource = "quarry"
-                updatedUser = user.quarries;
-                resourceLevel = updatedUser[resourceId]
-                updatedUser[resourceId]++;
-
-                updatedUser = { quarries: updatedUser }
-            } else {
-                res.redirect("/land");
-            }
-        } else {
-            console.debug(type, 'Error')
-        }
-
-        if (resourceLevel >= 20) {
-            res.redirect("/land");
-        } else {
-            const totalCost = await calculateTotalBuildingUpgradeCost(type, resourceLevel)
-
-            if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
-                await upgradeResource(client, user.username, updatedUser, resource);
-                await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
-            } else {
-                console.debug("bbb-1");
-            }
-            res.redirect(`/land/${type}/${resourceId}`);
-        }
+        await upgradeResourceField(client, user, type, resourceId)
+        res.redirect(`/land/${type}/${resourceId}`);
     } else {
         res.status(400).render('pages/400');
     }
