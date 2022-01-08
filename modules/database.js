@@ -160,6 +160,15 @@ databaseObject = {
             return true;
         }
         return false;
+    },
+    checkIfAlreadyTradingResource: async function (client, user, type) {
+        const result = await databaseObject.getUserTrades(client, user.username);
+        for (let i = 0; i < result.length; i++) {
+            if (result[i].sellResource === type) {
+                return true;
+            }
+        }
+        return false;
     }
 };
 

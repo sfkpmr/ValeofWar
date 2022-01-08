@@ -37,7 +37,7 @@ const client = new MongoClient(uri);
 const { addTrade, buyTrade } = require("./modules/market.js");
 const { getAttackLog, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
 const { trainTroops } = require("./modules/troops.js");
-const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs, userAllowedToTrade } = require("./modules/database.js");
+const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource } = require("./modules/database.js");
 const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getIncome } = require("./modules/resources.js");
 
@@ -360,7 +360,7 @@ app.get("/market", requiresAuth(), async (req, res) => {
     res.render('pages/market', { user, trades, allowedToTrade });
 });
 
-app.post("/market/sell", requiresAuth(), urlencodedParser, [ //TODO set max nr of trades
+app.post("/market/sell", requiresAuth(), urlencodedParser, [
     check('sellAmount', 'Must be between 100 and 9999').exists().isNumeric({ no_symbols: true }).isLength({ min: 3, max: 4 }),
     check('sellResource').exists(),
     check('buyAmount', 'Must be between 100 and 9999').exists().isNumeric({ no_symbols: true }).isLength({ min: 3, max: 4 }),
@@ -374,12 +374,11 @@ app.post("/market/sell", requiresAuth(), urlencodedParser, [ //TODO set max nr o
     const resources = ['Grain', 'Lumber', 'Stone', 'Iron', 'Gold'];
     const user = await getUserByEmail(client, req.oidc.user.email);
     const allowedToTrade = await userAllowedToTrade(client, user);
-    if (errors.isEmpty() && resources.includes(sellResource) && resources.includes(buyResource) && allowedToTrade) {
+    const alreadyTradingResource = await checkIfAlreadyTradingResource(client, user, sellResource)
+    if (errors.isEmpty() && resources.includes(sellResource) && resources.includes(buyResource) && allowedToTrade && !alreadyTradingResource) {
         await addTrade(client, user, sellAmount, sellResource, buyAmount, buyResource);
-        res.redirect("/market");
-    } else {
-        res.status(400).render('pages/400');
     }
+    res.redirect("/market");
 });
 
 app.post("/market/cancel/:id", requiresAuth(), urlencodedParser, [//change to delete request
