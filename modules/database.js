@@ -96,7 +96,7 @@ databaseObject = {
         if (type === "log") {
             result = await databaseObject.getInvolvedAttackLogs(client, user.username)
         } else if (type === "message") {
-            
+
             result = await databaseObject.getUserMessages(client, user.username)
         } else {
             console.debug(type, "Invalid object")
@@ -148,9 +148,18 @@ databaseObject = {
             };
             const filteredResult = objectToArray(reverseArray);
 
-            return { "result": result, "currentPage": currentPage, "maxPages": maxPages, "filteredResult": filteredResult }; //res.render('pages/inbox', { username, result, currentPage, maxPages, filteredResult })
-
+            return { "result": result, "currentPage": currentPage, "maxPages": maxPages, "filteredResult": filteredResult };
         }
+    },
+    checkHowManyTradesPlayerHas: async function (client, user) {
+        const number = await client.db("gamedb").collection("trades").countDocuments({ seller: user.username });
+        return number;
+    },
+    userAllowedToTrade: async function (client, user) {
+        if (await databaseObject.checkHowManyTradesPlayerHas(client, user) < 4) {
+            return true;
+        }
+        return false;
     }
 };
 

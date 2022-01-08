@@ -48,7 +48,6 @@ resourceObject = {
         const updatedUser = { "grain": grainIncome, "lumber": lumberIncome, "stone": stoneIncome, "gold": goldIncome, "iron": ironIncome, "recruits": recruitsIncome, "horses": horseIncome };
 
         await incDatabaseValue(client, username, updatedUser);
-
     },
 
     removeResources: async function (client, username, gold, lumber, stone, iron, grain, recruits, horses) {
@@ -80,8 +79,6 @@ resourceObject = {
     },
 
     stealResources: async function (client, username, gold, lumber, stone, iron, grain) {
-
-        //  console.log(username + " is stealing resources");
         const user = await getUserByUsername(client, username);
 
         const newGold = Math.round(user.gold + gold);
@@ -96,8 +93,6 @@ resourceObject = {
     },
 
     loseResources: async function (client, username, gold, lumber, stone, iron, grain) {
-
-        //  console.log(username + " is losing resources");
         const user = await getUserByUsername(client, username);
 
         const newGold = user.gold - gold;
@@ -111,7 +106,6 @@ resourceObject = {
         await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
     },
     incomeCalc: function (type, levels) {
-
         let baseIncome = 0;
 
         if (type === "grain") {

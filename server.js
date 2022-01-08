@@ -37,11 +37,9 @@ const client = new MongoClient(uri);
 const { addTrade, buyTrade } = require("./modules/market.js");
 const { getAttackLog, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
 const { trainTroops } = require("./modules/troops.js");
-const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs } = require("./modules/database.js");
+const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs, userAllowedToTrade } = require("./modules/database.js");
 const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getIncome } = require("./modules/resources.js");
-
-const maxFarms = 4, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 4;
 
 app.use(
     auth({
@@ -102,6 +100,7 @@ async function main() {
         const changeStream = collection.watch(pipeline);
 
         changeStream.on('change', (next) => {
+            validateUserTrades(client, next.documentKey._id);
             for (var i in userMap) {
                 if (i === next.documentKey._id && next.operationType != "delete") {
                     //https://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
@@ -144,27 +143,21 @@ async function main() {
                     const currentWallHealth = JSON.stringify(user.currentWallHealth);
 
                     let updateDamage = false;
-                    let checkTrades = false;
 
                     if (grain !== null && grain !== undefined) {
                         io.to(userMap[i]).emit("updateGrain", grain);
-                        checkTrades = true;
                     };
                     if (lumber !== null && lumber !== undefined) {
                         io.to(userMap[i]).emit("updateLumber", lumber);
-                        checkTrades = true;
                     };
                     if (stone !== null && stone !== undefined) {
                         io.to(userMap[i]).emit("updateStone", stone);
-                        checkTrades = true;
                     };
                     if (iron !== null && iron !== undefined) {
                         io.to(userMap[i]).emit("updateIron", iron);
-                        checkTrades = true;
                     };
                     if (gold !== null && gold !== undefined) {
                         io.to(userMap[i]).emit("updateGold", gold);
-                        checkTrades = true;
                     };
                     if (recruits !== null && recruits !== undefined) {
                         io.to(userMap[i]).emit("updateRecruits", recruits);
@@ -255,10 +248,6 @@ async function main() {
                     if (updateDamage) {
                         io.to(userMap[i]).emit("updatePower");
                     };
-
-                    if (checkTrades) {
-                        validateUserTrades(client, i);
-                    }
                 }
             }
         })
@@ -269,8 +258,7 @@ app.use('/static', express.static('static'));
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
-    const authenticated = req.oidc.isAuthenticated();
-    if (authenticated) {
+    if (req.oidc.isAuthenticated()) {
         res.redirect("/vale")
     } else {
         res.sendFile(path.join(__dirname, '/static/index.html'));
@@ -340,7 +328,6 @@ app.delete("/settings/delete", requiresAuth(), async (req, res) => {
         }
         console.log(id + " was deleted from auth0.");
     });
-
     res.status(200).end();
 });
 
@@ -369,7 +356,8 @@ app.get("/profile/:username", requiresAuth(), urlencodedParser, [
 app.get("/market", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const trades = await getAllTrades(client);
-    res.render('pages/market', { user, trades });
+    const allowedToTrade = await userAllowedToTrade(client, user);
+    res.render('pages/market', { user, trades, allowedToTrade });
 });
 
 app.post("/market/sell", requiresAuth(), urlencodedParser, [ //TODO set max nr of trades
@@ -384,9 +372,9 @@ app.post("/market/sell", requiresAuth(), urlencodedParser, [ //TODO set max nr o
     const buyAmount = parseInt(req.body.buyAmount);
     const buyResource = req.body.buyResource;
     const resources = ['Grain', 'Lumber', 'Stone', 'Iron', 'Gold'];
-    if (errors.isEmpty() && resources.includes(sellResource) && resources.includes(buyResource)) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const allowedToTrade = await userAllowedToTrade(client, user);
+    if (errors.isEmpty() && resources.includes(sellResource) && resources.includes(buyResource) && allowedToTrade) {
         await addTrade(client, user, sellAmount, sellResource, buyAmount, buyResource);
         res.redirect("/market");
     } else {
