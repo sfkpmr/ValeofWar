@@ -7,10 +7,12 @@
 
 <body>
 
-    <% if(user.username === message.sentBy) { %>
+    <% if(message.sentBy === "SYSTEM") { %>
+        Sent by: SYSTEM  <br>
+    <% }else if (user.username === message.sentBy){ %>
         Sent by: <%= message.sentBy %>  <br>
     <% }else{ %>
-    Sent by: <a href=/profile/<%=message.sentBy %>> <%= message.sentBy %> </a> <br>
+        Sent by: <a href=/profile/<%=message.sentBy %>> <%= message.sentBy %> </a> <br>
     <% } %>
 
     <% if(user.username === message.sentTo) { %>
@@ -27,7 +29,7 @@
                     <br>
 
 
-                    <% if (message.sentBy !=user.username){%>
+                    <% if (message.sentBy !== "SYSTEM"){%>
 
 
                         <form action=" /messages/send/<%=message.sentBy%>" method="post">

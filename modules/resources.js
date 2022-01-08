@@ -131,7 +131,7 @@ resourceObject = {
         const currentGold = user.gold;
 
         if (await hasTrades(client, user.username)) {
-            trades = await getUserTrades(client, user.username);
+            const trades = await getUserTrades(client, user.username);
             for (let i = 0; i < trades.length; i++) {
                 let cancelTrade = false;
                 if (trades[i].sellResource === "Grain" && trades[i].sellAmount > currentGrain) {
@@ -147,7 +147,7 @@ resourceObject = {
                 }
 
                 if (cancelTrade) {
-                    const data = { sentTo: user.username, sentBy: "SYSTEM", message: `Your trade offer of ${trades[i].sellResource} was canceled due to low stockpiles.`, time: new Date() };
+                    const data = { sentTo: user.username, sentBy: "SYSTEM", message: `Your trade offer of ${trades[i].sellResource} was canceled due to insufficient stockpiles.`, time: new Date() };
                     await deleteTrade(client, trades[i]._id);
                     addMessage(client, data);
                 }
