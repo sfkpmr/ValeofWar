@@ -155,33 +155,25 @@ resourceObject = {
         };
     },
     getIncome: async function (user, requestedIncome) {
-        let levels = 0, income = 0, count;
+        let levels = 0, income = 0;
         function calc(i) {
             levels += i;
         };
 
         if (requestedIncome === "getGrainIncome") {
-            count = user.farms;
-            count.forEach(calc);
+            user.farms.forEach(calc);
             income = resourceObject.incomeCalc("grain", levels);
         } else if (requestedIncome === "getLumberIncome") {
-            count = user.lumberCamps;
-            count.forEach(calc);
+            user.lumberCamps.forEach(calc);
             income = resourceObject.incomeCalc("lumber", levels);
-        }
-        else if (requestedIncome === "getStoneIncome") {
-            count = user.quarries;
-            count.forEach(calc);
+        } else if (requestedIncome === "getStoneIncome") {
+            user.quarries.forEach(calc);
             income = resourceObject.incomeCalc("stone", levels);
-        }
-        else if (requestedIncome === "getIronIncome") {
-            count = user.ironMines;
-            count.forEach(calc);
+        } else if (requestedIncome === "getIronIncome") {
+            user.ironMines.forEach(calc);
             income = resourceObject.incomeCalc("iron", levels);
-        }
-        else if (requestedIncome === "getGoldIncome") {
-            count = user.goldMines;
-            count.forEach(calc);
+        } else if (requestedIncome === "getGoldIncome") {
+            user.goldMines.forEach(calc);
             income = resourceObject.incomeCalc("gold", levels);
         } else if (requestedIncome === "getRecruitsIncome") {
             income = user.trainingfieldLevel * 5;

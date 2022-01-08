@@ -514,7 +514,6 @@ buildingObject = {
                 buildingName = "blacksmithLevel";
                 break;
             case "stables":
-                console.log('aaaaaaaaaaaa')
                 level = user.stablesLevel;
                 buildingName = "stablesLevel";
                 break;
