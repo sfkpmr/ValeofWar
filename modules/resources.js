@@ -1,4 +1,4 @@
-const { getUserByUsername, incDatabaseValue, getUserById, hasTrades, getUserTrades, deleteTrade } = require("../modules/database.js");
+const { getUserByUsername, incDatabaseValue, getUserById, hasTrades, getUserTrades, deleteTrade, addMessage } = require("../modules/database.js");
 
 const baseGrainIncome = 7, baseLumberIncome = 6, baseStoneIncome = 3, baseIronIncome = 2, baseGoldIncome = 1;
 
@@ -147,7 +147,9 @@ resourceObject = {
                 }
 
                 if (cancelTrade) {
+                    const data = { sentTo: user.username, sentBy: "SYSTEM", message: `Your trade offer of ${trades[i].sellResource} was canceled due to low stockpiles.`, time: new Date() };
                     await deleteTrade(client, trades[i]._id);
+                    addMessage(client, data);
                 }
             }
         };
