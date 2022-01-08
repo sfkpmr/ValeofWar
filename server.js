@@ -66,7 +66,7 @@ var management = new ManagementClient({
 const userMap = new Map();
 
 io.on('connection', (socket) => {
-    date = new Date();
+    let date = new Date();
     console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " " + socket.id + " connected.")
 
     io.to(socket.id).emit("sync"); //sends user info to server
@@ -143,8 +143,8 @@ async function main() {
 
                     const currentWallHealth = JSON.stringify(user.currentWallHealth);
 
-                    var updateDamage = false;
-                    var checkTrades = false;
+                    let updateDamage = false;
+                    let checkTrades = false;
 
                     if (grain !== null && grain !== undefined) {
                         io.to(userMap[i]).emit("updateGrain", grain);
@@ -322,7 +322,6 @@ app.get("/vale", requiresAuth(), async (req, res) => {
 });
 
 app.get("/settings", requiresAuth(), async (req, res) => {
-    //res.send(JSON.stringify(req.oidc.user));
     //Test user: johanna@test.com, saodhgi-9486y-(WYTH
     const profileUser = await getUserByEmail(client, req.oidc.user.email)
     res.render("pages/settings", { profileUser })
@@ -356,11 +355,10 @@ app.get("/profile/:username", requiresAuth(), urlencodedParser, [
         if (profileUser === false) {
             res.send("No such user");
         } else {
-            const username = req.params.username;
             if (currentUser === profileUser.email) {
                 res.render('pages/settings', { profileUser });
             } else {
-                res.render('pages/publicprofile', { username });
+                res.render('pages/publicprofile', { profileUser });
             }
         }
     } else {
@@ -823,12 +821,12 @@ app.get("/land/:type/:number", requiresAuth(), urlencodedParser, [
     check('number').exists().isNumeric({ no_symbols: true }).isLength({ min: 1, max: 1 })
 ], async (req, res) => {
     const errors = validationResult(req)
-    type = req.params.type;
-    resourceId = parseInt(req.params.number);
-    resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
+    const type = req.params.type;
+    const resourceId = parseInt(req.params.number);
+    const resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
     if (errors.isEmpty() && resources.includes(type)) {
         const user = await getUserByEmail(client, req.oidc.user.email);
-        var invalidId;
+        let invalidId;
 
         if (type === "farm") {
             if (resourceId >= 0 && resourceId <= maxFarms - 1) {
@@ -874,9 +872,9 @@ app.get("/land/:type/:number", requiresAuth(), urlencodedParser, [
             res.redirect("/land");
         } else if (resourceLevel !== undefined) {
             //use one field for all levels, none to 20
-            res.render('pages/resourcefield', { totalCost });
+            res.render('pages/resourcefield', { totalCost, resourceId });
         } else {
-            res.render('pages/emptyfield', { totalCost });
+            res.render('pages/emptyfield', { totalCost, resourceId, type });
         }
     } else {
         res.status(400).render('pages/400');
@@ -888,7 +886,7 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
     check('number').exists().isNumeric({ no_symbols: true }).isLength({ min: 1, max: 1 })
 ], async (req, res) => {
     const errors = validationResult(req)
-    let type = req.params.type;
+    const type = req.params.type;
     resources = ['farm', 'lumbercamp', 'quarry', 'ironmine', 'goldmine'];
     if (errors.isEmpty() && resources.includes(type)) {
         const resourceId = parseInt(req.params.number);
@@ -957,14 +955,13 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
         if (resourceLevel >= 20) {
             res.redirect("/land");
         } else {
-
             const totalCost = await calculateTotalBuildingUpgradeCost(type, resourceLevel)
 
             if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
                 await upgradeResource(client, user.username, updatedUser, resource);
                 await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
             } else {
-                console.log("bbb-1");
+                console.debug("bbb-1");
             }
             res.redirect(`/land/${type}/${resourceId}`);
         }
@@ -978,11 +975,10 @@ app.get("/land/:type/:number/establish", requiresAuth(), urlencodedParser, [
     check('number').exists().isNumeric({ no_symbols: true }).isLength({ min: 1, max: 1 })
 ], async (req, res) => {
     const errors = validationResult(req)
-    type = req.params.type;
-    resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
+    const type = req.params.type;
+    const resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
     if (errors.isEmpty() && resources.includes(type)) {
-        //Same thing as upgrade?
-        resourceId = parseInt(req.params.number);
+        //Merge with upgrade
         const user = await getUserByEmail(client, req.oidc.user.email);
         var updatedUser;
 
@@ -990,13 +986,11 @@ app.get("/land/:type/:number/establish", requiresAuth(), urlencodedParser, [
             updatedUser = user.farms;
             updatedUser.push(1);
             updatedUser = { farms: updatedUser }
-        } else if (type === "goldmine") {
-            type = "goldMine";
+        } else if (type === "goldMine") {
             updatedUser = user.goldMines;
             updatedUser.push(1);
             updatedUser = { goldMines: updatedUser }
-        } else if (type === "ironmine") {
-            type = "ironMine";
+        } else if (type === "ironMine") {
             updatedUser = user.ironMines;
             updatedUser.push(1);
             updatedUser = { ironMines: updatedUser }
@@ -1068,7 +1062,7 @@ app.get("/api/getUser/:id", requiresAuth(), urlencodedParser, [
 });
 
 //måste köra för alla så folk kan anfalla folk som är afk //ev kör när någon interagerar med afk folk
-var minutes = 15, the_interval = minutes * 60 * 1000;
+const minutes = 15, the_interval = minutes * 60 * 1000;
 setInterval(function () {
     const date = new Date();
     console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " Adding resources for everyone!");

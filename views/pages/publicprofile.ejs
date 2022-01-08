@@ -3,19 +3,19 @@
 
 <head>
     <title>
-        <%= username %>
+        <%= profileUser.username %>
     </title>
 </head>
 
 <body>
 
-    <%= username %><br><br>
+    <%= profileUser.username %><br><br>
 
-        <form action="/profile/<%= username %>/attack" method="post">
+        <form action="/profile/<%= profileUser.username %>/attack" method="post">
             <input type="submit" value="Attack">
         </form>
 
-        <form action="/messages/new/<%=username%>">
+        <form action="/messages/new/<%=profileUser.username%>">
             <input type="submit" value="Message">
         </form>
 
