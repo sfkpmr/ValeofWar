@@ -12,14 +12,23 @@ function barracksTrainCost() {
     if (archers < 0 || isNaN(archers)) {
         archers = 0;
         document.getElementById('archers').value = 0;
+    } else if (archers > 9999) {
+        archers = 9999;
+        document.getElementById('archers').value = 9999;
     }
     if (spearmen < 0 || isNaN(spearmen)) {
         spearmen = 0;
         document.getElementById('spearmen').value = 0;
+    } else if (spearmen > 9999) {
+        spearmen = 9999;
+        document.getElementById('spearmen').value = 9999;
     }
     if (swordsmen < 0 || isNaN(swordsmen)) {
         swordsmen = 0;
         document.getElementById('swordsmen').value = 0;
+    } else if (swordsmen > 9999) {
+        swordsmen = 9999;
+        document.getElementById('swordsmen').value = 9999;
     }
 
     grainCost += archers * archer.grain;

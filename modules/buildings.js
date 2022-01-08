@@ -488,7 +488,7 @@ buildingObject = {
         }
 
         if (resourceLevel >= 20) {
-            res.redirect("/land");
+            return false;
         } else {
             const totalCost = await buildingObject.calculateTotalBuildingUpgradeCost(type, resourceLevel)
 
@@ -500,6 +500,56 @@ buildingObject = {
                 return false;
             }
         }
+    },
+    fullUpgradeBuildingFunc: async function (client, user, type) {
+        let buildingName, level;
+
+        switch (type) {
+            case "barracks":
+                level = user.barracksLevel;
+                buildingName = "barracksLevel";
+                break;
+            case "blacksmith":
+                level = user.blacksmithLevel;
+                buildingName = "blacksmithLevel";
+                break;
+            case "stables":
+                console.log('aaaaaaaaaaaa')
+                level = user.stablesLevel;
+                buildingName = "stablesLevel";
+                break;
+            case "trainingfield":
+                level = user.trainingfieldLevel;
+                buildingName = "trainingfieldLevel";
+                break;
+            case "wall":
+                level = user.wallLevel;
+                buildingName = "wallLevel";
+                break;
+            case "workshop":
+                level = user.workshopLevel;
+                buildingName = "workshopLevel";
+                break;
+            default:
+                console.debug(type, "Error")
+        }
+
+        if (level >= 20) {
+            return false;
+        } else {
+            const totalCost = await buildingObject.calculateTotalBuildingUpgradeCost(type, level)
+            if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
+                await buildingObject.upgradeBuilding(client, user.username, buildingName);
+                await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
+                if (type === "wall") {
+                    await buildingObject.restoreWallHealth(client, user);
+                }
+            } else {
+                console.log("bbb-2");
+                return false;
+            }
+        }
+
     }
 };
 

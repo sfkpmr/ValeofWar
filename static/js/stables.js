@@ -1,8 +1,8 @@
 const horseman = { grain: 100, iron: 25, attackDamage: 5, defenseDamage: 5 };
 const knight = { grain: 100, iron: 100, gold: 50, attackDamage: 20, defenseDamage: 20 };
 
-function stablesTrainCost(val) {
-    let grainCost = 0, lumberCost = 0, ironCost = 0, goldCost = 0;
+function stablesTrainCost() {
+    let grainCost = 0, ironCost = 0, goldCost = 0;
 
     let horsemen = parseInt(document.getElementById('horsemen').value);
     let knights = parseInt(document.getElementById('knights').value);
@@ -10,10 +10,16 @@ function stablesTrainCost(val) {
     if (horsemen < 0 || isNaN(horsemen)) {
         horsemen = 0;
         document.getElementById('horsemen').value = 0;
+    } else if (horsemen > 9999) {
+        horsemen = 9999;
+        document.getElementById('horsemen').value = 9999;
     }
     if (knights < 0 || isNaN(knights)) {
         knights = 0;
         document.getElementById('knights').value = 0;
+    } else if (knights > 9999) {
+        knights = 9999;
+        document.getElementById('knights').value = 9999;
     }
 
     grainCost += horsemen * horseman.grain;

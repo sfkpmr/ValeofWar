@@ -22,34 +22,58 @@ function craftingCost(val) {
     if (boots < 0 || isNaN(boots)) {
         boots = 0;
         document.getElementById('boots').value = 0;
+    } else if (boots > 9999) {
+        boots = 9999;
+        document.getElementById('boots').value = 9999;
     }
     if (bracers < 0 || isNaN(bracers)) {
         bracers = 0;
         document.getElementById('bracers').value = 0;
+    } else if (bracers > 9999) {
+        bracers = 9999;
+        document.getElementById('bracers').value = 9999;
     }
     if (helmets < 0 || isNaN(helmets)) {
         helmets = 0;
         document.getElementById('helmet').value = 0;
+    } else if (helmets > 9999) {
+        helmets = 9999;
+        document.getElementById('helmet').value = 9999;
     }
     if (lances < 0 || isNaN(lances)) {
         lances = 0;
         document.getElementById('lance').value = 0;
+    } else if (lances > 9999) {
+        lances = 9999;
+        document.getElementById('lance').value = 9999;
     }
     if (longbows < 0 || isNaN(longbows)) {
         longbows = 0;
         document.getElementById('longbow').value = 0;
+    } else if (longbows > 9999) {
+        longbows = 9999;
+        document.getElementById('longbow').value = 9999;
     }
     if (shields < 0 || isNaN(shields)) {
         shields = 0;
         document.getElementById('shield').value = 0;
+    } else if (shields > 9999) {
+        shields = 9999;
+        document.getElementById('shield').value = 9999;
     }
     if (spears < 0 || isNaN(spears)) {
         spears = 0;
         document.getElementById('spear').value = 0;
+    } else if (spears > 9999) {
+        spears = 9999;
+        document.getElementById('spear').value = 9999;
     }
     if (swords < 0 || isNaN(swords)) {
         swords = 0;
         document.getElementById('sword').value = 0;
+    } else if (swords > 9999) {
+        swords = 9999;
+        document.getElementById('sword').value = 9999;
     }
 
     lumberCost += lances * lance.lumber;

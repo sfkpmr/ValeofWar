@@ -10,10 +10,16 @@ function workshopBuildCost() {
     if (batteringRams < 0 || isNaN(batteringRams)) {
         batteringRams = 0;
         document.getElementById("batteringram").value = 0;
+    } else if (batteringRams > 9999) {
+        batteringRams = 9999;
+        document.getElementById("batteringram").value = 9999;
     }
     if (siegeTowers < 0 || isNaN(siegeTowers)) {
         siegeTowers = 0;
         document.getElementById("siegetower").value = 0;
+    } else if (siegeTowers > 9999) {
+        siegeTowers = 9999;
+        document.getElementById("siegetower").value = 9999;
     }
 
     lumberCost += batteringRams * batteringRam.lumber;

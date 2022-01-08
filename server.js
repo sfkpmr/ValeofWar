@@ -38,7 +38,7 @@ const { addTrade, buyTrade } = require("./modules/market.js");
 const { getAttackLog, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
 const { trainTroops } = require("./modules/troops.js");
 const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs } = require("./modules/database.js");
-const { upgradeBuilding, craftArmor, upgradeResource, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField } = require("./modules/buildings.js");
+const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getIncome } = require("./modules/resources.js");
 
 const maxFarms = 4, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 4;
@@ -623,56 +623,12 @@ app.post("/town/:building/upgrade", requiresAuth(), urlencodedParser, [
     check('building').exists().isAlpha().isLength({ min: 4, max: 13 })
 ], async (req, res) => {
     const errors = validationResult(req)
-    buildings = ['barracks', 'blacksmith', 'stables', 'trainingfield', 'wall', 'workshop'];
+    const buildings = ['barracks', 'blacksmith', 'stables', 'trainingfield', 'wall', 'workshop'];
     const type = req.params.building;
     if (errors.isEmpty() && buildings.includes(type)) {
         const user = await getUserByEmail(client, req.oidc.user.email);
-        var buildingName, level;
-
-        switch (type) {
-            case "barracks":
-                level = user.barracksLevel;
-                buildingName = "barracksLevel";
-                break;
-            case "blacksmith":
-                level = user.blacksmithLevel;
-                buildingName = "blacksmithLevel";
-                break;
-            case "stables":
-                level = user.stablesLevel;
-                buildingName = "stablesLevel";
-                break;
-            case "trainingfield":
-                level = user.trainingfieldLevel;
-                buildingName = "trainingfieldLevel";
-                break;
-            case "wall":
-                level = user.wallLevel;
-                buildingName = "wallLevel";
-                break;
-            case "workshop":
-                level = user.workshopLevel;
-                buildingName = "workshopLevel";
-                break;
-            default:
-                console.log("error")
-        }
-
-        if (level >= 20) {
-            res.redirect(`/town/${req.params.building}`);
-        } else {
-            const totalCost = await calculateTotalBuildingUpgradeCost(type, level)
-            if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
-                await upgradeBuilding(client, user.username, buildingName);
-                await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
-                if (type === "wall") {
-                    await restoreWallHealth(client, user);
-                }
-            } else {
-                console.log("bbb-2");
-            }
-            res.redirect(`/town/${req.params.building}`);
-        }
+        await fullUpgradeBuildingFunc(client, user, type);
+        res.redirect(`/town/${req.params.building}`);
     } else {
         res.status(400).render('pages/400');
     }
@@ -918,9 +874,9 @@ app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
 });
 
 app.get("/api/:getIncome", requiresAuth(), urlencodedParser, [
-    check('getIncome').exists().isAlpha().isLength({ min: 13, max: 15 })
+    check('getIncome').exists().isAlpha().isLength({ min: 13, max: 17 })
 ], async (req, res) => {
-    const incomeTypes = ['getGrainIncome', 'getLumberIncome', 'getStoneIncome', 'getIronIncome', 'getGoldIncome'];
+    const incomeTypes = ['getGrainIncome', 'getLumberIncome', 'getStoneIncome', 'getIronIncome', 'getGoldIncome', 'getHorseIncome', 'getRecruitsIncome'];
     const errors = validationResult(req)
     if (errors.isEmpty() && incomeTypes.includes(req.params.getIncome)) {
         const user = await getUserByEmail(client, req.oidc.user.email);
