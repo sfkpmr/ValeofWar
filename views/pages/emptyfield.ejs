@@ -22,7 +22,7 @@
                         and <%= totalCost.goldCost %>
                             <img src="../../static/images/gold-ingots.png" height="35px" title="Gold"> </div><br>
 
-        <form action="/land/<%= type %>/<%= resourceId %>/establish">
+        <form action="/land/<%= type %>/<%= resourceId %>/upgrade" method="post">
             <input type="submit" class="submitButton" value="Establish">
         </form>
 

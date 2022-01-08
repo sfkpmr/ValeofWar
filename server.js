@@ -827,6 +827,7 @@ app.get("/land/:type/:number", requiresAuth(), urlencodedParser, [
     if (errors.isEmpty() && resources.includes(type)) {
         const user = await getUserByEmail(client, req.oidc.user.email);
         let invalidId;
+        let resourceLevel;
 
         if (type === "farm") {
             if (resourceId >= 0 && resourceId <= maxFarms - 1) {
@@ -870,9 +871,9 @@ app.get("/land/:type/:number", requiresAuth(), urlencodedParser, [
 
         if (invalidId) {
             res.redirect("/land");
-        } else if (resourceLevel !== undefined) {
+        } else if (resourceLevel !== undefined && resourceLevel > 0) {
             //use one field for all levels, none to 20
-            res.render('pages/resourcefield', { totalCost, resourceId });
+            res.render('pages/resourcefield', { totalCost, resourceId, resourceLevel, type });
         } else {
             res.render('pages/emptyfield', { totalCost, resourceId, type });
         }
@@ -887,7 +888,7 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     const errors = validationResult(req)
     const type = req.params.type;
-    resources = ['farm', 'lumbercamp', 'quarry', 'ironmine', 'goldmine'];
+    const resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
     if (errors.isEmpty() && resources.includes(type)) {
         const resourceId = parseInt(req.params.number);
         const user = await getUserByEmail(client, req.oidc.user.email);
@@ -903,9 +904,8 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
             } else {
                 res.redirect("/land");
             }
-        } else if (type === "goldmine") {
+        } else if (type === "goldMine") {
             if (resourceId >= 0 && resourceId <= maxGoldMines) {
-                type = "goldMine";
                 resource = "goldMines";
                 updatedUser = user.goldMines;
                 resourceLevel = updatedUser[resourceId]
@@ -915,9 +915,8 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
             } else {
                 res.redirect("/land");
             }
-        } else if (type === "ironmine") {
+        } else if (type === "ironMine") {
             if (resourceId >= 0 && resourceId <= maxIronMines) {
-                type = "ironMine";
                 resource = "ironMines";
                 updatedUser = user.ironMines;
                 resourceLevel = updatedUser[resourceId]
@@ -950,6 +949,8 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
             } else {
                 res.redirect("/land");
             }
+        } else {
+            console.debug(type, 'Error')
         }
 
         if (resourceLevel >= 20) {
@@ -965,52 +966,6 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
             }
             res.redirect(`/land/${type}/${resourceId}`);
         }
-    } else {
-        res.status(400).render('pages/400');
-    }
-});
-
-app.get("/land/:type/:number/establish", requiresAuth(), urlencodedParser, [
-    check('type').exists().isAlpha().isLength({ min: 4, max: 10 }),
-    check('number').exists().isNumeric({ no_symbols: true }).isLength({ min: 1, max: 1 })
-], async (req, res) => {
-    const errors = validationResult(req)
-    const type = req.params.type;
-    const resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
-    if (errors.isEmpty() && resources.includes(type)) {
-        //Merge with upgrade
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        var updatedUser;
-
-        if (type === "farm") {
-            updatedUser = user.farms;
-            updatedUser.push(1);
-            updatedUser = { farms: updatedUser }
-        } else if (type === "goldMine") {
-            updatedUser = user.goldMines;
-            updatedUser.push(1);
-            updatedUser = { goldMines: updatedUser }
-        } else if (type === "ironMine") {
-            updatedUser = user.ironMines;
-            updatedUser.push(1);
-            updatedUser = { ironMines: updatedUser }
-        } else if (type === "lumbercamp") {
-            updatedUser = user.lumberCamps;
-            updatedUser.push(1);
-            updatedUser = { lumberCamps: updatedUser }
-        } else if (type === "quarry") {
-            updatedUser = user.quarries;
-            updatedUser.push(1);
-            updatedUser = { quarries: updatedUser }
-        }
-
-        const totalCost = await calculateTotalBuildingUpgradeCost(type, 0)
-
-        if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
-            await upgradeResource(client, user.username, updatedUser, type);
-            await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
-        }
-        res.redirect("/land");
     } else {
         res.status(400).render('pages/400');
     }
