@@ -17,7 +17,11 @@
         <br>
         Walls boosts your defenses and hides part of your resources from enemy raiders.<br><br>
 
+        <% if (user.currentWallHealth === 0){ %>
+            Current defense bonus: +0%
+       <% } else { %>
         Current defense bonus: +<%= defenseBonus %>%
+        <% } %>
             <br><br>
             Wall health: <%= user.currentWallHealth %> out of <%= maxWallHealth %>.<br><br>
 

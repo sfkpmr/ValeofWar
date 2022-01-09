@@ -11,9 +11,9 @@
 
     <form action="/messages/send" method="POST">
         <label for="recipient">Name:</label><br>
-        <input type="text" id="recipient" name="recipient" value="<%=recipient%>" required><br>
+        <input type="text" id="recipient" name="recipient" value="<%=recipient%>" maxlength="15" required><br>
         <label for="message">Message:</label><br>
-        <textarea id="message" name="message" rows="4" cols="50" required></textarea><br>
+        <textarea id="message" name="message" rows="10" cols="80" maxlength="1000" required></textarea><br>
         <input type="submit" value="Send">
     </form>
 

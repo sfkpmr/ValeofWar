@@ -1,5 +1,5 @@
 const { incDatabaseValue, setDatabaseValue } = require("../modules/database.js");
-const { checkIfCanAfford } = require("../modules/resources.js");
+const { checkIfCanAfford, removeResources } = require("../modules/resources.js");
 
 const archer = { grain: 25, lumber: 50, gold: 10 };
 const spearman = { grain: 25, lumber: 50 };
@@ -30,6 +30,8 @@ const lumberCampBaseCost = { lumber: 500, stone: 100, iron: 5, gold: 5 };
 const quarryBaseCost = { lumber: 500, stone: 100, iron: 100, gold: 100 };
 const ironMineBaseCost = { lumber: 750, stone: 500, iron: 100, gold: 100 };
 const goldMineBaseCost = { lumber: 1000, stone: 250, iron: 250, gold: 100 };
+
+const maxFarms = 4, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 4;
 
 buildingObject = {
     calcGoldTrainCost: function (archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers) {
@@ -168,8 +170,7 @@ buildingObject = {
         await setDatabaseValue(client, username, data);
     },
     calcBuildingLumberCost: async function (type, buildingLevel) {
-
-        var cost;
+        let cost;
 
         switch (type) {
             case "barracks":
@@ -217,12 +218,11 @@ buildingObject = {
 
 
         }
-        return Math.round(cost);
+        return Math.round(cost / 100) * 100;
 
     },
     calcBuildingStoneCost: async function (type, buildingLevel) {
-
-        var cost;
+        let cost;
 
         switch (type) {
             case "barracks":
@@ -269,12 +269,11 @@ buildingObject = {
 
 
         }
-        return Math.round(cost);
+        return Math.round(cost / 100) * 100;
 
     },
     calcBuildingIronCost: async function (type, buildingLevel) {
-
-        var cost;
+        let cost;
 
         switch (type) {
             case "barracks":
@@ -321,12 +320,11 @@ buildingObject = {
 
 
         }
-        return Math.round(cost);
+        return Math.round(cost / 100) * 100;
 
     },
     calcBuildingGoldCost: async function (type, buildingLevel) {
-
-        var cost;
+        let cost;
 
         switch (type) {
             case "barracks":
@@ -373,7 +371,7 @@ buildingObject = {
 
 
         }
-        return Math.round(cost);
+        return Math.round(cost / 100) * 100;
 
     },
     restoreWallHealth: async function (client, user) {
@@ -416,11 +414,182 @@ buildingObject = {
         console.log(totalCost)
 
         if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0)) {
-            await troopsObject.addArmor(client, user.username, craftingOrder);
+            await troopsObject.addToDb(client, user.username, craftingOrder);
             await resourceObject.removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0);
         } else {
             console.log("bbbb");
         }
+
+    },
+    upgradeResourceField: async function (client, user, type, resourceId) {
+        let updatedUser, resourceLevel, resource;
+
+        if (type === "farm") {
+            if (resourceId >= 0 && resourceId <= maxFarms) {
+                resource = "farms"
+                updatedUser = user.farms;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+                updatedUser = { farms: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        } else if (type === "goldMine") {
+            if (resourceId >= 0 && resourceId <= maxGoldMines) {
+                resource = "goldMines";
+                updatedUser = user.goldMines;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+
+                updatedUser = { goldMines: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        } else if (type === "ironMine") {
+            if (resourceId >= 0 && resourceId <= maxIronMines) {
+                resource = "ironMines";
+                updatedUser = user.ironMines;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+
+                updatedUser = { ironMines: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        }
+        else if (type === "lumbercamp") {
+            if (resourceId >= 0 && resourceId <= maxLumberCamps) {
+                resource = "lumberCamp"
+                updatedUser = user.lumberCamps;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+
+                updatedUser = { lumberCamps: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        } else if (type === "quarry") {
+            if (resourceId >= 0 && resourceId <= maxQuarries) {
+                resource = "quarry"
+                updatedUser = user.quarries;
+                resourceLevel = updatedUser[resourceId]
+                updatedUser[resourceId]++;
+
+                updatedUser = { quarries: updatedUser }
+            } else {
+                res.redirect("/land");
+            }
+        } else {
+            console.debug(type, 'Error')
+        }
+
+        if (resourceLevel >= 20) {
+            return false;
+        } else {
+            const totalCost = await buildingObject.calculateTotalBuildingUpgradeCost(type, resourceLevel)
+
+            if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
+                await buildingObject.upgradeResource(client, user.username, updatedUser, resource);
+                await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
+            } else {
+                console.debug("bbb-1");
+                return false;
+            }
+        }
+    },
+    fullUpgradeBuildingFunc: async function (client, user, type) {
+        let buildingName, level;
+
+        switch (type) {
+            case "barracks":
+                level = user.barracksLevel;
+                buildingName = "barracksLevel";
+                break;
+            case "blacksmith":
+                level = user.blacksmithLevel;
+                buildingName = "blacksmithLevel";
+                break;
+            case "stables":
+                level = user.stablesLevel;
+                buildingName = "stablesLevel";
+                break;
+            case "trainingfield":
+                level = user.trainingfieldLevel;
+                buildingName = "trainingfieldLevel";
+                break;
+            case "wall":
+                level = user.wallLevel;
+                buildingName = "wallLevel";
+                break;
+            case "workshop":
+                level = user.workshopLevel;
+                buildingName = "workshopLevel";
+                break;
+            default:
+                console.debug(type, "Error")
+        }
+
+        if (level >= 20) {
+            return false;
+        } else {
+            const totalCost = await buildingObject.calculateTotalBuildingUpgradeCost(type, level)
+            if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
+                await buildingObject.upgradeBuilding(client, user.username, buildingName);
+                await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
+                if (type === "wall") {
+                    await buildingObject.restoreWallHealth(client, user);
+                }
+            } else {
+                console.log("bbb-2");
+                return false;
+            }
+        }
+
+    },
+    getResourceFieldData: async function (user, type, resourceId) {
+        let invalidId, resourceLevel, title;
+
+        if (type === "farm") {
+            if (resourceId >= 0 && resourceId <= maxFarms - 1) {
+                title = "Farm";
+                resourceLevel = user.farms[resourceId];
+            } else {
+                invalidId = true;
+            }
+        } else if (type === "goldMine") {
+            if (resourceId >= 0 && resourceId <= maxGoldMines - 1) {
+                title = "Gold mine";
+                resourceLevel = user.goldMines[resourceId];
+            } else {
+                invalidId = true;
+            }
+        } else if (type === "ironMine") {
+            if (resourceId >= 0 && resourceId <= maxIronMines - 1) {
+                title = "Iron mine";
+                resourceLevel = user.ironMines[resourceId];
+            } else {
+                invalidId = true;
+            }
+        }
+        else if (type === "lumbercamp") {
+            if (resourceId >= 0 && resourceId <= maxLumberCamps - 1) {
+                title = "Lumber camp";
+                resourceLevel = user.lumberCamps[resourceId];
+            } else {
+                invalidId = true;
+            }
+        }
+        else if (type === "quarry") {
+            if (resourceId >= 0 && resourceId <= maxQuarries - 1) {
+                title = "Quarry";
+                resourceLevel = user.quarries[resourceId];
+            } else {
+                invalidId = true;
+            }
+        }
+        const totalCost = await buildingObject.calculateTotalBuildingUpgradeCost(type, resourceLevel);
+
+        return { totalCost: totalCost, resourceLevel: resourceLevel, invalidId: invalidId, title: title };
 
     }
 };

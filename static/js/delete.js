@@ -1,4 +1,4 @@
-function myFunction() {
+function deleteUser() {
 
     var result = confirm("Are you sure that you want to delete your account?\nThis action can not be undone!");
     if (result) {
@@ -12,5 +12,4 @@ function myFunction() {
     }
 }
 
-document.getElementById("delete").addEventListener("click", myFunction);
-
+document.getElementById("delete").addEventListener("click", deleteUser);

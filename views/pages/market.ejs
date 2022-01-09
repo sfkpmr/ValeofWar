@@ -2,59 +2,14 @@
 
 <head>
 
-    <style>
-        /* Style the form - display items horizontally */
-        .form-inline {
-            display: flex;
-            flex-flow: row wrap;
-            align-items: center;
-        }
-
-        /* Add some margins for each label */
-        .form-inline label {
-            margin: 5px 10px 5px 0;
-        }
-
-        /* Style the input fields */
-        .form-inline input {
-            vertical-align: middle;
-            margin: 5px 10px 5px 0;
-            padding: 10px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-        }
-
-        /* Style the submit button */
-        .form-inline button {
-            padding: 10px 20px;
-            background-color: dodgerblue;
-            border: 1px solid #ddd;
-            color: white;
-        }
-
-        .form-inline button:hover {
-            background-color: royalblue;
-        }
-
-        /* Add responsiveness - display the form controls vertically instead of horizontally on screens that are less than 800px wide */
-        @media (max-width: 800px) {
-            .form-inline input {
-                margin: 10px 0;
-            }
-
-            .form-inline {
-                flex-direction: column;
-                align-items: stretch;
-            }
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="../static/style.css" />
 
 </head>
 
 <body>
     <form action="/market/sell" method="post">
         <label for="sellResource">Trade</label>
-        <input type="number" id="sellAmount" name="sellAmount" min=0 required>
+        <input type="number" id="sellAmount" name="sellAmount" value="100" min=100 max=9999 required>
         <select name="sellResource" id="sellResource">
             <option value="Grain">Grain</option>
             <option value="Lumber">Lumber</option>
@@ -63,7 +18,7 @@
             <option value="Gold">Gold</option>
         </select>
         for
-        <input type="number" id="buyAmount" name="buyAmount" min=0 required>
+        <input type="number" id="buyAmount" name="buyAmount" value="100" min=100 max=9999 required>
         <select name="buyResource" id="buyResource">
             <option value="Grain">Grain</option>
             <option value="Lumber" selected>Lumber</option>
@@ -71,7 +26,11 @@
             <option value="Iron">Iron</option>
             <option value="Gold">Gold</option>
         </select>
-        <input type="submit" value="Offer trade">
+        <% if (allowedToTrade) { %>
+            <input type="submit" value="Offer trade">
+            <% } else {%>
+                <input type="submit" value="Offer trade" disabled>
+                <%}%>
     </form>
 
 

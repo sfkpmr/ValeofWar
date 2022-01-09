@@ -3,10 +3,7 @@ const { checkIfCanAfford, removeResources } = require("../modules/resources.js")
 const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost } = require("../modules/buildings.js");
 
 troopsObject = {
-    addTroops: async function (client, username, data) {
-        await incDatabaseValue(client, username, data);
-    },
-    addArmor: async function (client, username, data) {
+    addToDb: async function (client, username, data) {
         await incDatabaseValue(client, username, data);
     },
     trainTroops: async function (client, user, trainees) {
@@ -53,19 +50,21 @@ troopsObject = {
         const ironCost = calcIronTrainCost(archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers);
 
         let recruitsCost;
+        let horseCost = 0;
         if (archers > 0 || spearmen > 0 || swordsmen > 0) {
             recruitsCost = archers + spearmen + swordsmen;
         } else if (horsemen > 0 || knights > 0) {
             recruitsCost = horsemen + knights;
+            horseCost = recruitsCost;
         } else {
             recruitsCost = (batteringrams + siegetowers) * 2;
         }
 
         const data = { archers: archers, spearmen: spearmen, swordsmen: swordsmen, horsemen: horsemen, knights: knights, "batteringrams": batteringrams, "siegetowers": siegetowers };
 
-        if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, 0)) {
-            await troopsObject.addTroops(client, user.username, data);
-            await removeResources(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, 0);
+        if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost)) {
+            await troopsObject.addToDb(client, user.username, data);
+            await removeResources(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost);
         } else {
             console.log("bbbb");
         }
