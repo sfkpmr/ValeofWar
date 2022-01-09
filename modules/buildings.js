@@ -170,8 +170,7 @@ buildingObject = {
         await setDatabaseValue(client, username, data);
     },
     calcBuildingLumberCost: async function (type, buildingLevel) {
-
-        var cost;
+        let cost;
 
         switch (type) {
             case "barracks":
@@ -219,12 +218,11 @@ buildingObject = {
 
 
         }
-        return Math.round(cost);
+        return Math.round(cost / 100) * 100;
 
     },
     calcBuildingStoneCost: async function (type, buildingLevel) {
-
-        var cost;
+        let cost;
 
         switch (type) {
             case "barracks":
@@ -271,12 +269,11 @@ buildingObject = {
 
 
         }
-        return Math.round(cost);
+        return Math.round(cost / 100) * 100;
 
     },
     calcBuildingIronCost: async function (type, buildingLevel) {
-
-        var cost;
+        let cost;
 
         switch (type) {
             case "barracks":
@@ -323,12 +320,11 @@ buildingObject = {
 
 
         }
-        return Math.round(cost);
+        return Math.round(cost / 100) * 100;
 
     },
     calcBuildingGoldCost: async function (type, buildingLevel) {
-
-        var cost;
+        let cost;
 
         switch (type) {
             case "barracks":
@@ -375,7 +371,7 @@ buildingObject = {
 
 
         }
-        return Math.round(cost);
+        return Math.round(cost / 100) * 100;
 
     },
     restoreWallHealth: async function (client, user) {

@@ -183,6 +183,17 @@ resourceObject = {
             levels = null;
         }
         return income;
+    },
+    getAllIncomes: async function (user) {
+        const grainIncome = await resourceObject.getIncome(user, "getGrainIncome");
+        const lumberIncome = await resourceObject.getIncome(user, "getLumberIncome");
+        const stoneIncome = await resourceObject.getIncome(user, "getStoneIncome");
+        const ironIncome = await resourceObject.getIncome(user, "getIronIncome");
+        const goldIncome = await resourceObject.getIncome(user, "getGoldIncome");
+        const recruitsIncome = await resourceObject.getIncome(user, "getRecruitsIncome");
+        const horseIncome = await resourceObject.getIncome(user, "getHorseIncome");
+
+        return { grainIncome: grainIncome, lumberIncome: lumberIncome, stoneIncome: stoneIncome, ironIncome: ironIncome, goldIncome: goldIncome, recruitsIncome: recruitsIncome, horseIncome: horseIncome }
     }
 };
 

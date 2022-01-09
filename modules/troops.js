@@ -50,7 +50,7 @@ troopsObject = {
         const ironCost = calcIronTrainCost(archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers);
 
         let recruitsCost;
-        let horseCost;
+        let horseCost = 0;
         if (archers > 0 || spearmen > 0 || swordsmen > 0) {
             recruitsCost = archers + spearmen + swordsmen;
         } else if (horsemen > 0 || knights > 0) {
