@@ -27,8 +27,6 @@
             <input type="submit" class="submitButton" value="Construct">
         </form>
 
-
-
         <% } else { %>
 
             Stables level: <%= user.stablesLevel %> <br>
@@ -42,11 +40,15 @@
                         <input type="number" id="horsemen" name="horsemen" placeholder="0" min=0 max=9999> Attack
                         damage: <output id="horsemanAttackDamage">0</output> Defense damage: <output
                             id="horsemanDefenseDamage">0</output><br>
-                        <label for="knights"><img src="../static/images/knight.png" height="35px" title="Knight">
+                         <label for="knights"><img src="../static/images/knight.png" height="35px" title="Knight">
                             Current: <%= user.knights %>
                                 Train:</label>
-                        <input type="number" id="knights" name="knights" placeholder="0" min=0 max=9999> Attack damage:
-                        <output id="knightAttackDamage">0</output> Defense damage: <output
+                        <% if (user.stablesLevel >= 5) { %>
+                        <input type="number" id="knights" name="knights" placeholder="0" min=0 max=9999> 
+                        <% } else { %>
+                            <input type="number" id="knights" name="knights" placeholder="0" min=0 max=9999 disabled> 
+                        <% } %>
+                        Attack damage: <output id="knightAttackDamage">0</output> Defense damage: <output
                             id="knightDefenseDamage">0</output><br><br>
                         <div class="resources">Training cost: <output id="grain">0</output> <img
                                 src="../static/images/grain.png" alt="Grain" title="Grain">, <output

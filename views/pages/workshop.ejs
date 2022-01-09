@@ -30,22 +30,31 @@
 
             Workshop level: <%= user.workshopLevel %> <br>
                 <br>
-                The workshop lets you construct powerful siege weapons.
+                The workshop lets you construct powerful siege weapons. <br>
                 <br>
+                Battering rams require level 5. Siege towers require level 10. <br>
                 <br>
                 <div class="training">
                     <form action="/town/workshop/train" method="POST">
                         <label for="batteringram"><img src="../static/images/batteringram.png" height="35px"
                                 title="Battering ram">
                             Current: <%= user.batteringrams %> Train:</label>
+                            <% if (user.workshopLevel >= 5){ %>
                         <input type="number" id="batteringram" name="batteringram" placeholder="0" min=0 max=9999>
+                        <% } else { %>
+                            <input type="number" id="batteringram" name="batteringram" placeholder="0" min=0 max=9999 disabled>
+                        <% } %>
                         Attack damage:
                         <output id="batteringramAttackDamage">0</output><br>
                         <label for="siegetower"><img src="../static/images/siegetower.png" height="35px"
                                 title="Siege tower">
                             Current: <%= user.siegetowers %> Train:</label>
-                        <input type="number" id="siegetower" name="siegetower" placeholder="0" min=0 max=9999> Attack
-                        damage: <output id="siegetowerAttackDamage">0</output><br><br>
+                            <% if (user.workshopLevel >= 10){ %>
+                        <input type="number" id="siegetower" name="siegetower" placeholder="0" min=0 max=9999> 
+                       <% } else { %>
+                        <input type="number" id="siegetower" name="siegetower" placeholder="0" min=0 max=9999 disabled> 
+                            <% } %>
+                            Attack damage: <output id="siegetowerAttackDamage">0</output><br><br>
                         <div class="resources">Build cost: <output id="lumber">0</output> <img
                                 src="../static/images/wood.png" alt="Lumber" title="Lumber">, <output
                                 id="iron">0</output> <img src="../static/images/iron-ingots.png" alt="Iron"
