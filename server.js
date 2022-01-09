@@ -35,7 +35,7 @@ const { addTrade, buyTrade } = require("./modules/market.js");
 const { getAttackLog, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
 const { trainTroops } = require("./modules/troops.js");
 const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource } = require("./modules/database.js");
-const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData } = require("./modules/buildings.js");
+const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData, validateRequiredProductionLevel } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getAllIncomes } = require("./modules/resources.js");
 
 app.use(
@@ -518,11 +518,12 @@ app.post("/town/workshop/train", requiresAuth(), urlencodedParser, [
     check('siegetower').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
     const errors = validationResult(req);
-    if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const batteringrams = convertNegativeToZero(parseInt(req.body.batteringram));
-        const siegetowers = convertNegativeToZero(parseInt(req.body.siegetower));
-        const trainees = { batteringrams: batteringrams, siegetowers: siegetowers };
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const batteringrams = convertNegativeToZero(parseInt(req.body.batteringram));
+    const siegetowers = convertNegativeToZero(parseInt(req.body.siegetower));
+    const trainees = { batteringrams: batteringrams, siegetowers: siegetowers };
+    const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
+    if (errors.isEmpty() && requiredValidationResult) {
         await trainTroops(client, user, trainees);
     }
     res.redirect('/town/workshop');
@@ -551,17 +552,18 @@ app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
     check('sword').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
     const errors = validationResult(req);
-    if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const boots = convertNegativeToZero(parseInt(req.body.boots));
-        const bracers = convertNegativeToZero(parseInt(req.body.bracers));
-        const helmets = convertNegativeToZero(parseInt(req.body.helmet));
-        const lances = convertNegativeToZero(parseInt(req.body.lance));
-        const longbows = convertNegativeToZero(parseInt(req.body.longbow));
-        const shields = convertNegativeToZero(parseInt(req.body.shield));
-        const spears = convertNegativeToZero(parseInt(req.body.spear));
-        const swords = convertNegativeToZero(parseInt(req.body.sword));
-        const craftingOrder = { boots: boots, bracers: bracers, helmets: helmets, lances: lances, longbows: longbows, shields: shields, spears: spears, swords: swords };
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const boots = convertNegativeToZero(parseInt(req.body.boots));
+    const bracers = convertNegativeToZero(parseInt(req.body.bracers));
+    const helmets = convertNegativeToZero(parseInt(req.body.helmet));
+    const lances = convertNegativeToZero(parseInt(req.body.lance));
+    const longbows = convertNegativeToZero(parseInt(req.body.longbow));
+    const shields = convertNegativeToZero(parseInt(req.body.shield));
+    const spears = convertNegativeToZero(parseInt(req.body.spear));
+    const swords = convertNegativeToZero(parseInt(req.body.sword));
+    const craftingOrder = { boots: boots, bracers: bracers, helmets: helmets, lances: lances, longbows: longbows, shields: shields, spears: spears, swords: swords };
+    const requiredValidationResult = validateRequiredProductionLevel(user, craftingOrder);
+    if (errors.isEmpty() && requiredValidationResult) {
         await craftArmor(client, user, craftingOrder);
     }
     res.redirect('/town/blacksmith');
@@ -576,11 +578,12 @@ app.post("/town/stables/train", requiresAuth(), urlencodedParser, [
     check('knights').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
     const errors = validationResult(req)
-    if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const horsemen = convertNegativeToZero(parseInt(req.body.horsemen));
-        const knights = convertNegativeToZero(parseInt(req.body.knights));
-        const trainees = { horsemen: horsemen, knights: knights };
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const horsemen = convertNegativeToZero(parseInt(req.body.horsemen));
+    const knights = convertNegativeToZero(parseInt(req.body.knights));
+    const trainees = { horsemen: horsemen, knights: knights };
+    const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
+    if (errors.isEmpty() && requiredValidationResult) {
         await trainTroops(client, user, trainees);
     }
     res.redirect('/town/stables');
@@ -591,13 +594,14 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
     check('spearmen').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
     check('swordsmen').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
-    const errors = validationResult(req)
-    if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const archers = convertNegativeToZero(parseInt(req.body.archers));
-        const spearmen = convertNegativeToZero(parseInt(req.body.spearmen));
-        const swordsmen = convertNegativeToZero(parseInt(req.body.swordsmen));
-        const trainees = { archers: archers, spearmen: spearmen, swordsmen: swordsmen };
+    const errors = validationResult(req);
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const archers = convertNegativeToZero(parseInt(req.body.archers));
+    const spearmen = convertNegativeToZero(parseInt(req.body.spearmen));
+    const swordsmen = convertNegativeToZero(parseInt(req.body.swordsmen));
+    const trainees = { archers: archers, spearmen: spearmen, swordsmen: swordsmen };
+    const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
+    if (errors.isEmpty() && requiredValidationResult) {
         await trainTroops(client, user, trainees);
     }
     res.redirect('/town/barracks');
