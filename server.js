@@ -27,9 +27,6 @@ const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 const { Server } = require("socket.io");
 const io = new Server(server);
-const req = require("express/lib/request");
-const { filter } = require("compression");
-const { get } = require("express/lib/response");
 
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
 const client = new MongoClient(uri);
@@ -39,7 +36,7 @@ const { getAttackLog, calculateAttack, calculateDefense, attackFunc } = require(
 const { trainTroops } = require("./modules/troops.js");
 const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource } = require("./modules/database.js");
 const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData } = require("./modules/buildings.js");
-const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getIncome, getAllIncomes } = require("./modules/resources.js");
+const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getAllIncomes } = require("./modules/resources.js");
 
 app.use(
     auth({
@@ -452,15 +449,20 @@ app.get("/town/wall", requiresAuth(), async (req, res) => {
     const maxWallHealth = user.wallLevel * 100;
     const defenseBonus = user.wallLevel * 10;
 
-    let notAtMaxHealth;
+    let atMaxHealth;
     if (maxWallHealth === user.currentWallHealth) {
-        notAtMaxHealth = true;
+        atMaxHealth = true;
     } else {
-        notAtMaxHealth = false;
+        atMaxHealth = false;
     }
+    const upgradeCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel);
+    const repairCost = {};
+    repairCost.lumberCost = upgradeCost.lumberCost * 0.5;
+    repairCost.stoneCost = upgradeCost.stoneCost * 0.5;
+    repairCost.ironCost = upgradeCost.ironCost * 0.5;
+    repairCost.goldCost = upgradeCost.goldCost * 0.5;
 
-    const totalCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel)
-    res.render('pages/wall', { user, maxWallHealth, notAtMaxHealth, totalCost, defenseBonus })
+    res.render('pages/wall', { user, maxWallHealth, atMaxHealth, repairCost, upgradeCost, defenseBonus })
 });
 
 app.post("/town/:building/upgrade", requiresAuth(), urlencodedParser, [
@@ -663,12 +665,6 @@ async function checkAll() {
         addResources(client, user.username);
     });
 }
-
-app.get("/api/getResources", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const data = { grain: user.grain, lumber: user.lumber, stone: user.stone, iron: user.iron, gold: user.gold };
-    res.send(JSON.stringify(data))
-});
 
 app.get("/api/getAttackPower", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);

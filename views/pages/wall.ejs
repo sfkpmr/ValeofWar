@@ -25,7 +25,17 @@
             <br><br>
             Wall health: <%= user.currentWallHealth %> out of <%= maxWallHealth %>.<br><br>
 
-                    <% if (!notAtMaxHealth) { %>
+                    <% if (!atMaxHealth) { %>
+
+                        <div class="resources">
+                            Repair cost: <%= repairCost.lumberCost %> <img src="../static/images/wood.png"
+                                    alt="Lumber" title="Lumber">,
+                                <%= repairCost.stoneCost %> <img src="../static/images/stone.png" alt="Stone"
+                                        title="Stone">, <%= repairCost.ironCost %>
+                                        <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> and
+                                        <%= repairCost.goldCost %>
+                                            <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold">
+                        </div>
 
                         <form action="/town/wall/repair" method="POST">
                             <input type="submit" class="submitButton" value="Repair">
@@ -33,12 +43,12 @@
                         <%}%>
                             <% if (user.wallLevel <=19){ %>
                                 <div class="resources">
-                                    Upgrade cost: <%= totalCost.lumberCost %> <img src="../static/images/wood.png"
+                                    Upgrade cost: <%= upgradeCost.lumberCost %> <img src="../static/images/wood.png"
                                             alt="Lumber" title="Lumber">,
-                                        <%= totalCost.stoneCost %> <img src="../static/images/stone.png" alt="Stone"
-                                                title="Stone">, <%= totalCost.ironCost %>
+                                        <%= upgradeCost.stoneCost %> <img src="../static/images/stone.png" alt="Stone"
+                                                title="Stone">, <%= upgradeCost.ironCost %>
                                                 <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> and
-                                                <%= totalCost.goldCost %>
+                                                <%= upgradeCost.goldCost %>
                                                     <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold">
                                 </div>
                                 <br>
