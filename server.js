@@ -39,7 +39,7 @@ const { getAttackLog, calculateAttack, calculateDefense, attackFunc } = require(
 const { trainTroops } = require("./modules/troops.js");
 const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource } = require("./modules/database.js");
 const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData } = require("./modules/buildings.js");
-const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getIncome } = require("./modules/resources.js");
+const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getIncome, getAllIncomes } = require("./modules/resources.js");
 
 app.use(
     auth({
@@ -87,9 +87,7 @@ async function main() {
 
     try {
         await client.connect();
-
         await checkDb(client, 15000);
-
     } catch (e) {
         console.error(e);
     }
@@ -104,150 +102,9 @@ async function main() {
             for (var i in userMap) {
                 if (i === next.documentKey._id && next.operationType != "delete") {
                     //https://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
-                    const user = next.updateDescription.updatedFields;
-
-                    const grain = JSON.stringify(user.grain);
-                    const lumber = JSON.stringify(user.lumber);
-                    const stone = JSON.stringify(user.stone);
-                    const iron = JSON.stringify(user.iron);
-                    const gold = JSON.stringify(user.gold);
-                    const recruits = JSON.stringify(user.recruits);
-                    const horses = JSON.stringify(user.horses);
-
-                    const archers = JSON.stringify(user.archers);
-                    const spearmen = JSON.stringify(user.spearmen);
-                    const swordsmen = JSON.stringify(user.swordsmen);
-                    const horsemen = JSON.stringify(user.horsemen);
-                    const knights = JSON.stringify(user.knights);
-                    const batteringrams = JSON.stringify(user.batteringrams);
-                    const siegetowers = JSON.stringify(user.siegetowers);
-
-                    const farms = JSON.stringify(user.farms);
-                    const lumbercamps = JSON.stringify(user.lumberCamps);
-                    const quarries = JSON.stringify(user.quarries);
-                    const ironmines = JSON.stringify(user.ironMines);
-                    const goldmines = JSON.stringify(user.goldMines);
-                    const trainingfield = JSON.stringify(user.trainingfieldLevel);
-                    const stables = JSON.stringify(user.stablesLevel);
-                    const wall = JSON.stringify(user.wallLevel);
-
-                    const boots = JSON.stringify(user.boots);
-                    const bracers = JSON.stringify(user.bracers);
-                    const helmets = JSON.stringify(user.helmets);
-                    const lances = JSON.stringify(user.lances);
-                    const longbows = JSON.stringify(user.longbows);
-                    const shields = JSON.stringify(user.shields);
-                    const spears = JSON.stringify(user.spears);
-                    const swords = JSON.stringify(user.swords);
-
-                    const currentWallHealth = JSON.stringify(user.currentWallHealth);
-
-                    let updateDamage = false;
-
-                    if (grain !== null && grain !== undefined) {
-                        io.to(userMap[i]).emit("updateGrain", grain);
-                    };
-                    if (lumber !== null && lumber !== undefined) {
-                        io.to(userMap[i]).emit("updateLumber", lumber);
-                    };
-                    if (stone !== null && stone !== undefined) {
-                        io.to(userMap[i]).emit("updateStone", stone);
-                    };
-                    if (iron !== null && iron !== undefined) {
-                        io.to(userMap[i]).emit("updateIron", iron);
-                    };
-                    if (gold !== null && gold !== undefined) {
-                        io.to(userMap[i]).emit("updateGold", gold);
-                    };
-                    if (recruits !== null && recruits !== undefined) {
-                        io.to(userMap[i]).emit("updateRecruits", recruits);
-                    };
-                    if (horses !== null && horses !== undefined) {
-                        io.to(userMap[i]).emit("updateHorses", horses);
-                    };
-                    if (archers !== null && archers !== undefined) {
-                        io.to(userMap[i]).emit("updateArchers", archers);
-                        updateDamage = true;
-                    };
-                    if (spearmen !== null && spearmen !== undefined) {
-                        io.to(userMap[i]).emit("updateSpearmen", spearmen);
-                        updateDamage = true;
-                    };
-                    if (swordsmen !== null && swordsmen !== undefined) {
-                        io.to(userMap[i]).emit("updateSwordsmen", swordsmen);
-                        updateDamage = true;
-                    };
-                    if (horsemen !== null && horsemen !== undefined) {
-                        io.to(userMap[i]).emit("updateHorsemen", horsemen);
-                        updateDamage = true;
-                    };
-                    if (knights !== null && knights !== undefined) {
-                        io.to(userMap[i]).emit("updateKnights", knights);
-                        updateDamage = true;
-                    };
-                    if (batteringrams !== null && batteringrams !== undefined) {
-                        io.to(userMap[i]).emit("updateBatteringRams", batteringrams);
-                        updateDamage = true;
-                    };
-                    if (siegetowers !== null && siegetowers !== undefined) {
-                        io.to(userMap[i]).emit("updateSiegeTowers", siegetowers);
-                        updateDamage = true;
-                    };
-                    if (farms !== null && farms !== undefined) {
-                        io.to(userMap[i]).emit("getGrainIncome");
-                    };
-                    if (lumbercamps !== null && lumbercamps !== undefined) {
-                        io.to(userMap[i]).emit("getLumberIncome");
-                    };
-                    if (quarries !== null && quarries !== undefined) {
-                        io.to(userMap[i]).emit("getStoneIncome");
-                    };
-                    if (ironmines !== null && ironmines !== undefined) {
-                        io.to(userMap[i]).emit("getIronIncome");
-                    };
-                    if (goldmines !== null && goldmines !== undefined) {
-                        io.to(userMap[i]).emit("getGoldIncome");
-                    };
-                    if (trainingfield !== null && trainingfield !== undefined) {
-                        io.to(userMap[i]).emit("getRecruitsIncome");
-                    };
-                    if (stables !== null && stables !== undefined) {
-                        io.to(userMap[i]).emit("getHorseIncome");
-                    };
-                    if (wall !== null && wall !== undefined) {
-                        updateDamage = true;
-                    };
-                    if (boots !== null && boots !== undefined) {
-                        updateDamage = true;
-                    };
-                    if (bracers !== null && bracers !== undefined) {
-                        updateDamage = true;
-                    };
-                    if (helmets !== null && helmets !== undefined) {
-                        updateDamage = true;
-                    };
-                    if (lances !== null && lances !== undefined) {
-                        updateDamage = true;
-                    };
-                    if (longbows !== null && longbows !== undefined) {
-                        updateDamage = true;
-                    };
-                    if (shields !== null && shields !== undefined) {
-                        updateDamage = true;
-                    };
-                    if (spears !== null && spears !== undefined) {
-                        updateDamage = true;
-                    };
-                    if (swords !== null && swords !== undefined) {
-                        updateDamage = true;
-                    };
-                    if (currentWallHealth !== null && currentWallHealth !== undefined) {
-                        updateDamage = true;
-                    };
-
-                    if (updateDamage) {
-                        io.to(userMap[i]).emit("updatePower");
-                    };
+                    io.to(userMap[i]).emit("sync");
+                    io.to(userMap[i]).emit("getIncomes");
+                    io.to(userMap[i]).emit("updatePower");
                 }
             }
         })
@@ -807,6 +664,12 @@ async function checkAll() {
     });
 }
 
+app.get("/api/getResources", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const data = { grain: user.grain, lumber: user.lumber, stone: user.stone, iron: user.iron, gold: user.gold };
+    res.send(JSON.stringify(data))
+});
+
 app.get("/api/getAttackPower", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const result = await calculateAttack(user);
@@ -816,21 +679,13 @@ app.get("/api/getAttackPower", requiresAuth(), async (req, res) => {
 app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const result = await calculateDefense(user);
-    res.send(JSON.stringify(result))
+    res.send(JSON.stringify(result));
 });
 
-app.get("/api/:getIncome", requiresAuth(), urlencodedParser, [
-    check('getIncome').exists().isAlpha().isLength({ min: 13, max: 17 })
-], async (req, res) => {
-    const incomeTypes = ['getGrainIncome', 'getLumberIncome', 'getStoneIncome', 'getIronIncome', 'getGoldIncome', 'getHorseIncome', 'getRecruitsIncome'];
-    const errors = validationResult(req)
-    if (errors.isEmpty() && incomeTypes.includes(req.params.getIncome)) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const income = await getIncome(user, req.params.getIncome);
-        res.send(JSON.stringify(income))
-    } else {
-        res.status(400).render('pages/400');
-    }
+app.get("/api/getIncomes", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const incomes = await getAllIncomes(user);
+    res.send(JSON.stringify(incomes));
 });
 
 app.get("/api/getUser/:id", requiresAuth(), urlencodedParser, [
@@ -839,8 +694,9 @@ app.get("/api/getUser/:id", requiresAuth(), urlencodedParser, [
     const errors = validationResult(req)
     if (errors.isEmpty()) {
         const user = await getUserByEmail(client, req.oidc.user.email);
+        const data = { grain: user.grain, lumber: user.lumber, stone: user.stone, iron: user.iron, gold: user.gold, recruits: user.recruits, horses: user.horses, archers: user.archers, spearmen: user.spearmen, swordsmen: user.swordsmen, horsemen: user.horsemen, knights: user.knights, batteringrams: user.batteringrams, siegetowers: user.siegetowers };
         userMap[user._id] = req.params.id
-        res.status(200).end();
+        res.send(JSON.stringify(data));
     } else {
         res.status(400).render('pages/400');
     }
