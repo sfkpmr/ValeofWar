@@ -3,6 +3,7 @@
 
 <head>
     <title>Battle log</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
 </head>
 
 <body>
@@ -18,8 +19,10 @@
     There was <%= log.wallDamage %> damage to the walls!
     <br>  <br>
     
-    The attackers got their hands on <%= log.goldLoot %> gold, <%= log.grainLoot %> grain, <%= log.lumberLoot %> lumber, <%= log.stoneLoot %> stone and <%= log.ironLoot %> 
-    iron in the ensuing turmoil!
+    The attackers got their hands on <%= log.grainLoot %> <img src="../../static/images/grain.png"
+    title="Grain">, <%= log.lumberLoot %> <img src="../../static/images/wood.png"
+    title="Lumber">, <%= log.stoneLoot %> <img src="../../static/images/stone.png" title="Stone">, <%= log.ironLoot %> <img src="../../static/images/iron-ingots.png" title="Iron"> and <%= log.goldLoot %> <img src="../../static/images/gold-ingots.png" title="Gold">
+     in the ensuing turmoil!
     <br>
     <br>
     <% if (log.attacker === username) {%>

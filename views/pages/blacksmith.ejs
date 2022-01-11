@@ -3,7 +3,7 @@
 
 <head>
     <title>Blacksmith</title>
-    <link rel="stylesheet" type="text/css" href="../static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
@@ -19,11 +19,11 @@
         We don't have a blacksmith yet!<br>
         <br>
         <div class="resources"> Construct one for: <%= totalCost.lumberCost %> <img src="../static/images/wood.png"
-                    height="35px" title="Lumber">
-                <%= totalCost.stoneCost %> <img src="../static/images/stone.png" height="35px" title="Stone">
-                    <%= totalCost.ironCost %> <img src="../static/images/iron-ingots.png" height="35px" title="Iron">
+                   title="Lumber">
+                <%= totalCost.stoneCost %> <img src="../static/images/stone.png" title="Stone">
+                    <%= totalCost.ironCost %> <img src="../static/images/iron-ingots.png" title="Iron">
                         and <%= totalCost.goldCost %>
-                            <img src="../static/images/gold-ingots.png" height="35px" title="Gold"> </div>
+                            <img src="../static/images/gold-ingots.png" title="Gold"> </div>
         <br>
         <form action="/town/blacksmith/upgrade" method="POST">
             <input type="submit" class="submitButton" value="Construct">
