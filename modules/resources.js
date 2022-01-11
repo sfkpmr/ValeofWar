@@ -51,7 +51,6 @@ resourceObject = {
         const newGrain = user.grain - grain;
         const newRecruits = user.recruits - recruits;
         const newHorses = user.horses - horses;
-
         const updatedUser = { "grain": newGrain, "lumber": newLumber, "stone": newStone, "gold": newGold, "iron": newIron, "recruits": newRecruits, "horses": newHorses };
 
         await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
@@ -59,10 +58,6 @@ resourceObject = {
 
     checkIfCanAfford: async function (client, username, goldCost, lumberCost, stoneCost, ironCost, grainCost, recruitCost, horseCost) {
         const user = await getUserByUsername(client, username);
-
-        console.log("User has " + user.gold + " " + user.lumber + " " + user.stone + " " + user.iron + " " + user.grain + " " + user.recruits + " " + user.horses);
-        console.log("User wants to use " + goldCost + " gold, " + lumberCost + " lumber, " + stoneCost + " stone, " + ironCost + " iron, " + grainCost + " grain, " + recruitCost + " " + horseCost);
-
         if (user.gold >= goldCost && user.lumber >= lumberCost && user.stone >= stoneCost && user.iron >= ironCost && user.grain >= grainCost && user.recruits >= recruitCost && user.horses >= horseCost) {
             return true;
         }
