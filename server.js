@@ -298,6 +298,26 @@ app.get("/messages/inbox/:id", requiresAuth(), urlencodedParser, [
     }
 });
 
+app.post("/messages/inbox/:id/report", requiresAuth(), urlencodedParser, [
+    check('id').exists().isMongoId()
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const messageExists = await getMessageById(client, new ObjectId(req.params.id));
+        const message = "Reported message ID: " + messageExists._id;
+
+        if (messageExists) {
+            const data = { sentTo: "johanna", sentBy: "SYSTEM", message: message, time: new Date() };
+            addMessage(client, data);
+            res.redirect(`/messages/inbox`);
+        } else {
+            res.send("No such message!")
+        }
+    } else {
+        res.status(400).render('pages/400');
+    }
+});
+
 app.post("/messages/send", requiresAuth(), urlencodedParser, [
     check('recipient').exists().isAlphanumeric().isLength({ min: 5, max: 15 }),
     check('message').exists().isLength({ max: 1000 })//TODO handle ?!#%  ????
