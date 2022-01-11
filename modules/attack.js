@@ -258,8 +258,6 @@ attackObject = {
         var spears = defender.spears;
         var swords = defender.swords;
 
-        //todo account for nr of weapons, check nulls
-
         //TODO nr of ===
         //TODO send object, return with correct 0s? Same with dmg calc?
         if (boots == undefined || boots == null) {
@@ -654,4 +652,3 @@ attackObject = {
 };
 
 module.exports = attackObject;
-
