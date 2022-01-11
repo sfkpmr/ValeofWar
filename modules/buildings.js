@@ -34,88 +34,88 @@ const goldMineBaseCost = { lumber: 1000, stone: 250, iron: 250, gold: 100 };
 const maxFarms = 4, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 4;
 
 buildingObject = {
-    calcGoldTrainCost: function (archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers) {
+    calcGoldTrainCost: function (trainees) {
         let cost = 0;
 
-        cost += archers * archer.gold;
-        cost += swordsmen * swordsman.gold;
-        cost += knights * knight.gold;
-        cost += batteringrams * batteringram.gold;
-        cost += siegetowers * siegetower.gold;
+        cost += trainees.archers * archer.gold;
+        cost += trainees.swordsmen * swordsman.gold;
+        cost += trainees.knights * knight.gold;
+        cost += trainees.batteringrams * batteringram.gold;
+        cost += trainees.siegetowers * siegetower.gold;
 
         return Math.round(cost);
     },
 
-    calcIronTrainCost: function (archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers) {
+    calcIronTrainCost: function (trainees) {
         let cost = 0;
 
-        cost += swordsmen * swordsman.iron;
-        cost += horsemen * horseman.iron;
-        cost += knights * knight.iron;
-        cost += batteringrams * batteringram.iron;
-        cost += siegetowers * siegetower.iron;
+        cost += trainees.swordsmen * swordsman.iron;
+        cost += trainees.horsemen * horseman.iron;
+        cost += trainees.knights * knight.iron;
+        cost += trainees.batteringrams * batteringram.iron;
+        cost += trainees.siegetowers * siegetower.iron;
 
         return Math.round(cost);
     },
 
-    calcGrainTrainCost: function (archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers) {
+    calcGrainTrainCost: function (trainees) {
         let cost = 0;
 
-        cost += archers * archer.grain;
-        cost += spearmen * spearman.grain;
-        cost += swordsmen * swordsman.grain;
-        cost += horsemen * horseman.grain;
-        cost += knights * knight.grain;
+        cost += trainees.archers * archer.grain;
+        cost += trainees.spearmen * spearman.grain;
+        cost += trainees.swordsmen * swordsman.grain;
+        cost += trainees.horsemen * horseman.grain;
+        cost += trainees.knights * knight.grain;
 
         return Math.round(cost);
     },
-    calcLumberTrainCost: function (archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers) {
+    calcLumberTrainCost: function (trainees) {
         let cost = 0;
 
-        cost += archers * archer.lumber;
-        cost += spearmen * spearman.lumber;
-        cost += batteringrams * batteringram.lumber;
-        cost += siegetowers * siegetower.lumber;
+        cost += trainees.archers * archer.lumber;
+        cost += trainees.spearmen * spearman.lumber;
+        cost += trainees.batteringrams * batteringram.lumber;
+        cost += trainees.siegetowers * siegetower.lumber;
 
         return Math.round(cost);
     },
-    calcLumberCraftCost: function (boots, bracers, helmets, lances, longbows, shields, spears, swords) {
+    calcLumberCraftCost: function (armorOrder) {
         let cost = 0;
 
-        cost += lances * lance.lumber;
-        cost += longbows * longbow.lumber;
-        cost += shields * shield.lumber;
-        cost += spears * spear.lumber;
+        cost += armorOrder.lances * lance.lumber;
+        cost += armorOrder.longbows * longbow.lumber;
+        cost += armorOrder.shields * shield.lumber;
+        cost += armorOrder.spears * spear.lumber;
 
         return Math.round(cost);
     },
-    calcIronCraftCost: function (boots, bracers, helmets, lances, longbows, shields, spears, swords) {
+    calcIronCraftCost: function (armorOrder) {
         let cost = 0;
 
-        cost += boots * boot.iron;
-        cost += bracers * bracer.iron;
-        cost += helmets * helmet.iron;
-        cost += lances * lance.iron;
-        cost += longbows * longbow.iron;
-        cost += shields * shield.iron;
-        cost += spears * spear.iron;
-        cost += swords * sword.iron;
+        cost += armorOrder.boots * boot.iron;
+        cost += armorOrder.bracers * bracer.iron;
+        cost += armorOrder.helmets * helmet.iron;
+        cost += armorOrder.lances * lance.iron;
+        cost += armorOrder.longbows * longbow.iron;
+        cost += armorOrder.shields * shield.iron;
+        cost += armorOrder.spears * spear.iron;
+        cost += armorOrder.swords * sword.iron;
 
         return Math.round(cost);
     },
     //pass object instead
-    calcGoldCraftCost: function (boots, bracers, helmets, lances, longbows, shields, spears, swords) {
+    calcGoldCraftCost: function (armorOrder) {
         let cost = 0;
 
-        cost += lances * lance.gold;
-        cost += swords * sword.gold;
+        cost += armorOrder.lances * lance.gold;
+        cost += armorOrder.swords * sword.gold;
 
         return Math.round(cost);
     },
     calcTotalCraftCost: function (armorOrder) {
-        const lumberCost = buildingObject.calcLumberCraftCost(armorOrder.boots, armorOrder.bracers, armorOrder.helmets, armorOrder.lances, armorOrder.longbows, armorOrder.shields, armorOrder.spears, armorOrder.swords);
-        const ironCost = buildingObject.calcIronCraftCost(armorOrder.boots, armorOrder.bracers, armorOrder.helmets, armorOrder.lances, armorOrder.longbows, armorOrder.shields, armorOrder.spears, armorOrder.swords);
-        const goldCost = buildingObject.calcGoldCraftCost(armorOrder.boots, armorOrder.bracers, armorOrder.helmets, armorOrder.lances, armorOrder.longbows, armorOrder.shields, armorOrder.spears, armorOrder.swords);
+        const lumberCost = buildingObject.calcLumberCraftCost(armorOrder);
+        const ironCost = buildingObject.calcIronCraftCost(armorOrder);
+        const goldCost = buildingObject.calcGoldCraftCost(armorOrder);
 
         return { lumberCost: lumberCost, ironCost: ironCost, goldCost: goldCost };
     },

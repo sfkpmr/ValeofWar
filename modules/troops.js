@@ -44,22 +44,21 @@ troopsObject = {
         } else {
             siegetowers = 0;
         }
-        const goldCost = calcGoldTrainCost(archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers);
-        const grainCost = calcGrainTrainCost(archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers);
-        const lumberCost = calcLumberTrainCost(archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers);
-        const ironCost = calcIronTrainCost(archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers);
+        const verifiedTrainees = { archers: archers, spearmen: spearmen, swordsmen: swordsmen, horsemen: horsemen, knights: knights, batteringrams: batteringrams, siegetowers: siegetowers }
+        const goldCost = calcGoldTrainCost(verifiedTrainees);
+        const grainCost = calcGrainTrainCost(verifiedTrainees);
+        const lumberCost = calcLumberTrainCost(verifiedTrainees);
+        const ironCost = calcIronTrainCost(verifiedTrainees);
 
-        let recruitsCost;
+        let recruitsCost = 0;
         let horseCost = 0;
         if (archers > 0 || spearmen > 0 || swordsmen > 0) {
             recruitsCost = archers + spearmen + swordsmen;
         } else if (horsemen > 0 || knights > 0) {
             recruitsCost = horsemen + knights;
             horseCost = recruitsCost;
-        } else {
-            recruitsCost = (batteringrams + siegetowers) * 2;
         }
-
+        //  recruitsCost = (batteringrams + siegetowers) * 2;
         const data = { archers: archers, spearmen: spearmen, swordsmen: swordsmen, horsemen: horsemen, knights: knights, "batteringrams": batteringrams, "siegetowers": siegetowers };
 
         if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost)) {
