@@ -52,34 +52,34 @@ attackObject = {
         var batteringrams = attacker.batteringrams * 10;
         var siegetowers = attacker.siegetowers * 25;
 
-        if (boots == undefined || boots == null) {
+        if (boots === undefined || boots === null) {
             boots = 0;
         }
-        if (bracers == undefined || bracers == null) {
+        if (bracers === undefined || bracers === null) {
             bracers = 0;
         }
-        if (helmets == undefined || helmets == null) {
+        if (helmets === undefined || helmets === null) {
             helmets = 0;
         }
-        if (lances == undefined || lances == null) {
+        if (lances === undefined || lances === null) {
             lances = 0;
         }
-        if (longbows == undefined || longbows == null) {
+        if (longbows === undefined || longbows === null) {
             longbows = 0;
         }
-        if (shields == undefined || shields == null) {
+        if (shields === undefined || shields === null) {
             shields = 0;
         }
-        if (spears == undefined || spears == null) {
+        if (spears === undefined || spears === null) {
             spears = 0;
         }
-        if (swords == undefined || swords == null) {
+        if (swords === undefined || swords === null) {
             swords = 0;
         }
-        if (batteringrams == undefined || batteringrams == null) {
+        if (batteringrams === undefined || batteringrams === null) {
             batteringrams = 0;
         }
-        if (siegetowers == undefined || siegetowers == null) {
+        if (siegetowers === undefined || siegetowers === null) {
             siegetowers = 0;
         }
 
@@ -258,30 +258,29 @@ attackObject = {
         var spears = defender.spears;
         var swords = defender.swords;
 
-        //TODO nr of ===
         //TODO send object, return with correct 0s? Same with dmg calc?
-        if (boots == undefined || boots == null) {
+        if (boots === undefined || boots === null) {
             boots = 0;
         }
-        if (bracers == undefined || bracers == null) {
+        if (bracers === undefined || bracers === null) {
             bracers = 0;
         }
-        if (helmets == undefined || helmets == null) {
+        if (helmets === undefined || helmets === null) {
             helmets = 0;
         }
-        if (lances == undefined || lances == null) {
+        if (lances === undefined || lances === null) {
             lances = 0;
         }
-        if (longbows == undefined || longbows == null) {
+        if (longbows === undefined || longbows === null) {
             longbows = 0;
         }
-        if (shields == undefined || shields == null) {
+        if (shields === undefined || shields === null) {
             shields = 0;
         }
-        if (spears == undefined || spears == null) {
+        if (spears === undefined || spears === null) {
             spears = 0;
         }
-        if (swords == undefined || swords == null) {
+        if (swords === undefined || swords === null) {
             swords = 0;
         }
 
@@ -436,7 +435,7 @@ attackObject = {
         // console.log(("aaaaaaaaaaaaaaaa " + archerDamage + " " + spearmenDamage + " " + swordsmenDamage + " " + horsemenDamage + " " + knightsDamage + " " + walls))
         // console.log(boots + " " + bracers + " " + helmets + " " + longbows)
 
-        wallBonus = (1 + (walls / 10));
+        const wallBonus = (1 + (walls / 10));
         if (defender.currentWallHealth === 0) {
             wallBonus = 1;
         }
