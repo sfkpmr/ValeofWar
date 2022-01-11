@@ -44,7 +44,7 @@ troopsObject = {
         } else {
             siegetowers = 0;
         }
-        const verifiedTrainees = { archers: archers, spearmen: spearmen, swordsmen: swordsmen, horsemen: horsemen, knights: knights, batteringrams: batteringrams, siegetowers: siegetowers }
+        const verifiedTrainees = { "archers": archers, "spearmen": spearmen, "swordsmen": swordsmen, "horsemen": horsemen, "knights": knights, "batteringrams": batteringrams, "siegetowers": siegetowers }
         const goldCost = calcGoldTrainCost(verifiedTrainees);
         const grainCost = calcGrainTrainCost(verifiedTrainees);
         const lumberCost = calcLumberTrainCost(verifiedTrainees);
@@ -59,7 +59,7 @@ troopsObject = {
             horseCost = recruitsCost;
         }
         //  recruitsCost = (batteringrams + siegetowers) * 2;
-        const data = { archers: archers, spearmen: spearmen, swordsmen: swordsmen, horsemen: horsemen, knights: knights, "batteringrams": batteringrams, "siegetowers": siegetowers };
+        const data = { "archers": archers, "spearmen": spearmen, "swordsmen": swordsmen, "horsemen": horsemen, "knights": knights, "batteringrams": batteringrams, "siegetowers": siegetowers };
 
         if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost)) {
             await troopsObject.addToDb(client, user.username, data);

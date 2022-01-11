@@ -365,7 +365,7 @@ buildingObject = {
         switch (type) {
             case "farm":
                 //check correct number
-                if (resourceId <= maxFarms) {
+                if (resourceId <= maxFarms - 1) {
                     resource = "farms"
                     upgradedFieldData = user.farms;
                     resourceLevel = upgradedFieldData[resourceId]
@@ -375,7 +375,7 @@ buildingObject = {
                 }
                 break;
             case "lumbercamp":
-                if (resourceId <= maxLumberCamps) {
+                if (resourceId <= maxLumberCamps - 1) {
                     resource = "lumberCamp"
                     upgradedFieldData = user.lumberCamps;
                     resourceLevel = upgradedFieldData[resourceId]
@@ -384,7 +384,7 @@ buildingObject = {
                 }
                 break;
             case "quarry":
-                if (resourceId <= maxQuarries) {
+                if (resourceId <= maxQuarries - 1) {
                     resource = "quarry"
                     upgradedFieldData = user.quarries;
                     resourceLevel = upgradedFieldData[resourceId]
@@ -393,7 +393,7 @@ buildingObject = {
                 }
                 break;
             case "ironMine":
-                if (resourceId <= maxIronMines) {
+                if (resourceId <= maxIronMines - 1) {
                     resource = "ironMines";
                     upgradedFieldData = user.ironMines;
                     resourceLevel = upgradedFieldData[resourceId]
@@ -402,7 +402,7 @@ buildingObject = {
                 }
                 break;
             case "goldMine":
-                if (resourceId <= maxGoldMines) {
+                if (resourceId <= maxGoldMines - 1) {
                     resource = "goldMines";
                     upgradedFieldData = user.goldMines;
                     resourceLevel = upgradedFieldData[resourceId]
