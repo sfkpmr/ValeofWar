@@ -633,7 +633,6 @@ app.get("/land/:type/:number", requiresAuth(), urlencodedParser, [
     if (errors.isEmpty() && resources.includes(type)) {
         const user = await getUserByEmail(client, req.oidc.user.email);
         const resourceData = await getResourceFieldData(user, type, resourceId);
-
         if (resourceData.invalidId) {
             res.redirect("/land");
         } else if (resourceData.resourceLevel !== undefined && resourceData.resourceLevel > 0) {
@@ -670,16 +669,11 @@ async function checkAll() {
     });
 }
 
-app.get("/api/getAttackPower", requiresAuth(), async (req, res) => {
+app.get("/api/getPowers", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
-    const result = await calculateAttack(user);
-    res.send(JSON.stringify(result))
-});
-
-app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const result = await calculateDefense(user);
-    res.send(JSON.stringify(result));
+    const attackValue = await calculateAttack(user);
+    const defenseValue = await calculateDefense(user);
+    res.send(JSON.stringify({ attack: attackValue, defense: defenseValue }))
 });
 
 app.get("/api/getIncomes", requiresAuth(), async (req, res) => {
