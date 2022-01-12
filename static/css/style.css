@@ -75,6 +75,14 @@
     background-color: royalblue;
 }
 
+input[type=number]:read-only {
+  border-color: darkgrey;
+  border-style: solid;
+  border-width: 1px;
+  background-color: rgb(235, 235, 228);
+  color: rgb(84, 84, 84);
+}
+
 /* Add responsiveness - display the form controls vertically instead of horizontally on screens that are less than 800px wide */
 @media (max-width: 800px) {
     .form-inline input {

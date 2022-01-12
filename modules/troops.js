@@ -1,73 +1,46 @@
-const { incDatabaseValue } = require("../modules/database.js");
+const { incDatabaseValue, incTroopValues } = require("../modules/database.js");
 const { checkIfCanAfford, removeResources } = require("../modules/resources.js");
 const { calcGoldTrainCost, calcGrainTrainCost, calcIronTrainCost, calcLumberTrainCost } = require("../modules/buildings.js");
 
 troopsObject = {
-    addToDb: async function (client, username, data) {
-        await incDatabaseValue(client, username, data);
-    },
-    trainTroops: async function (client, user, trainees) {
-        let archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers;
+    // addToDb: async function (client, username, data) {//ta bort?
+    //     await incDatabaseValue(client, username, data);
+    // },
+    trainTroops: async function (client, username, trainees) {
 
-        if (trainees.archers !== null && trainees.archers !== undefined) {
-            archers = trainees.archers;
-        } else {
-            archers = 0;
-        }
-        if (trainees.spearmen !== null && trainees.spearmen !== undefined) {
-            spearmen = trainees.spearmen;
-        } else {
-            spearmen = 0;
-        }
-        if (trainees.swordsmen !== null && trainees.swordsmen !== undefined) {
-            swordsmen = trainees.swordsmen;
-        } else {
-            swordsmen = 0;
-        }
-        if (trainees.horsemen !== null && trainees.horsemen !== undefined) {
-            horsemen = trainees.horsemen;
-        } else {
-            horsemen = 0;
-        }
-        if (trainees.knights !== null && trainees.knights !== undefined) {
-            knights = trainees.knights;
-        } else {
-            knights = 0;
-        }
-        if (trainees.batteringrams !== null && trainees.batteringrams !== undefined) {
-            batteringrams = trainees.batteringrams;
-        } else {
-            batteringrams = 0;
-        }
-        if (trainees.siegetowers !== null && trainees.siegetowers !== undefined) {
-            siegetowers = trainees.siegetowers;
-        } else {
-            siegetowers = 0;
-        }
-        const verifiedTrainees = { "archers": archers, "spearmen": spearmen, "swordsmen": swordsmen, "horsemen": horsemen, "knights": knights, "batteringrams": batteringrams, "siegetowers": siegetowers }
-        const goldCost = calcGoldTrainCost(verifiedTrainees);
-        const grainCost = calcGrainTrainCost(verifiedTrainees);
-        const lumberCost = calcLumberTrainCost(verifiedTrainees);
-        const ironCost = calcIronTrainCost(verifiedTrainees);
+        const grainCost = calcGrainTrainCost(trainees);
+        const lumberCost = calcLumberTrainCost(trainees);
+        const ironCost = calcIronTrainCost(trainees);
+        const goldCost = calcGoldTrainCost(trainees);
+        const recruitsCost = troopsObject.calcRecruitsCost(trainees);
+        const horseCost = troopsObject.calcHorseCost(trainees);
 
-        let recruitsCost = 0;
-        let horseCost = 0;
-        if (archers > 0 || spearmen > 0 || swordsmen > 0) {
-            recruitsCost = archers + spearmen + swordsmen;
-        } else if (horsemen > 0 || knights > 0) {
-            recruitsCost = horsemen + knights;
-            horseCost = recruitsCost;
-        }
-        //  recruitsCost = (batteringrams + siegetowers) * 2;
-        const data = { "archers": archers, "spearmen": spearmen, "swordsmen": swordsmen, "horsemen": horsemen, "knights": knights, "batteringrams": batteringrams, "siegetowers": siegetowers };
-
-        if (await checkIfCanAfford(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost)) {
-            await troopsObject.addToDb(client, user.username, data);
-            await removeResources(client, user.username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost);
+        if (await checkIfCanAfford(client, username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost)) {
+            await incTroopValues(client, username, trainees);
+            await removeResources(client, username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost);
         } else {
             console.log("bbbb");
         }
 
+    },
+    calcRecruitsCost: function (trainees) {
+        if (trainees.archers > 0 || trainees.spearmen > 0 || trainees.swordsmen > 0 || trainees.twoHandedSwordsmen > 0 || trainees.crossbowmen > 0 ||
+            trainees.halberdiers > 0 || trainees.longbowmen > 0) {
+            return trainees.archers + trainees.spearmen + trainees.swordsmen + trainees.twoHandedSwordsmen + trainees.crossbowmen + trainees.halberdiers + trainees.longbowmen;
+        } else if (trainees.horsemen > 0 || trainees.knights > 0 || trainees.horseArchers > 0) {
+            return trainees.horsemen + trainees.knights + trainees.horseArchers;
+        } else if (trainees.ballistas > 0 || trainees.trebuchets > 0) {
+            return (trainees.ballistas + trainees.trebuchets) * 5;
+        }else{
+            return 0;
+        }
+    },
+    calcHorseCost: function (trainees) {
+        if (trainees.horsemen > 0 || trainees.knights > 0 || trainees.horseArchers > 0) {
+            return trainees.horsemen + trainees.knights + trainees.horseArchers;
+        } else {
+            return 0;
+        }
     }
 };
 module.exports = troopsObject;

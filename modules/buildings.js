@@ -1,4 +1,4 @@
-const { incDatabaseValue, setDatabaseValue } = require("../modules/database.js");
+const { incDatabaseValue, setDatabaseValue,incArmorValues } = require("../modules/database.js");
 const { checkIfCanAfford, removeResources } = require("../modules/resources.js");
 
 const archer = { grain: 25, lumber: 50, gold: 10, requiredLevel: 0 };
@@ -6,8 +6,16 @@ const spearman = { grain: 25, lumber: 50, requiredLevel: 0 };
 const swordsman = { grain: 50, iron: 50, gold: 25, requiredLevel: 5 };
 const horseman = { grain: 100, iron: 25, requiredLevel: 0 };
 const knight = { grain: 100, iron: 100, gold: 50, requiredLevel: 5 };
-const batteringram = { lumber: 500, iron: 100, gold: 50, requiredLevel: 5 };
-const siegetower = { lumber: 1000, iron: 100, gold: 100, requiredLevel: 10 };
+const batteringRam = { lumber: 500, iron: 100, gold: 50, requiredLevel: 5 };
+const siegeTower = { lumber: 1000, iron: 100, gold: 100, requiredLevel: 10 };
+
+const crossbowman = { grain: 1, lumber: 50, iron: 10, gold: 50, requiredLevel: 10 };
+const ballista = { grain: 1, lumber: 1000, iron: 100, gold: 100, requiredLevel: 15 };
+const twoHandedSwordsman = { grain: 1, lumber: 1000, iron: 100, gold: 100, requiredLevel: 20 };
+const halberdier = { grain: 1, lumber: 1000, iron: 100, gold: 100, requiredLevel: 15 };
+const longbowman = { grain: 1, lumber: 1000, iron: 100, gold: 100, requiredLevel: 10 };
+const horseArcher = { grain: 1, lumber: 1000, iron: 100, gold: 100, requiredLevel: 15 };
+const trebuchet = { grain: 1, lumber: 1000, iron: 100, gold: 100, requiredLevel: 20 };
 
 const boot = { iron: 25, requiredLevel: 0 };
 const bracer = { iron: 25, requiredLevel: 0 };
@@ -40,8 +48,14 @@ buildingObject = {
         cost += trainees.archers * archer.gold;
         cost += trainees.swordsmen * swordsman.gold;
         cost += trainees.knights * knight.gold;
-        cost += trainees.batteringrams * batteringram.gold;
-        cost += trainees.siegetowers * siegetower.gold;
+        cost += trainees.batteringRams * batteringRam.gold;
+        cost += trainees.siegeTowers * siegeTower.gold;
+        cost += trainees.crossbowmen * crossbowman.gold;
+        cost += trainees.ballistas * ballista.gold;
+        cost += trainees.twoHandedSwordsmen * twoHandedSwordsman.gold;
+        cost += trainees.longbowmen * longbowman.gold;
+        cost += trainees.horseArchers * horseArcher.gold;
+        cost += trainees.trebuchets * trebuchet.gold;
 
         return Math.round(cost);
     },
@@ -52,8 +66,16 @@ buildingObject = {
         cost += trainees.swordsmen * swordsman.iron;
         cost += trainees.horsemen * horseman.iron;
         cost += trainees.knights * knight.iron;
-        cost += trainees.batteringrams * batteringram.iron;
-        cost += trainees.siegetowers * siegetower.iron;
+        cost += trainees.batteringRams * batteringRam.iron;
+        cost += trainees.siegeTowers * siegeTower.iron;
+
+        cost += trainees.crossbowmen * crossbowman.iron;
+        cost += trainees.ballistas * ballista.iron;
+        cost += trainees.twoHandedSwordsmen * twoHandedSwordsman.iron;
+        cost += trainees.halberdiers * halberdier.iron;
+        cost += trainees.longbowmen * longbowman.iron;
+        cost += trainees.horseArchers * horseArcher.iron;
+        cost += trainees.trebuchets * trebuchet.iron;
 
         return Math.round(cost);
     },
@@ -67,6 +89,14 @@ buildingObject = {
         cost += trainees.horsemen * horseman.grain;
         cost += trainees.knights * knight.grain;
 
+        cost += trainees.crossbowmen * crossbowman.grain;
+        cost += trainees.twoHandedSwordsmen * twoHandedSwordsman.grain;
+        cost += trainees.halberdiers * halberdier.grain;
+        cost += trainees.longbowmen * longbowman.grain;
+        cost += trainees.horseArchers * horseArcher.grain;
+
+        console.log(cost)
+
         return Math.round(cost);
     },
     calcLumberTrainCost: function (trainees) {
@@ -74,8 +104,14 @@ buildingObject = {
 
         cost += trainees.archers * archer.lumber;
         cost += trainees.spearmen * spearman.lumber;
-        cost += trainees.batteringrams * batteringram.lumber;
-        cost += trainees.siegetowers * siegetower.lumber;
+        cost += trainees.batteringRams * batteringRam.lumber;
+        cost += trainees.siegeTowers * siegeTower.lumber;
+        cost += trainees.crossbowmen * crossbowman.lumber;
+        cost += trainees.ballistas * ballista.lumber;
+        cost += trainees.twoHandedSwordsmen * twoHandedSwordsman.lumber;
+        cost += trainees.halberdiers * halberdier.lumber;
+        cost += trainees.longbowmen * longbowman.lumber;
+        cost += trainees.trebuchets * trebuchet.lumber;
 
         return Math.round(cost);
     },
@@ -350,7 +386,7 @@ buildingObject = {
     craftArmor: async function (client, user, craftingOrder) {
         const totalCost = buildingObject.calcTotalCraftCost(craftingOrder);
         if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0)) {
-            await troopsObject.addToDb(client, user.username, craftingOrder);
+            await incArmorValues(client, user.username, craftingOrder);
             await resourceObject.removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0);
         } else {
             console.log("bbbb");
@@ -524,17 +560,39 @@ buildingObject = {
         const totalCost = await buildingObject.calculateTotalBuildingUpgradeCost(type, resourceLevel);
         return { totalCost: totalCost, resourceLevel: resourceLevel, invalidId: invalidId, title: title };
     },
+    //todo split up for check units/armor only, or barracks/stables etc only
     validateRequiredProductionLevel: function (user, data) {
+        if (data.crossbowmen > 0 && user.barracksLevel < crossbowman.requiredLevel) {
+            return false;
+        }
         if (data.swordsmen > 0 && user.barracksLevel < swordsman.requiredLevel) {
+            return false;
+        }
+        if (data.twoHandedSwordsmen > 0 && user.barracksLevel < twoHandedSwordsman.requiredLevel) {
+            return false;
+        }
+        if (data.halberdiers > 0 && user.barracksLevel < halberdier.requiredLevel) {
+            return false;
+        }
+        if (data.longbowmen > 0 && user.barracksLevel < longbowman.requiredLevel) {
             return false;
         }
         if (data.knights > 0 && user.stablesLevel < knight.requiredLevel) {
             return false;
         }
-        if (data.batteringrams > 0 && user.workshopLevel < batteringram.requiredLevel) {
+        if (data.horseArchers > 0 && user.stablesLevel < horseArcher.requiredLevel) {
             return false;
         }
-        if (data.siegetowers > 0 && user.workshopLevel < siegetower.requiredLevel) {
+        if (data.batteringrams > 0 && user.workshopLevel < batteringRam.requiredLevel) {
+            return false;
+        }
+        if (data.siegetowers > 0 && user.workshopLevel < siegeTower.requiredLevel) {
+            return false;
+        }
+        if (data.ballistas > 0 && user.workshopLevel < ballista.requiredLevel) {
+            return false;
+        }
+        if (data.trebuchets > 0 && user.workshopLevel < trebuchet.requiredLevel) {
             return false;
         }
         if (data.helmets > 0 && user.blacksmithLevel < helmet.requiredLevel) {

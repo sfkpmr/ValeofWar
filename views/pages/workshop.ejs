@@ -38,21 +38,44 @@
                     <form action="/town/workshop/train" method="POST">
                         <label for="batteringram"><img src="../static/images/batteringram.png" height="35px"
                                 title="Battering ram">
-                            Current: <%= user.batteringrams %> Train:</label>
+                            Current: <%= army.batteringRams %> Train:</label>
                             <% if (user.workshopLevel >= 5){ %>
                         <input type="number" id="batteringram" name="batteringram" placeholder="0" min=0 max=9999>
                         <% } else { %>
-                            <input type="number" id="batteringram" name="batteringram" placeholder="0" min=0 max=9999 disabled>
+                            <input type="number" id="batteringram" name="batteringram" placeholder="0" min=0 max=9999 readonly="readonly">
                         <% } %>
                         Attack damage:
                         <output id="batteringramAttackDamage">0</output><br>
                         <label for="siegetower"><img src="../static/images/siegetower.png" height="35px"
                                 title="Siege tower">
-                            Current: <%= user.siegetowers %> Train:</label>
+                            Current: <%= army.siegeTowers %> Train:</label>
                             <% if (user.workshopLevel >= 10){ %>
                         <input type="number" id="siegetower" name="siegetower" placeholder="0" min=0 max=9999> 
                        <% } else { %>
-                        <input type="number" id="siegetower" name="siegetower" placeholder="0" min=0 max=9999 disabled> 
+                        <input type="number" id="siegetower" name="siegetower" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                            <% } %>
+                            Attack damage: <output id="siegetowerAttackDamage">0</output><br>
+                            
+                            
+                            <label for="ballista"><img src="../static/images/ballista.png" height="35px"
+                                title="Ballista">
+                            Current: <%= army.ballistas %> Train:</label>
+                            <% if (user.workshopLevel >= 15){ %>
+                        <input type="number" id="ballista" name="ballista" placeholder="0" min=0 max=9999> 
+                       <% } else { %>
+                        <input type="number" id="ballista" name="ballista" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                            <% } %>
+                            Attack damage: <output id="siegetowerAttackDamage">0</output><br>
+                            
+                            
+                            
+                            <label for="trebuchet"><img src="../static/images/trebuchet.png" height="35px"
+                                title="Trebuchet">
+                            Current: <%= army.trebuchets %> Train:</label>
+                            <% if (user.workshopLevel === 20){ %>
+                        <input type="number" id="trebuchet" name="trebuchet" placeholder="0" min=0 max=9999> 
+                       <% } else { %>
+                        <input type="number" id="trebuchet" name="trebuchet" placeholder="0" min=0 max=9999 readonly="readonly"> 
                             <% } %>
                             Attack damage: <output id="siegetowerAttackDamage">0</output><br><br>
                         <div class="resources">Build cost: <output id="lumber">0</output> <img

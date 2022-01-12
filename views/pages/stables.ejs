@@ -35,21 +35,33 @@
                 <div class="training">
                     <form action="/town/stables/train" method="POST">
                         <label for="horsemen"><img src="../static/images/horseman.png" height="35px" title="Horseman">
-                            Current: <%= user.horsemen %>
+                            Current: <%= army.horsemen %>
                                 Train:</label>
                         <input type="number" id="horsemen" name="horsemen" placeholder="0" min=0 max=9999> Attack
                         damage: <output id="horsemanAttackDamage">0</output> Defense damage: <output
                             id="horsemanDefenseDamage">0</output><br>
                          <label for="knights"><img src="../static/images/knight.png" height="35px" title="Knight">
-                            Current: <%= user.knights %>
+                            Current: <%= army.knights %>
                                 Train:</label>
                         <% if (user.stablesLevel >= 5) { %>
                         <input type="number" id="knights" name="knights" placeholder="0" min=0 max=9999> 
                         <% } else { %>
-                            <input type="number" id="knights" name="knights" placeholder="0" min=0 max=9999 disabled> 
+                            <input type="number" id="knights" name="knights" placeholder="0" min=0 max=9999 readonly="readonly"> 
                         <% } %>
                         Attack damage: <output id="knightAttackDamage">0</output> Defense damage: <output
-                            id="knightDefenseDamage">0</output><br><br>
+                            id="knightDefenseDamage">0</output><br>
+
+                            <label for="horseArcher"><img src="../static/images/horseArcher.png" height="35px" title="Horse archer">
+                                Current: <%= army.horseArchers %>
+                                    Train:</label>
+                            <% if (user.stablesLevel >= 15) { %>
+                            <input type="number" id="horseArchers" name="horseArchers" placeholder="0" min=0 max=9999> 
+                            <% } else { %>
+                                <input type="number" id="horseArchers" name="horseArchers" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                            <% } %>
+                            Attack damage: <output id="horseArcherAttackDamage">0</output> Defense damage: <output
+                                id="horseArcherDefenseDamage">0</output><br><br>
+
                         <div class="resources">Training cost: <output id="grain">0</output> <img
                                 src="../static/images/grain.png" alt="Grain" title="Grain">, <output
                                 id="iron">0</output> <img src="../static/images/iron-ingots.png" alt="Iron"

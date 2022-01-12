@@ -1,11 +1,15 @@
 const batteringRam = { lumber: 500, iron: 100, gold: 50, attackDamage: 250 };
 const siegeTower = { lumber: 1000, iron: 100, gold: 100, attackDamage: 500 };
+const ballista = { lumber: 1000, iron: 100, gold: 100, attackDamage: 500 };
+const trebuchet = { lumber: 1000, iron: 100, gold: 100, attackDamage: 500 };
 
 function workshopBuildCost() {
     var lumberCost = 0, ironCost = 0, goldCost = 0;
 
     let batteringRams = parseInt(document.getElementById('batteringram').value);
     let siegeTowers = parseInt(document.getElementById('siegetower').value);
+    let ballistas = parseInt(document.getElementById('ballista').value);
+    let trebuchets = parseInt(document.getElementById('trebuchet').value);
 
     if (batteringRams < 0 || isNaN(batteringRams)) {
         batteringRams = 0;
@@ -21,15 +25,35 @@ function workshopBuildCost() {
         siegeTowers = 9999;
         document.getElementById("siegetower").value = 9999;
     }
+    if (ballistas < 0 || isNaN(ballistas)) {
+        ballistas = 0;
+        document.getElementById("ballista").value = 0;
+    } else if (ballistas > 9999) {
+        ballistas = 9999;
+        document.getElementById("ballista").value = 9999;
+    }
+    if (trebuchets < 0 || isNaN(trebuchets)) {
+        trebuchets = 0;
+        document.getElementById("trebuchet").value = 0;
+    } else if (trebuchets > 9999) {
+        trebuchets = 9999;
+        document.getElementById("trebuchet").value = 9999;
+    }
 
     lumberCost += batteringRams * batteringRam.lumber;
     lumberCost += siegeTowers * siegeTower.lumber;
+    lumberCost += ballistas * ballista.lumber;
+    lumberCost += trebuchets * trebuchet.lumber;
 
     ironCost += batteringRams * batteringRam.iron;
     ironCost += siegeTowers * siegeTower.iron;
+    ironCost += ballistas * ballista.lumber;
+    ironCost += trebuchets * trebuchet.lumber;
 
     goldCost += batteringRams * batteringRam.gold;
     goldCost += siegeTowers * siegeTower.gold;
+    goldCost += ballistas * ballista.lumber;
+    goldCost += trebuchets * trebuchet.lumber;
 
     document.getElementById("lumber").innerText = lumberCost;
     document.getElementById("iron").innerText = ironCost;
@@ -39,5 +63,7 @@ function workshopBuildCost() {
 
 document.getElementById("batteringram").addEventListener("input", workshopBuildCost);
 document.getElementById("siegetower").addEventListener("input", workshopBuildCost);
+document.getElementById("ballista").addEventListener("input", workshopBuildCost);
+document.getElementById("trebuchet").addEventListener("input", workshopBuildCost);
 document.getElementById("batteringramAttackDamage").innerText = batteringRam.attackDamage;
 document.getElementById("siegetowerAttackDamage").innerText = siegeTower.attackDamage;

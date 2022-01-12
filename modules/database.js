@@ -168,7 +168,25 @@ databaseObject = {
             }
         }
         return false;
+    },
+    getArmyByEmail: async function (client, email) {
+        return await client.db("gamedb").collection("armies").findOne({ "email": email });
+    },
+    getArmoryByEmail: async function (client, email) {
+        return await client.db("gamedb").collection("armories").findOne({ "email": email });
+    },
+    //remove plural s
+    incTroopValues: async function (client, username, data) {
+        await client.db("gamedb").collection("armies").updateOne({ "username": username }, { $inc: data });
+    },
+    setTroopsValue: async function (client, username, data) {
+        await client.db("gamedb").collection("armies").updateOne({ "username": username }, { $set: data });
+    },
+    incArmorValues: async function (client, username, data) {
+        console.log('apa')
+        await client.db("gamedb").collection("armories").updateOne({ "username": username }, { $inc: data });
     }
+
 };
 
 module.exports = databaseObject;

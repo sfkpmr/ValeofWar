@@ -22,25 +22,70 @@
             <br>
             <form action="/town/barracks/train" method="POST">
                 <label for="archers"><img src="../static/images/archer.png" height="35px" title="Archer">
-                    Current: <%= user.archers %> Train:</label>
+                    Current: <%= army.archers %> Train:</label>
                 <input type="number" id="archers" name="archers" placeholder="0" min=0 max=9999 size="10"> Attack
                 damage: <output id="archerAttackDamage">0</output> Defense damage: <output
                     id="archerDefenseDamage">0</output><br>
                 <label for="spearmen"><img src="../static/images/spearman.png" height="35px" title="Spearman">
-                    Current: <%= user.spearmen %> Train:</label>
+                    Current: <%= army.spearmen %> Train:</label>
                 <input type="number" id="spearmen" name="spearmen" placeholder="0" min=0 max=9999> Attack damage:
                 <output id="spearmanAttackDamage">0</output> Defense damage: <output
                     id="spearmanDefenseDamage">0</output><br>
                 <label for="swordsmen"><img src="../static/images/swordsman.png" height="35px" title="Swordsman">
-                    Current: <%= user.swordsmen %> Train:
+                    Current: <%= army.swordsmen %> Train:
                 </label>
                 <% if (user.barracksLevel >= 5) { %>
                     <input type="number" id="swordsmen" name="swordsmen" placeholder="0" min=0 max=9999> 
                 <% } else { %>
-                    <input type="number" id="swordsmen" name="swordsmen" placeholder="0" min=0 max=9999 disabled> 
+                    <input type="number" id="swordsmen" name="swordsmen" placeholder="0" min=0 max=9999 readonly="readonly"> 
                 <% } %>Attack damage:
                 <output id="swordsmanAttackDamage">0</output> Defense damage: <output
-                    id="swordsmanDefenseDamage">0</output><br><br>
+                    id="swordsmanDefenseDamage">0</output><br>
+
+                   <label for="crossbowmen"><img src="../static/images/crossbow.png" height="35px" title="Crossbowman">
+                    Current: <%= army.crossbowmen %> Train:
+                </label>
+                <% if (user.barracksLevel >= 10) { %>
+                    <input type="number" id="crossbowmen" name="crossbowmen" placeholder="0" min=0 max=9999> 
+                <% } else { %>
+                    <input type="number" id="crossbowmen" name="crossbowmen" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                <% } %>Attack damage:
+                <output id="crossbowmenAttackDamage">0</output> Defense damage: <output
+                    id="crossbowmenDefenseDamage">0</output><br>
+                    
+                       <label for="twoHandedSwordsmen"><img src="../static/images/twoHandedSword.png" height="35px" title="Two-handed swordsman">
+                    Current: <%= army.twoHandedSwordsmen %> Train:
+                </label>
+                <% if (user.barracksLevel === 20) { %>
+                    <input type="number" id="twoHandedSwordsmen" name="twoHandedSwordsmen" placeholder="0" min=0 max=9999> 
+                <% } else { %>
+                    <input type="number" id="twoHandedSwordsmen" name="twoHandedSwordsmen" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                <% } %>Attack damage:
+                <output id="twoHandedSwordsmenAttackDamage">0</output> Defense damage: <output
+                    id="twoHandedSwordsmenDefenseDamage">0</output><br>
+
+                       <label for="halberdiers"><img src="../static/images/halberd.png" height="35px" title="Halberdier">
+                    Current: <%= army.halberdiers %> Train:
+                </label>
+                <% if (user.barracksLevel >= 10) { %>
+                    <input type="number" id="halberdiers" name="halberdiers" placeholder="0" min=0 max=9999> 
+                <% } else { %>
+                    <input type="number" id="halberdiers" name="halberdiers" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                <% } %>Attack damage:
+                <output id="halberdiersAttackDamage">0</output> Defense damage: <output
+                    id="halberdiersDefenseDamage">0</output><br>
+
+                       <label for="longbowmen"><img src="../static/images/bowman.png" height="35px" title="Longbowman">
+                    Current: <%= army.longbowmen %> Train:
+                </label>
+                <% if (user.barracksLevel >= 10) { %>
+                    <input type="number" id="longbowmen" name="longbowmen" placeholder="0" min=0 max=9999> 
+                <% } else { %>
+                    <input type="number" id="longbowmen" name="longbowmen" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                <% } %>Attack damage:
+                <output id="longbowmenAttackDamage">0</output> Defense damage: <output
+                    id="longbowmenDefenseDamage">0</output><br><br>    <!-- print one value for both  -->
+
                 <div class="resources">Training cost: <output id="grain">0</output> <img
                         src="../static/images/grain.png" alt="Grain" title="Grain">, <output id="lumber">0</output> <img
                         src="../static/images/wood.png" alt="Lumber" title="Lumber">, <output id="iron">0</output> <img

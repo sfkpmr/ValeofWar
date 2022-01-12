@@ -58,6 +58,7 @@ resourceObject = {
 
     checkIfCanAfford: async function (client, username, goldCost, lumberCost, stoneCost, ironCost, grainCost, recruitCost, horseCost) {
         const user = await getUserByUsername(client, username);
+        console.log(grainCost, lumberCost, stoneCost, ironCost, goldCost, recruitCost, horseCost)
         if (user.gold >= goldCost && user.lumber >= lumberCost && user.stone >= stoneCost && user.iron >= ironCost && user.grain >= grainCost && user.recruits >= recruitCost && user.horses >= horseCost) {
             return true;
         }
@@ -75,7 +76,7 @@ resourceObject = {
 
         const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
 
-        await client.db("gamedb").collection("players").updateOne({ "username": username }, { $set: updatedUser });
+        await client.db("gamedb").collection("players").updateOne({ "username": username }, { $set: updatedUser });//flytta till db module
         //return something to check against with unit test? return true/false?
     },
 
@@ -89,7 +90,6 @@ resourceObject = {
         const newGrain = user.grain - grain;
 
         const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
-        console.log('User spent', updatedUser)
         await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
     },
     incomeCalc: function (type, levels) {
