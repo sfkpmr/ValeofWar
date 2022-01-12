@@ -1,30 +1,30 @@
-const { incDatabaseValue, setDatabaseValue,incArmorValues } = require("../modules/database.js");
+const { incDatabaseValue, setDatabaseValue, incArmorValues } = require("../modules/database.js");
 const { checkIfCanAfford, removeResources } = require("../modules/resources.js");
 
-const archer = { grain: 25, lumber: 50, gold: 10, requiredLevel: 0 };
-const spearman = { grain: 25, lumber: 50, requiredLevel: 0 };
-const swordsman = { grain: 50, iron: 50, gold: 25, requiredLevel: 5 };
-const horseman = { grain: 100, iron: 25, requiredLevel: 0 };
-const knight = { grain: 100, iron: 100, gold: 50, requiredLevel: 5 };
-const batteringRam = { lumber: 500, iron: 100, gold: 50, requiredLevel: 5 };
-const siegeTower = { lumber: 1000, iron: 100, gold: 100, requiredLevel: 10 };
+const archer = { grain: 25, lumber: 50, gold: 10, levelRequirement: 0 };
+const spearman = { grain: 25, lumber: 50, levelRequirement: 0 };
+const swordsman = { grain: 50, iron: 50, gold: 25, levelRequirement: 5 };
+const horseman = { grain: 100, iron: 25, levelRequirement: 0 };
+const knight = { grain: 100, iron: 100, gold: 50, levelRequirement: 5 };
+const batteringRam = { lumber: 500, iron: 100, gold: 50, levelRequirement: 5 };
+const siegeTower = { lumber: 1000, iron: 100, gold: 100, levelRequirement: 10 };
 
-const crossbowman = { grain: 1, lumber: 50, iron: 10, gold: 50, requiredLevel: 10 };
-const ballista = { grain: 1, lumber: 1000, iron: 100, gold: 100, requiredLevel: 15 };
-const twoHandedSwordsman = { grain: 1, lumber: 1000, iron: 100, gold: 100, requiredLevel: 20 };
-const halberdier = { grain: 1, lumber: 1000, iron: 100, gold: 100, requiredLevel: 15 };
-const longbowman = { grain: 1, lumber: 1000, iron: 100, gold: 100, requiredLevel: 10 };
-const horseArcher = { grain: 1, lumber: 1000, iron: 100, gold: 100, requiredLevel: 15 };
-const trebuchet = { grain: 1, lumber: 1000, iron: 100, gold: 100, requiredLevel: 20 };
+const crossbowman = { grain: 15, lumber: 50, iron: 10, gold: 50, levelRequirement: 10 };
+const ballista = { grain: 0, lumber: 1000, iron: 100, gold: 100, levelRequirement: 15 };
+const twoHandedSwordsman = { grain: 100, lumber: 10, iron: 100, gold: 100, levelRequirement: 20 };
+const halberdier = { grain: 100, lumber: 50, iron: 100, gold: 100, levelRequirement: 15 };
+const longbowman = { grain: 15, lumber: 50, iron: 10, gold: 100, levelRequirement: 10 };
+const horseArcher = { grain: 100, lumber: 15, iron: 100, gold: 100, levelRequirement: 15 };
+const trebuchet = { grain: 0, lumber: 1500, iron: 100, gold: 100, levelRequirement: 20 };
 
-const boot = { iron: 25, requiredLevel: 0 };
-const bracer = { iron: 25, requiredLevel: 0 };
-const helmet = { iron: 50, requiredLevel: 5 };
-const lance = { lumber: 100, iron: 50, gold: 10, requiredLevel: 10 };
-const longbow = { lumber: 50, iron: 10, requiredLevel: 10 };
-const shield = { lumber: 50, iron: 25, requiredLevel: 5 };
-const spear = { lumber: 100, iron: 5, requiredLevel: 0 };
-const sword = { iron: 50, gold: 15, requiredLevel: 5 };
+const boot = { iron: 25, levelRequirement: 0 };
+const bracer = { iron: 25, levelRequirement: 0 };
+const helmet = { iron: 50, levelRequirement: 5 };
+const lance = { lumber: 100, iron: 50, gold: 10, levelRequirement: 10 };
+const longbow = { lumber: 50, iron: 10, levelRequirement: 10 };
+const shield = { lumber: 50, iron: 25, levelRequirement: 5 };
+const spear = { lumber: 100, iron: 5, levelRequirement: 0 };
+const sword = { iron: 50, gold: 15, levelRequirement: 5 };
 
 const barracksBaseCost = { lumber: 200, stone: 50, iron: 10, gold: 5 };
 const blacksmithBaseCost = { lumber: 250, stone: 50, iron: 100, gold: 25 };
@@ -562,52 +562,52 @@ buildingObject = {
     },
     //todo split up for check units/armor only, or barracks/stables etc only
     validateRequiredProductionLevel: function (user, data) {
-        if (data.crossbowmen > 0 && user.barracksLevel < crossbowman.requiredLevel) {
+        if (data.crossbowmen > 0 && user.barracksLevel < crossbowman.levelRequirement) {
             return false;
         }
-        if (data.swordsmen > 0 && user.barracksLevel < swordsman.requiredLevel) {
+        if (data.swordsmen > 0 && user.barracksLevel < swordsman.levelRequirement) {
             return false;
         }
-        if (data.twoHandedSwordsmen > 0 && user.barracksLevel < twoHandedSwordsman.requiredLevel) {
+        if (data.twoHandedSwordsmen > 0 && user.barracksLevel < twoHandedSwordsman.levelRequirement) {
             return false;
         }
-        if (data.halberdiers > 0 && user.barracksLevel < halberdier.requiredLevel) {
+        if (data.halberdiers > 0 && user.barracksLevel < halberdier.levelRequirement) {
             return false;
         }
-        if (data.longbowmen > 0 && user.barracksLevel < longbowman.requiredLevel) {
+        if (data.longbowmen > 0 && user.barracksLevel < longbowman.levelRequirement) {
             return false;
         }
-        if (data.knights > 0 && user.stablesLevel < knight.requiredLevel) {
+        if (data.knights > 0 && user.stablesLevel < knight.levelRequirement) {
             return false;
         }
-        if (data.horseArchers > 0 && user.stablesLevel < horseArcher.requiredLevel) {
+        if (data.horseArchers > 0 && user.stablesLevel < horseArcher.levelRequirement) {
             return false;
         }
-        if (data.batteringrams > 0 && user.workshopLevel < batteringRam.requiredLevel) {
+        if (data.batteringrams > 0 && user.workshopLevel < batteringRam.levelRequirement) {
             return false;
         }
-        if (data.siegetowers > 0 && user.workshopLevel < siegeTower.requiredLevel) {
+        if (data.siegetowers > 0 && user.workshopLevel < siegeTower.levelRequirement) {
             return false;
         }
-        if (data.ballistas > 0 && user.workshopLevel < ballista.requiredLevel) {
+        if (data.ballistas > 0 && user.workshopLevel < ballista.levelRequirement) {
             return false;
         }
-        if (data.trebuchets > 0 && user.workshopLevel < trebuchet.requiredLevel) {
+        if (data.trebuchets > 0 && user.workshopLevel < trebuchet.levelRequirement) {
             return false;
         }
-        if (data.helmets > 0 && user.blacksmithLevel < helmet.requiredLevel) {
+        if (data.helmets > 0 && user.blacksmithLevel < helmet.levelRequirement) {
             return false;
         }
-        if (data.lances > 0 && user.blacksmithLevel < lance.requiredLevel) {
+        if (data.lances > 0 && user.blacksmithLevel < lance.levelRequirement) {
             return false;
         }
-        if (data.longbows > 0 && user.blacksmithLevel < longbow.requiredLevel) {
+        if (data.longbows > 0 && user.blacksmithLevel < longbow.levelRequirement) {
             return false;
         }
-        if (data.shields > 0 && user.blacksmithLevel < shield.requiredLevel) {
+        if (data.shields > 0 && user.blacksmithLevel < shield.levelRequirement) {
             return false;
         }
-        if (data.swords > 0 && user.blacksmithLevel < sword.requiredLevel) {
+        if (data.swords > 0 && user.blacksmithLevel < sword.levelRequirement) {
             return false;
         }
         return true;

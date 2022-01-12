@@ -1,10 +1,10 @@
-const archer = { grain: 25, lumber: 50, gold: 10, attackDamage: 10, defenseDamage: 10 };
-const spearman = { grain: 25, lumber: 50, attackDamage: 10, defenseDamage: 10 };
-const swordsman = { grain: 50, iron: 50, gold: 25, attackDamage: 20, defenseDamage: 20 };
-const crossbowman = { grain: 50, lumber: 1, iron: 50, gold: 25, attackDamage: 20, defenseDamage: 20 };
-const twoHandedSwordsman = { grain: 50, lumber: 1, iron: 50, gold: 25, attackDamage: 20, defenseDamage: 20 };
-const halberdier = { grain: 50, lumber: 1, iron: 50, gold: 25, attackDamage: 20, defenseDamage: 20 };
-const longbowman = { grain: 50, lumber: 1, iron: 50, gold: 25, attackDamage: 20, defenseDamage: 20 };
+const archer = { grain: 25, lumber: 50, gold: 10, attackDamage: 10, defenseDamage: 10, levelRequirement: 0 };
+const spearman = { grain: 25, lumber: 50, attackDamage: 10, defenseDamage: 10, levelRequirement: 0 };
+const swordsman = { grain: 50, iron: 50, gold: 25, attackDamage: 20, defenseDamage: 20, levelRequirement: 5 };
+const crossbowman = { grain: 15, lumber: 50, iron: 10, gold: 50, attackDamage: 20, defenseDamage: 20, levelRequirement: 10 };
+const twoHandedSwordsman = { grain: 100, lumber: 10, iron: 100, gold: 100, attackDamage: 20, defenseDamage: 20, levelRequirement: 20 };
+const halberdier = { grain: 100, lumber: 50, iron: 100, gold: 100, attackDamage: 20, defenseDamage: 20, levelRequirement: 15 };
+const longbowman = { grain: 15, lumber: 50, iron: 10, gold: 100, attackDamage: 20, defenseDamage: 20, levelRequirement: 10 };
 
 function barracksTrainCost() {
     let grainCost = 0, lumberCost = 0, ironCost = 0, goldCost = 0;
@@ -112,7 +112,22 @@ document.getElementById("halberdiers").addEventListener("input", barracksTrainCo
 document.getElementById("longbowmen").addEventListener("input", barracksTrainCost);
 document.getElementById("archerAttackDamage").innerText = archer.attackDamage;
 document.getElementById("archerDefenseDamage").innerText = archer.defenseDamage;
+document.getElementById("archerLevelRequirement").innerText = archer.levelRequirement;
 document.getElementById("spearmanAttackDamage").innerText = spearman.attackDamage;
 document.getElementById("spearmanDefenseDamage").innerText = spearman.defenseDamage;
+document.getElementById("spearmanLevelRequirement").innerText = spearman.levelRequirement;
 document.getElementById("swordsmanAttackDamage").innerText = swordsman.attackDamage;
 document.getElementById("swordsmanDefenseDamage").innerText = swordsman.defenseDamage;
+document.getElementById("swordsmanLevelRequirement").innerText = swordsman.levelRequirement;
+document.getElementById("longbowmanAttackDamage").innerText = longbowman.defenseDamage;
+document.getElementById("longbowmanDefenseDamage").innerText = longbowman.defenseDamage;
+document.getElementById("longbowmanLevelRequirement").innerText = longbowman.levelRequirement;
+document.getElementById("halberdierAttackDamage").innerText = halberdier.defenseDamage;
+document.getElementById("halberdierDefenseDamage").innerText = halberdier.defenseDamage;
+document.getElementById("halberdierLevelRequirement").innerText = halberdier.levelRequirement;
+document.getElementById("twoHandedSwordsmanAttackDamage").innerText = twoHandedSwordsman.defenseDamage;
+document.getElementById("twoHandedSwordsmanDefenseDamage").innerText = twoHandedSwordsman.defenseDamage;
+document.getElementById("twoHandedSwordsmanLevelRequirement").innerText = twoHandedSwordsman.levelRequirement;
+document.getElementById("crossbowmanAttackDamage").innerText = crossbowman.defenseDamage;
+document.getElementById("crossbowmanDefenseDamage").innerText = crossbowman.defenseDamage;
+document.getElementById("crossbowmanLevelRequirement").innerText = crossbowman.levelRequirement;

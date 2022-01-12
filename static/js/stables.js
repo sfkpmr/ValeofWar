@@ -1,6 +1,6 @@
-const horseman = { grain: 100, iron: 25, attackDamage: 5, defenseDamage: 5 };
-const knight = { grain: 100, iron: 100, gold: 50, attackDamage: 20, defenseDamage: 20 };
-const horseArcher = { grain: 1, lumber: 1000, iron: 100, gold: 100, attackDamage: 20, defenseDamage: 20  };
+const horseman = { grain: 100, iron: 25, attackDamage: 5, defenseDamage: 5, levelRequirement: 0 };
+const knight = { grain: 100, iron: 100, gold: 50, attackDamage: 20, defenseDamage: 20, levelRequirement: 5 };
+const horseArcher = { grain: 100, lumber: 15, iron: 100, gold: 100, attackDamage: 20, defenseDamage: 20, levelRequirement: 15 };
 
 function stablesTrainCost() {
     let grainCost = 0, lumberCost = 0, ironCost = 0, goldCost = 0;
@@ -56,5 +56,10 @@ document.getElementById("knights").addEventListener("input", stablesTrainCost);
 document.getElementById("horseArchers").addEventListener("input", stablesTrainCost);
 document.getElementById("horsemanAttackDamage").innerText = horseman.attackDamage;
 document.getElementById("horsemanDefenseDamage").innerText = horseman.defenseDamage;
+document.getElementById("horsemanLevelRequirement").innerText = horseman.levelRequirement;
 document.getElementById("knightAttackDamage").innerText = knight.attackDamage;
 document.getElementById("knightDefenseDamage").innerText = knight.defenseDamage;
+document.getElementById("knightLevelRequirement").innerText = knight.levelRequirement;
+document.getElementById("horseArcherAttackDamage").innerText = horseArcher.attackDamage;
+document.getElementById("horseArcherDefenseDamage").innerText = horseArcher.defenseDamage;
+document.getElementById("horseArcherLevelRequirement").innerText = horseArcher.levelRequirement;

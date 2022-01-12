@@ -11,20 +11,18 @@
 
 <body>
 
-    <!-- TODO server check barrack exists and has levels-->
-
-    Training field level: <%= user.trainingfieldLevel %> <br>
+    <h1>Training field level: <%= user.trainingfieldLevel %> </h1>
         <br>
-        The training field gathers fresh recruits for your army.
+        The training field gathers fresh recruits for your army. <br>
         <br>
+        Current recruits income: <%= user.trainingfieldLevel * 5 %> <br>
         <br>
         <div class="resources">
-            Upgrade cost: <%= totalCost.lumberCost %> <img src="../static/images/wood.png" alt="Lumber" title="Lumber">,
-                <%= totalCost.stoneCost %> <img src="../static/images/stone.png" alt="Stone" title="Stone">, <%=
-                        totalCost.ironCost %>
-                        <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> and <%= totalCost.goldCost
-                            %>
-                            <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div><br>
+            Upgrade cost: <img src="../../static/images/wood.png" height="35px" title="Lumber"> 
+            <%= totalCost.lumberCost %> <img src="../../static/images/stone.png" height="35px" title="Stone"> 
+                <%= totalCost.stoneCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron"> 
+                <%= totalCost.ironCost %> and <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
+                 <%= totalCost.goldCost %></div><br>
         <% if (user.trainingfieldLevel <=19){ %>
             <form action="/town/trainingfield/upgrade" method="POST">
                 <input type="submit" class="submitButton" value="Upgrade">

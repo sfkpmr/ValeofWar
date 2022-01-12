@@ -30,87 +30,105 @@
         </form>
 
         <% } else { %>
-            Blacksmith level: <%= user.blacksmithLevel %> <br><br>
+            <h1>Blacksmith level: <%= user.blacksmithLevel %></h1> 
                 At the blacksmith you can craft armor and weapons for your troops.<br>
-                <br>
-                Helmets, shields and swords require blacksmith level 5. Lances and longbows require level 10.<br>
                 <br>
                 <div class="training">
                     <form action="/town/blacksmith/craft" method="POST">
-                        <label for="boots"><img src="../static/images/boots.png" height="35px" title="Boots"> Current:
-                            <%= armory.boots %> Craft:
-                        </label>
+                        <label for="boots"><img src="../static/images/boots.png" height="35px" title="Boots"><div class="tooltip">Boots
+                            <span class="tooltiptext">Attack: <output id="bootAttackDamage">0</output> Defense: <output
+                                    id="bootDefenseDamage">0</output> Level req: <output
+                                    id="bootLevelRequirement">0</output>  </span>
+                            </div></label><br>
+                            Current: <%= armory.boots %> Craft:
                         <input type="number" id="boots" name="boots" placeholder="0" min=0 max=9999> 
-                        <br> Attack damage: <output id="bootAttackDamage">0</output> Defense damage: <output
-                            id="bootDefenseDamage">0</output><br>
+                        <br>
                         <label for="bracers"><img src="../static/images/bracers.png" height="35px" title="Bracers">
-                            Current: <%= armory.bracers %> Craft:
-                        </label>
+                            <div class="tooltip">Bracers
+                                <span class="tooltiptext">Attack: <output id="bracerAttackDamage">0</output> Defense: <output
+                                        id="bracerDefenseDamage">0</output> Level req: <output
+                                        id="bracerLevelRequirement">0</output>  </span>
+                                </div></label><br>
+                                Current: <%= armory.bracers %> Craft:
                         <input type="number" id="bracers" name="bracers" placeholder="0" min=0 max=9999> 
-                        <br>Attack damage: <output id="bracerAttackDamage">0</output> Defense damage: <output
-                            id="bracerDefenseDamage">0</output><br>
+                        <br>
                         <label for="helmet"> <img src="../static/images/helmet.png" height="35px" title="Helmets">
-                            Current: <%= armory.helmets %> Craft:
-                        </label>
+                            <div class="tooltip">Helmets
+                                <span class="tooltiptext">Attack: <output id="helmetAttackDamage">0</output> Defense: <output
+                                        id="helmetDefenseDamage">0</output> Level req: <output
+                                        id="helmetLevelRequirement">0</output>  </span>
+                                </div></label><br>
+                                Current: <%= armory.helmets %> Craft:
                         <% if (user.blacksmithLevel >= 5) { %>
                         <input type="number" id="helmet" name="helmet" placeholder="0" min=0 max=9999> 
                         <% } else { %>
                             <input type="number" id="helmet" name="helmet" placeholder="0" min=0 max=9999 disabled> 
                             <%}%>
-                        <br>Attack damage: <output id="helmetAttackDamage">0</output> Defense damage: <output
-                            id="helmetDefenseDamage">0</output><br>
+                       <br>
                         <label for="lance"> <img src="../static/images/lance.png" height="35px" title="Lances">
-                            Current: <%= armory.lances %> Craft:
-                        </label>
+                            <div class="tooltip">Lances
+                                <span class="tooltiptext">Attack: <output id="lanceAttackDamage">0</output> Defense: <output
+                                        id="lanceDefenseDamage">0</output> Level req: <output
+                                        id="lanceLevelRequirement">0</output>  </span>
+                                </div></label><br>
+                                Current: <%= armory.lances %> Craft:
                         <% if (user.blacksmithLevel >= 10) { %>
                         <input type="number" id="lance" name="lance" placeholder="0" min=0 max=9999>
                         <% } else { %>
                             <input type="number" id="lance" name="lance" placeholder="0" min=0 max=9999 disabled>
                             <%}%>
-                        <br>Attack damage: <output id="lanceAttackDamage">0</output> Defense damage: <output
-                            id="lanceDefenseDamage">0</output><br>
+                       <br>
                         <label for="longbow"> <img src="../static/images/longbow.png" height="35px" title="Longbows">
-                            Current: <%= armory.longbows %> Craft:
-                        </label>
+                            <div class="tooltip">Longbows
+                                <span class="tooltiptext">Attack: <output id="longbowAttackDamage">0</output> Defense: <output
+                                        id="longbowDefenseDamage">0</output> Level req: <output
+                                        id="longbowLevelRequirement">0</output>  </span>
+                                </div></label><br>
+                                Current: <%= armory.longbows %> Craft:
                         <% if (user.blacksmithLevel >= 10) { %>
                         <input type="number" id="longbow" name="longbow" placeholder="0" min=0 max=9999>
                         <% } else { %>
                             <input type="number" id="longbow" name="longbow" placeholder="0" min=0 max=9999 disabled>
                             <%}%>
-                        <br>Attack damage: <output id="longbowAttackDamage">0</output> Defense damage: <output
-                            id="longbowDefenseDamage">0</output><br>
+                       <br>
                         <label for="shield"> <img src="../static/images/shield.png" height="35px" title="Shields">
-                            Current: <%= armory.shields %> Craft:
-                        </label>
+                            <div class="tooltip">Shields
+                                <span class="tooltiptext">Attack: <output id="shieldAttackDamage">0</output> Defense: <output
+                                        id="shieldDefenseDamage">0</output> Level req: <output
+                                        id="shieldLevelRequirement">0</output>  </span>
+                                </div></label><br>
+                                Current: <%= armory.shields %> Craft:
                         <% if (user.blacksmithLevel >= 5) { %>
                         <input type="number" id="shield" name="shield" placeholder="0" min=0 max=9999>
                         <% } else { %>
                             <input type="number" id="shield" name="shield" placeholder="0" min=0 max=9999 disabled>
                             <%}%>
-                        <br>Attack damage: <output id="shieldAttackDamage">0</output> Defense damage: <output
-                            id="shieldDefenseDamage">0</output><br>
+                        <br>
                         <label for="spear"><img src="../static/images/spears.png" height="35px" title="Spears">
-                            Current: <%= armory.spears %> Craft:
-                        </label>
+                            <div class="tooltip">Spears
+                                <span class="tooltiptext">Attack: <output id="spearAttackDamage">0</output> Defense: <output
+                                        id="spearDefenseDamage">0</output> Level req: <output
+                                        id="spearLevelRequirement">0</output>  </span>
+                                </div></label><br>
+                                Current: <%= armory.spears %> Craft:
                         <input type="number" id="spear" name="spear" placeholder="0" min=0 max=9999>
-                        <br>Attack damage: <output id="spearAttackDamage">0</output> Defense damage: <output
-                            id="spearDefenseDamage">0</output><br>
+                       <br>
                         <label for="sword"> <img src="../static/images/sword.png" height="35px" title="Swords">
-                            Current: <%= armory.swords %> Craft:
-                        </label>
+                            <div class="tooltip">Swords
+                                <span class="tooltiptext">Attack: <output id="swordAttackDamage">0</output> Defense: <output
+                                        id="swordDefenseDamage">0</output> Level req: <output
+                                        id="swordLevelRequirement">0</output>  </span>
+                                </div></label><br>
+                                Current: <%= armory.swords %> Craft:
                         <% if (user.blacksmithLevel >= 5) { %>
                         <input type="number" id="sword" name="sword" placeholder="0" min=0 max=9999>
                         <% } else { %>
                             <input type="number" id="sword" name="sword" placeholder="0" min=0 max=9999 disabled>
                         <%}%>
-                        <br>Attack damage: <output id="swordAttackDamage">0</output> Defense damage: <output
-                            id="swordDefenseDamage">0</output><br><br>
-                        <div class="resources">Crafting cost: <output id="lumber">0</output> <img
-                                src="../static/images/wood.png" alt="Lumber" title="Lumber">, <output
-                                id="iron">0</output> <img src="../static/images/iron-ingots.png" alt="Iron"
-                                title="Iron"> and
-                            <output id="gold">0</output> <img src="../static/images/gold-ingots.png" alt="Gold"
-                                title="Gold">
+                       <br><br>
+                        <div class="resources">Crafting cost:  <img src="../static/images/wood.png" alt="Lumber" title="Lumber"> <output id="lumber">0</output> <img src="../static/images/iron-ingots.png" alt="Iron"
+                            title="Iron"> <output id="iron">0</output>  and <img src="../static/images/gold-ingots.png" alt="Gold"
+                            title="Gold"> <output id="gold">0</output> 
                         </div><br>
                         <input type="submit" class="submitButton" value="Craft">
                     </form>
@@ -119,14 +137,12 @@
 
                 <% if (user.blacksmithLevel <=19){ %>
 
-
                     <div class="resources">
-                        Upgrade cost: <%= totalCost.lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
-                                title="Lumber">, <%= totalCost.stoneCost %> <img src="../static/images/stone.png"
-                                    alt="Stone" title="Stone">, <%= totalCost.ironCost %>
-                                    <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron">
-                                    and <%= totalCost.goldCost %>
-                                        <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div>
+                        Upgrade cost: <img src="../../static/images/wood.png" height="35px" title="Lumber"> 
+                <%= totalCost.lumberCost %> <img src="../../static/images/stone.png" height="35px" title="Stone"> 
+                    <%= totalCost.stoneCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron"> 
+                    <%= totalCost.ironCost %> and <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
+                     <%= totalCost.goldCost %></div>
                     <br>
                     <form action="/town/blacksmith/upgrade" method="POST">
                         <input type="submit" class="submitButton" value="Upgrade">

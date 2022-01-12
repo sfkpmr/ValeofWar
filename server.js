@@ -36,7 +36,7 @@ const { getAttackLog, calculateAttack, calculateDefense, attackFunc } = require(
 const { trainTroops } = require("./modules/troops.js");
 const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource, getArmyByEmail, getArmoryByEmail } = require("./modules/database.js");
 const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData, validateRequiredProductionLevel } = require("./modules/buildings.js");
-const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getAllIncomes } = require("./modules/resources.js");
+const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getAllIncomes, getResourceBoost } = require("./modules/resources.js");
 
 app.use(
     auth({
@@ -538,15 +538,15 @@ app.get("/town/workshop", requiresAuth(), async (req, res) => {
 });
 
 app.post("/town/workshop/train", requiresAuth(), urlencodedParser, [
-    check('batteringram').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
-    check('siegetower').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('batteringRam').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('siegeTower').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
     check('ballista').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
     check('trebuchet').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
     const errors = validationResult(req);
     const user = await getUserByEmail(client, req.oidc.user.email);
-    const batteringRams = convertNegativeToZero(parseInt(req.body.batteringram));
-    const siegeTowers = convertNegativeToZero(parseInt(req.body.siegetower));
+    const batteringRams = convertNegativeToZero(parseInt(req.body.batteringRam));
+    const siegeTowers = convertNegativeToZero(parseInt(req.body.siegeTower));
     const ballistas = convertNegativeToZero(parseInt(req.body.ballista));
     const trebuchets = convertNegativeToZero(parseInt(req.body.trebuchet));
     const trainees = {
@@ -667,13 +667,13 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
 app.post("/profile/:username/attack", requiresAuth(), urlencodedParser, [
     check('username').isLength({ min: 5, max: 15 }),
 ], async (req, res) => {
-    //TODO validate //TODO attack limiter? //reset all at midnight? //lose armor //TODO validate db input
+    //TODO attack limiter? //reset all at midnight? //lose armor //TODO validate db input
+    const errors = validationResult(req);
     const attacker = await getUserByEmail(client, req.oidc.user.email);
     const defender = await getUserByUsername(client, req.params.username);
     if (defender === false) {
         res.send("No such user");
-    } else {
-        //TODO can't attack self
+    } else if (errors.isEmpty() && attacker !== defender) {
         console.log(attacker.username + " tries to attack " + defender.username);
         result = await attackFunc(client, attacker, defender);
         res.redirect(`/mailbox/log/${result}`);
@@ -688,6 +688,7 @@ app.get("/land/:type/:number", requiresAuth(), urlencodedParser, [
     const type = req.params.type;
     const resourceId = parseInt(req.params.number);
     const resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
+    const incomeBoost = getResourceBoost(type);
     if (errors.isEmpty() && resources.includes(type)) {
         const user = await getUserByEmail(client, req.oidc.user.email);
         const resourceData = await getResourceFieldData(user, type, resourceId);
@@ -695,7 +696,7 @@ app.get("/land/:type/:number", requiresAuth(), urlencodedParser, [
             res.redirect("/land");
         } else if (resourceData.resourceLevel !== undefined && resourceData.resourceLevel > 0) {
             //use one field for all levels, none to 20
-            res.render('pages/resourcefield', { resourceData, resourceId, type });
+            res.render('pages/resourcefield', { resourceData, resourceId, type, incomeBoost });
         } else {
             res.render('pages/emptyfield', { resourceData, resourceId, type });
         }

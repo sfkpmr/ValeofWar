@@ -130,3 +130,18 @@ Taken From: https://www.programmingnotes.org/ */
   width: 200px;
   border: none;
 }
+
+.troopColumns {
+  column-count: 2;
+}
+
+.powersColumns {
+  column-count: 2;
+  column-width: 100px;
+}
+
+.info {
+  color: white;
+  text-align: center;
+  font-size: 10px;
+}

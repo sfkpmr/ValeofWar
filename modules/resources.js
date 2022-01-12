@@ -187,6 +187,20 @@ resourceObject = {
         const horseIncome = resourceObject.getIncome(user, "getHorseIncome");
 
         return { grainIncome: grainIncome, lumberIncome: lumberIncome, stoneIncome: stoneIncome, ironIncome: ironIncome, goldIncome: goldIncome, recruitsIncome: recruitsIncome, horseIncome: horseIncome }
+    },
+    getResourceBoost: function (type) {
+        switch (type) {
+            case "farm":
+                return baseGrainIncome;
+            case "lumbercamp":
+                return baseLumberIncome;
+            case "quarry":
+                return baseStoneIncome;
+            case "ironMine":
+                return baseIronIncome;
+            case "goldMine":
+                return baseGoldIncome;
+        }
     }
 };
 

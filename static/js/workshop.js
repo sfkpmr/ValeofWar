@@ -1,29 +1,29 @@
-const batteringRam = { lumber: 500, iron: 100, gold: 50, attackDamage: 250 };
-const siegeTower = { lumber: 1000, iron: 100, gold: 100, attackDamage: 500 };
-const ballista = { lumber: 1000, iron: 100, gold: 100, attackDamage: 500 };
-const trebuchet = { lumber: 1000, iron: 100, gold: 100, attackDamage: 500 };
+const batteringRam = { lumber: 500, iron: 100, gold: 50, attackDamage: 250, levelRequirement: 5 };
+const siegeTower = { lumber: 1000, iron: 100, gold: 100, attackDamage: 500, levelRequirement: 10 };
+const ballista = { lumber: 1000, iron: 100, gold: 100, attackDamage: 500, defenseDamage: 250, levelRequirement: 15 };
+const trebuchet = { lumber: 1500, iron: 100, gold: 100, attackDamage: 500, levelRequirement: 20 };
 
 function workshopBuildCost() {
     var lumberCost = 0, ironCost = 0, goldCost = 0;
 
-    let batteringRams = parseInt(document.getElementById('batteringram').value);
-    let siegeTowers = parseInt(document.getElementById('siegetower').value);
+    let batteringRams = parseInt(document.getElementById('batteringRam').value);
+    let siegeTowers = parseInt(document.getElementById('siegeTower').value);
     let ballistas = parseInt(document.getElementById('ballista').value);
     let trebuchets = parseInt(document.getElementById('trebuchet').value);
 
     if (batteringRams < 0 || isNaN(batteringRams)) {
         batteringRams = 0;
-        document.getElementById("batteringram").value = 0;
+        document.getElementById("batteringRam").value = 0;
     } else if (batteringRams > 9999) {
         batteringRams = 9999;
-        document.getElementById("batteringram").value = 9999;
+        document.getElementById("batteringRam").value = 9999;
     }
     if (siegeTowers < 0 || isNaN(siegeTowers)) {
         siegeTowers = 0;
-        document.getElementById("siegetower").value = 0;
+        document.getElementById("siegeTower").value = 0;
     } else if (siegeTowers > 9999) {
         siegeTowers = 9999;
-        document.getElementById("siegetower").value = 9999;
+        document.getElementById("siegeTower").value = 9999;
     }
     if (ballistas < 0 || isNaN(ballistas)) {
         ballistas = 0;
@@ -58,12 +58,19 @@ function workshopBuildCost() {
     document.getElementById("lumber").innerText = lumberCost;
     document.getElementById("iron").innerText = ironCost;
     document.getElementById("gold").innerText = goldCost;
-
+    document.getElementById("recruits").innerText = (ballistas + trebuchets) * 5;
 }
 
-document.getElementById("batteringram").addEventListener("input", workshopBuildCost);
-document.getElementById("siegetower").addEventListener("input", workshopBuildCost);
+document.getElementById("batteringRam").addEventListener("input", workshopBuildCost);
+document.getElementById("siegeTower").addEventListener("input", workshopBuildCost);
 document.getElementById("ballista").addEventListener("input", workshopBuildCost);
 document.getElementById("trebuchet").addEventListener("input", workshopBuildCost);
-document.getElementById("batteringramAttackDamage").innerText = batteringRam.attackDamage;
-document.getElementById("siegetowerAttackDamage").innerText = siegeTower.attackDamage;
+document.getElementById("batteringRamAttackDamage").innerText = batteringRam.attackDamage;
+document.getElementById("batteringRamLevelRequirement").innerText = batteringRam.levelRequirement;
+document.getElementById("siegeTowerAttackDamage").innerText = siegeTower.attackDamage;
+document.getElementById("siegeTowerLevelRequirement").innerText = siegeTower.levelRequirement;
+document.getElementById("ballistaAttackDamage").innerText = ballista.attackDamage;
+document.getElementById("ballistaDefenseDamage").innerText = ballista.defenseDamage;
+document.getElementById("ballistaLevelRequirement").innerText = ballista.levelRequirement;
+document.getElementById("trebuchetAttackDamage").innerText = trebuchet.attackDamage;
+document.getElementById("trebuchetLevelRequirement").innerText = trebuchet.levelRequirement;
