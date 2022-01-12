@@ -15,8 +15,8 @@ const trebuchet = { attackDamage: 250 };
 const twoHandedSwordsman = { attackDamage: 50, defenseDamage: 20 };
 const horseman = { attackDamage: 5, defenseDamage: 5 };
 const knight = { attackDamage: 20, defenseDamage: 20 };
-const batteringRam = { attackDamage: 25 };
-const siegeTower = { attackDamage: 50 };
+const batteringRam = { attackDamage: 250 };
+const siegeTower = { attackDamage: 500 };
 
 const boot = { attackDamage: 10, defenseDamage: 10 };
 const bracer = { attackDamage: 5, defenseDamage: 10 };
