@@ -304,9 +304,8 @@ app.post("/messages/inbox/:id/report", requiresAuth(), urlencodedParser, [
     const errors = validationResult(req)
     if (errors.isEmpty()) {
         const messageExists = await getMessageById(client, new ObjectId(req.params.id));
-        const message = "Reported message ID: " + messageExists._id;
-
         if (messageExists) {
+            const message = "Reported message ID: " + messageExists._id;
             const data = { sentTo: "johanna", sentBy: "SYSTEM", message: message, time: new Date() };
             addMessage(client, data);
             res.redirect(`/messages/inbox`);
@@ -717,7 +716,7 @@ app.get("/api/getUser/:id", requiresAuth(), urlencodedParser, [
 });
 
 //måste köra för alla så folk kan anfalla folk som är afk //ev kör när någon interagerar med afk folk
-const minutes = 15, the_interval = minutes * 60 * 1000;
+const minutes = 0.1, the_interval = minutes * 60 * 1000;
 setInterval(function () {
     const date = new Date();
     console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " Adding resources for everyone!");
