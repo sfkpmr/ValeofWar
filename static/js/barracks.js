@@ -99,7 +99,6 @@ function barracksTrainCost() {
     document.getElementById("lumber").innerText = lumberCost;
     document.getElementById("iron").innerText = ironCost;
     document.getElementById("gold").innerText = goldCost;
-    console.log(archers, spearmen, swordsmen, crossbowmen, twoHandedSwordsmen, halberdiers, longbowmen)
     document.getElementById("recruits").innerText = archers + spearmen + swordsmen + crossbowmen + twoHandedSwordsmen + halberdiers + longbowmen;
 }
 
