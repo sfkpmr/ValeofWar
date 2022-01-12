@@ -62,7 +62,7 @@
                         <% if (user.blacksmithLevel >= 5) { %>
                         <input type="number" id="helmet" name="helmet" placeholder="0" min=0 max=9999> 
                         <% } else { %>
-                            <input type="number" id="helmet" name="helmet" placeholder="0" min=0 max=9999 disabled> 
+                            <input type="number" id="helmet" name="helmet" placeholder="0" min=0 max=9999 readonly="readonly"> 
                             <%}%>
                        <br>
                         <label for="lance"> <img src="../static/images/lance.png" height="35px" title="Lances">
@@ -75,7 +75,7 @@
                         <% if (user.blacksmithLevel >= 10) { %>
                         <input type="number" id="lance" name="lance" placeholder="0" min=0 max=9999>
                         <% } else { %>
-                            <input type="number" id="lance" name="lance" placeholder="0" min=0 max=9999 disabled>
+                            <input type="number" id="lance" name="lance" placeholder="0" min=0 max=9999 readonly="readonly">
                             <%}%>
                        <br>
                         <label for="longbow"> <img src="../static/images/longbow.png" height="35px" title="Longbows">
@@ -88,7 +88,7 @@
                         <% if (user.blacksmithLevel >= 10) { %>
                         <input type="number" id="longbow" name="longbow" placeholder="0" min=0 max=9999>
                         <% } else { %>
-                            <input type="number" id="longbow" name="longbow" placeholder="0" min=0 max=9999 disabled>
+                            <input type="number" id="longbow" name="longbow" placeholder="0" min=0 max=9999 readonly="readonly">
                             <%}%>
                        <br>
                         <label for="shield"> <img src="../static/images/shield.png" height="35px" title="Shields">
@@ -101,7 +101,7 @@
                         <% if (user.blacksmithLevel >= 5) { %>
                         <input type="number" id="shield" name="shield" placeholder="0" min=0 max=9999>
                         <% } else { %>
-                            <input type="number" id="shield" name="shield" placeholder="0" min=0 max=9999 disabled>
+                            <input type="number" id="shield" name="shield" placeholder="0" min=0 max=9999 readonly="readonly">
                             <%}%>
                         <br>
                         <label for="spear"><img src="../static/images/spears.png" height="35px" title="Spears">
@@ -123,7 +123,7 @@
                         <% if (user.blacksmithLevel >= 5) { %>
                         <input type="number" id="sword" name="sword" placeholder="0" min=0 max=9999>
                         <% } else { %>
-                            <input type="number" id="sword" name="sword" placeholder="0" min=0 max=9999 disabled>
+                            <input type="number" id="sword" name="sword" placeholder="0" min=0 max=9999 readonly="readonly">
                         <%}%>
                        <br><br>
                         <div class="resources">Crafting cost:  <img src="../static/images/wood.png" alt="Lumber" title="Lumber"> <output id="lumber">0</output> <img src="../static/images/iron-ingots.png" alt="Iron"
