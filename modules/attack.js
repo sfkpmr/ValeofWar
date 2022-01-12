@@ -206,7 +206,7 @@ attackObject = {
             totalDamage += swordsTroops * sword.defenseDamage;
         }
 
-        const wallBonus = (1 + (defender.wallLevel / 10));
+        let wallBonus = (1 + (defender.wallLevel / 10));
         if (defender.currentWallHealth === 0) {
             wallBonus = 1;
         }
@@ -221,8 +221,8 @@ attackObject = {
         const swordsmen = army.swordsmen;
         const horsemen = army.horsemen;
         const knights = army.knights;
-        const batteringrams = army.batteringrams;
-        const siegetowers = army.siegetowers;
+        const batteringRams = army.batteringRams;
+        const siegeTowers = army.siegeTowers;
 
         const crossbowmen = army.crossbowmen;
         const halberdiers = army.halberdiers;
@@ -232,20 +232,22 @@ attackObject = {
         const trebuchets = army.trebuchets;
         const horseArchers = army.horseArchers;
 
-        const totalTroops = archers + spearmen + swordsmen + horsemen + knights + batteringrams + siegetowers + crossbowmen + halberdiers + longbowmen + twoHandedSwordsmen + ballistas + trebuchets + horseArchers;
+        const totalTroops = archers + spearmen + swordsmen + horsemen + knights + batteringRams + siegeTowers + crossbowmen + halberdiers + longbowmen + twoHandedSwordsmen + ballistas + trebuchets + horseArchers;
+
         const battleLosses = Math.round(totalTroops / divider);
 
         let lossesCounter = battleLosses;
+        console.log("-----------", battleLosses, lossesCounter, totalTroops)
 
-        if (lossesCounter > batteringrams) {
-            potentialBatteringramLosses = batteringrams;
+        if (lossesCounter > batteringRams) {
+            potentialBatteringramLosses = batteringRams;
         } else {
             potentialBatteringramLosses = lossesCounter;
         }
         const batteringramLosses = Math.floor(Math.random() * potentialBatteringramLosses);
         lossesCounter = lossesCounter - batteringramLosses;
-        if (lossesCounter > siegetowers) {
-            potentialSiegtowerLosses = siegetowers;
+        if (lossesCounter > siegeTowers) {
+            potentialSiegtowerLosses = siegeTowers;
         } else {
             potentialSiegtowerLosses = lossesCounter;
         }
@@ -344,8 +346,8 @@ attackObject = {
         let newSwordsmen = swordsmen - swordsmenLosses;
         let newHorsemen = horsemen - horsemenLosses;
         let newKnights = knights - knightsLosses;
-        let newBatteringrams = batteringrams - batteringramLosses;
-        let newSiegetowers = siegetowers - siegetowerLosses;
+        let newBatteringRams = batteringRams - batteringramLosses;
+        let newSiegeTowers = siegeTowers - siegetowerLosses;
         let newCrossbowmen = crossbowmen - crossbowmenLosses;
         let newHalberdiers = halberdiers - halberdiersLosses;
         let newLongbowmen = longbowmen - longbowmenLosses;
@@ -369,11 +371,11 @@ attackObject = {
         if (newKnights < 0) {
             newKnights = 0;
         }
-        if (newBatteringrams < 0) {
-            newBatteringrams = 0;
+        if (newBatteringRams < 0) {
+            newBatteringRams = 0;
         }
-        if (newSiegetowers < 0) {
-            newSiegetowers = 0;
+        if (newSiegeTowers < 0) {
+            newSiegeTowers = 0;
         }
         if (newCrossbowmen < 0) {
             newCrossbowmen = 0;
@@ -397,7 +399,12 @@ attackObject = {
             newHorseArchers = 0;
         }
 
-        const data = { archers: newArchers, spearmen: newSpearmen, swordsmen: newSwordsmen, horsemen: newHorsemen, knights: newKnights, batteringrams: newBatteringrams, siegetowers: newSiegetowers };
+        console.log(army.username, newArchers, newSpearmen, newSwordsmen, newHorsemen, newKnights, newBatteringRams, newSiegeTowers, newBallistas, newCrossbowmen, newTwoHandedSwordsmen, newLongbowmen, newHorseArchers, newHalberdiers, newTrebuchets)
+
+        const data = {
+            "archers": newArchers, "spearmen": newSpearmen, "swordsmen": newSwordsmen, "horsemen": newHorsemen, "knights": newKnights, "batteringRams": newBatteringRams, "siegeTowers": newSiegeTowers,
+            "crossbowmen": newCrossbowmen, "ballistas": newBallistas, "twoHandedSwordsmen": newTwoHandedSwordsmen, "longbowmen": newLongbowmen, "horseArchers": newHorseArchers, "trebuchets": newTrebuchets, "halberdiers": newHalberdiers
+        };
 
         await setTroopsValue(client, army.username, data);
 

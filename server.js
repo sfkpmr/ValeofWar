@@ -673,6 +673,7 @@ app.post("/profile/:username/attack", requiresAuth(), urlencodedParser, [
     if (defender === false) {
         res.send("No such user");
     } else {
+        //TODO can't attack self
         console.log(attacker.username + " tries to attack " + defender.username);
         result = await attackFunc(client, attacker, defender);
         res.redirect(`/mailbox/log/${result}`);
