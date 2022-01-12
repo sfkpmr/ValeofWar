@@ -325,18 +325,15 @@ app.post("/messages/send", requiresAuth(), urlencodedParser, [
     check('message').exists().isLength({ max: 1000 })//TODO handle ?!#%  ????
 ], async (req, res) => {
     const errors = validationResult(req)
-    if (errors.isEmpty()) {
+    const receiver = await getUserByUsername(client, req.body.recipient);
+    if (!receiver) {
+        res.send("No such user")
+    } else if (errors.isEmpty() && receiver) {
         const sender = await getUserByEmail(client, req.oidc.user.email);
-        const receiver = await getUserByUsername(client, req.body.recipient);
         const message = req.body.message;
-
-        if (receiver) {
-            const data = { sentTo: receiver.username, sentBy: sender.username, message: message, time: new Date() };
-            const result = await addMessage(client, data);
-            res.redirect(`/messages/inbox/${result}`);
-        } else {
-            res.send("No such user")
-        }
+        const data = { sentTo: receiver.username, sentBy: sender.username, message: message, time: new Date() };
+        const result = await addMessage(client, data);
+        res.redirect(`/messages/inbox/${result}`);
     } else {
         res.status(400).render('pages/400');
     }
