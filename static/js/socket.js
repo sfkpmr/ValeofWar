@@ -25,23 +25,15 @@ socket.on('sync', async function () {
         alert("HTTP-Error: " + response.status);
     }
 });
-
 socket.on('updatePower', async function () {
-    let attackResponse = await fetch("/api/getAttackPower");
-    let defenseResponse = await fetch("/api/getDefensePower");
+    let response = await fetch("/api/getPowers");
 
-    if (attackResponse.ok) {
-        let json = await attackResponse.json();
-        document.getElementById("attack").innerText = json;
+    if (response.ok) {
+        let json = await response.json();
+        document.getElementById("attack").innerText = json.attack;
+        document.getElementById("defense").innerText = json.defense;
     } else {
-        alert("HTTP-Error: " + attackResponse.status);
-    }
-
-    if (defenseResponse.ok) {
-        let json = await defenseResponse.json();
-        document.getElementById("defense").innerText = json;
-    } else {
-        alert("HTTP-Error: " + defenseResponse.status);
+        alert("HTTP-Error: " + response.status);
     }
 });
 socket.on('getIncomes', async function () {

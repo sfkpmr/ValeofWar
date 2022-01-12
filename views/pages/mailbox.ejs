@@ -2,26 +2,34 @@
 <html>
 
 <head>
-    <title>
-        Search
-    </title>
+    <head>
+        <title>Mailbox</title>
+        <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+    </head>
+    
 </head>
 
 <body>
 
-    <a href="/mailbox/log">Attack log</a><br>
+    <h1>Mailbox</h1> 
+
+    <a href="/mailbox/log" >Attack log</a><br>
     <a href="/messages/inbox">Inbox</a><br>
     <a href="/messages/new">Send message</a><br>
     <br>
     <form action="/search" method="POST">
         <label for="searchName">Name:</label>
         <input type="text" id="searchName" name="searchName" minlength=5 maxlength=15 required>
-        <input type="submit" value="Search">
+        <input type="submit" class="submitButton" value="Search">
     </form>
     <br>
     <form action="/search/random">
-        <input type="submit" value="Find random player">
+        <input type="submit" class="submitButton" value="Find random player">
     </form>
+    
     <br>
 
 </body>

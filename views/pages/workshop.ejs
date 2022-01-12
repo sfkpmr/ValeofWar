@@ -3,7 +3,7 @@
 
 <head>
     <title>Workshop</title>
-    <link rel="stylesheet" type="text/css" href="../static/style.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
@@ -28,30 +28,65 @@
 
         <% } else { %>
 
-            Workshop level: <%= user.workshopLevel %> <br>
-                <br>
-                The workshop lets you construct powerful siege weapons.
-                <br>
+           <h1> Workshop level: <%= user.workshopLevel %> </h1>
+                The workshop lets you construct powerful siege weapons. <br>
                 <br>
                 <div class="training">
                     <form action="/town/workshop/train" method="POST">
-                        <label for="batteringram"><img src="../static/images/batteringram.png" height="35px"
-                                title="Battering ram">
-                            Current: <%= user.batteringrams %> Train:</label>
-                        <input type="number" id="batteringram" name="batteringram" placeholder="0" min=0 max=9999>
-                        Attack damage:
-                        <output id="batteringramAttackDamage">0</output><br>
+                        <label for="batteringRam"><img src="../static/images/batteringram.png" height="35px"
+                                title="Battering ram"><div class="tooltip">Battering ram
+                                    <span class="tooltiptext">Attack: <output id="batteringRamAttackDamage">0</output> Level req: <output
+                                        id="batteringRamLevelRequirement">0</output></span>
+                                    </div></label><br>
+                                    Current: <%= army.batteringRams %> Train:
+                            <% if (user.workshopLevel >= 5){ %>
+                        <input type="number" id="batteringRam" name="batteringRam" placeholder="0" min=0 max=9999>
+                        <% } else { %>
+                            <input type="number" id="batteringRam" name="batteringRam" placeholder="0" min=0 max=9999 readonly="readonly">
+                        <% } %><br>
                         <label for="siegetower"><img src="../static/images/siegetower.png" height="35px"
-                                title="Siege tower">
-                            Current: <%= user.siegetowers %> Train:</label>
-                        <input type="number" id="siegetower" name="siegetower" placeholder="0" min=0 max=9999> Attack
-                        damage: <output id="siegetowerAttackDamage">0</output><br><br>
-                        <div class="resources">Build cost: <output id="lumber">0</output> <img
-                                src="../static/images/wood.png" alt="Lumber" title="Lumber">, <output
-                                id="iron">0</output> <img src="../static/images/iron-ingots.png" alt="Iron"
-                                title="Iron"> and
-                            <output id="gold">0</output> <img src="../static/images/gold-ingots.png" alt="Gold"
-                                title="Gold">
+                                title="Siege tower">                <div class="tooltip">Siege tower
+                                    <span class="tooltiptext">Attack: <output id="siegeTowerAttackDamage">0</output> Level req: <output
+                                        id="siegeTowerLevelRequirement">0</output> </span>
+                                    </div></label><br>
+                                    Current: <%= army.siegeTowers %> Train:
+                            <% if (user.workshopLevel >= 10){ %>
+                        <input type="number" id="siegeTower" name="siegeTower" placeholder="0" min=0 max=9999> 
+                       <% } else { %>
+                        <input type="number" id="siegeTower" name="siegeTower" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                            <% } %><br>
+                            
+                            
+                            <label for="ballista"><img src="../static/images/ballista.png" height="35px"
+                                title="Ballista">                <div class="tooltip">Ballista
+                                    <span class="tooltiptext">Attack: <output id="ballistaAttackDamage">0</output> Defense: <output
+                                            id="ballistaDefenseDamage">0</output> Level req: <output
+                                            id="ballistaLevelRequirement">0</output></span>
+                                    </div></label><br>
+                                    Current: <%= army.ballistas %> Train:
+                            <% if (user.workshopLevel >= 15){ %>
+                        <input type="number" id="ballista" name="ballista" placeholder="0" min=0 max=9999> 
+                       <% } else { %>
+                        <input type="number" id="ballista" name="ballista" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                            <% } %><br>
+                            
+                            
+                            
+                            <label for="trebuchet"><img src="../static/images/trebuchet.png" height="35px"
+                                title="Trebuchet"><div class="tooltip">Trebuchet
+                                    <span class="tooltiptext">Attack: <output id="trebuchetAttackDamage">0</output>  Level req: <output
+                                        id="trebuchetLevelRequirement">0</output></span>
+                                    </div></label><br>
+                                    Current: <%= army.trebuchets %> Train:
+                            <% if (user.workshopLevel === 20){ %>
+                        <input type="number" id="trebuchet" name="trebuchet" placeholder="0" min=0 max=9999> 
+                       <% } else { %>
+                        <input type="number" id="trebuchet" name="trebuchet" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                            <% } %><br><br>
+                        <div class="resources">Build cost: <img src="../static/images/wood.png" alt="Lumber" title="Lumber"> <output id="lumber">0</output> 
+                            <img src="../static/images/iron-ingots.png" alt="Iron"
+                            title="Iron"> <output id="iron">0</output>  <img src="../static/images/gold-ingots.png" alt="Gold"
+                            title="Gold"> <output id="gold">0</output> and  <img src="../static/images/recruit.png" alt="Recruits" title="Recruits"> <output id="recruits">0</output>
                         </div><br>
                         <input type="submit" class="submitButton" value="Build">
                     </form>
@@ -59,20 +94,16 @@
                 <br>
                 <% if (user.workshopLevel <=19){ %>
                     <div class="resources">
-                        Upgrade cost: <%= totalCost.lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
-                                title="Lumber">, <%= totalCost.stoneCost %> <img src="../static/images/stone.png"
-                                    alt="Stone" title="Stone">, <%= totalCost.ironCost %>
-                                    <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron">
-                                    and <%= totalCost.goldCost %>
-                                        <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div><br>
+                        Upgrade cost: <img src="../../static/images/wood.png" height="35px" title="Lumber"> 
+                        <%= totalCost.lumberCost %> <img src="../../static/images/stone.png" height="35px" title="Stone"> 
+                            <%= totalCost.stoneCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron"> 
+                            <%= totalCost.ironCost %> and <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
+                             <%= totalCost.goldCost %></div><br>
                     <form action="/town/workshop/upgrade" method="POST">
                         <input type="submit" class="submitButton" value="Upgrade">
                     </form>
-                    <% } else { %>
-                        The workshop is already at max level!
-
-
-                        <% } %>
+                    <% }  %>
+                       
                             <% } %>
                                 <script type="text/javascript" src="../static/js/workshop.js"></script>
 </body>

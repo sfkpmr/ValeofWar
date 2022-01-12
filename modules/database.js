@@ -9,7 +9,7 @@ databaseObject = {
         await client.db("gamedb").collection("players").updateOne({ "username": username }, { $set: data });
     },
     getUserByUsername: async function (client, username) {
-        result = await client.db("gamedb").collection("players").findOne({ "username": username });
+        const result = await client.db("gamedb").collection("players").findOne({ "username": username });
         if (result === null) {
             return false;
         } else {
@@ -38,8 +38,7 @@ databaseObject = {
         }
     },
     getTrade: async function (client, id) {
-        searchObject = new ObjectId(id);
-        return await client.db("gamedb").collection("trades").findOne({ "_id": searchObject });
+        return await client.db("gamedb").collection("trades").findOne({ "_id": new ObjectId(id) });
     },
     deleteTrade: async function (client, id) {
         return await client.db("gamedb").collection("trades").deleteOne({ "_id": id });
@@ -76,6 +75,7 @@ databaseObject = {
         return result;
     },
     addMessage: async function (client, data) {
+        //alltid?
         try {
             result = await client.db("gamedb").collection("messages").insertOne(data);
         } catch (e) {
@@ -96,7 +96,6 @@ databaseObject = {
         if (type === "log") {
             result = await databaseObject.getInvolvedAttackLogs(client, user.username)
         } else if (type === "message") {
-
             result = await databaseObject.getUserMessages(client, user.username)
         } else {
             console.debug(type, "Invalid object")
@@ -169,7 +168,25 @@ databaseObject = {
             }
         }
         return false;
+    },
+    getArmyByEmail: async function (client, email) {
+        return await client.db("gamedb").collection("armies").findOne({ "email": email });
+    },
+    getArmoryByEmail: async function (client, email) {
+        return await client.db("gamedb").collection("armories").findOne({ "email": email });
+    },
+    //remove plural s
+    incTroopValues: async function (client, username, data) {
+        await client.db("gamedb").collection("armies").updateOne({ "username": username }, { $inc: data });
+    },
+    setTroopsValue: async function (client, username, data) {
+        await client.db("gamedb").collection("armies").updateOne({ "username": username }, { $set: data });
+    },
+    incArmorValues: async function (client, username, data) {
+        console.log('apa')
+        await client.db("gamedb").collection("armories").updateOne({ "username": username }, { $inc: data });
     }
+
 };
 
 module.exports = databaseObject;

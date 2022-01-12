@@ -5,23 +5,15 @@ const baseGrainIncome = 7, baseLumberIncome = 6, baseStoneIncome = 3, baseIronIn
 resourceObject = {
     addResources: async function (client, username) {
         const user = await getUserByUsername(client, username);
+        const recruitsIncome = user.trainingfieldLevel * 5;
+        const horseIncome = user.stablesLevel * 3;
+        let farmLevels = 0, lumberLevels = 0, stoneLevels = 0, ironLevels = 0, goldLevels = 0;
 
-        const farms = user.farms;
-        const lumberCamps = user.lumberCamps;
-        const quarries = user.quarries;
-        const ironMines = user.ironMines;
-        const goldMines = user.goldMines;
-        const trainingfield = user.trainingfieldLevel;
-        const stables = user.stablesLevel;
-
-        var recruitsIncome = trainingfield * 5, horseIncome = stables * 3;
-        var farmLevels = 0, lumberLevels = 0, stoneLevels = 0, ironLevels = 0, goldLevels = 0;
-
-        farms.forEach(grainCalc);
-        lumberCamps.forEach(lumberCalc);
-        quarries.forEach(stoneCalc);
-        ironMines.forEach(ironCalc);
-        goldMines.forEach(goldCalc);
+        user.farms.forEach(grainCalc);
+        user.lumberCamps.forEach(lumberCalc);
+        user.quarries.forEach(stoneCalc);
+        user.ironMines.forEach(ironCalc);
+        user.goldMines.forEach(goldCalc);
 
         function grainCalc(i) {
             farmLevels += i;
@@ -44,7 +36,6 @@ resourceObject = {
         const stoneIncome = resourceObject.incomeCalc("stone", stoneLevels);
         const ironIncome = resourceObject.incomeCalc("iron", ironLevels);
         const goldIncome = resourceObject.incomeCalc("gold", goldLevels);
-
         const updatedUser = { "grain": grainIncome, "lumber": lumberIncome, "stone": stoneIncome, "gold": goldIncome, "iron": ironIncome, "recruits": recruitsIncome, "horses": horseIncome };
 
         await incDatabaseValue(client, username, updatedUser);
@@ -60,7 +51,6 @@ resourceObject = {
         const newGrain = user.grain - grain;
         const newRecruits = user.recruits - recruits;
         const newHorses = user.horses - horses;
-
         const updatedUser = { "grain": newGrain, "lumber": newLumber, "stone": newStone, "gold": newGold, "iron": newIron, "recruits": newRecruits, "horses": newHorses };
 
         await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
@@ -68,10 +58,7 @@ resourceObject = {
 
     checkIfCanAfford: async function (client, username, goldCost, lumberCost, stoneCost, ironCost, grainCost, recruitCost, horseCost) {
         const user = await getUserByUsername(client, username);
-
-        console.log("User has " + user.gold + " " + user.lumber + " " + user.stone + " " + user.iron + " " + user.grain + " " + user.recruits + " " + user.horses);
-        console.log("User wants to use " + goldCost + " gold, " + lumberCost + " lumber, " + stoneCost + " stone, " + ironCost + " iron, " + grainCost + " grain, " + recruitCost + " " + horseCost);
-
+        console.log(grainCost, lumberCost, stoneCost, ironCost, goldCost, recruitCost, horseCost)
         if (user.gold >= goldCost && user.lumber >= lumberCost && user.stone >= stoneCost && user.iron >= ironCost && user.grain >= grainCost && user.recruits >= recruitCost && user.horses >= horseCost) {
             return true;
         }
@@ -89,7 +76,8 @@ resourceObject = {
 
         const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
 
-        await client.db("gamedb").collection("players").updateOne({ "username": username }, { $set: updatedUser });
+        await client.db("gamedb").collection("players").updateOne({ "username": username }, { $set: updatedUser });//flytta till db module
+        //return something to check against with unit test? return true/false?
     },
 
     loseResources: async function (client, username, gold, lumber, stone, iron, grain) {
@@ -102,24 +90,28 @@ resourceObject = {
         const newGrain = user.grain - grain;
 
         const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
-        console.log('User spent', updatedUser)
         await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
     },
     incomeCalc: function (type, levels) {
         let baseIncome = 0;
 
-        if (type === "grain") {
-            baseIncome = baseGrainIncome;
-        } else if (type === "lumber") {
-            baseIncome = baseLumberIncome;
-        } else if (type === "stone") {
-            baseIncome = baseStoneIncome;
-        } else if (type === "iron") {
-            baseIncome = baseIronIncome;
-        } else if (type === "gold") {
-            baseIncome = baseGoldIncome;
+        switch (type) {
+            case "grain":
+                baseIncome = baseGrainIncome;
+                break;
+            case "lumber":
+                baseIncome = baseLumberIncome;
+                break;
+            case "stone":
+                baseIncome = baseStoneIncome;
+                break;
+            case "iron":
+                baseIncome = baseIronIncome;
+                break;
+            case "gold":
+                baseIncome = baseGoldIncome;
+                break;
         }
-
         return income = levels * baseIncome;
     },
     validateUserTrades: async function (client, id) {
@@ -154,46 +146,61 @@ resourceObject = {
             }
         };
     },
-    getIncome: async function (user, requestedIncome) {
-        let levels = 0, income = 0;
+    getIncome: function (user, requestedIncome) {
+        let levels = 0;
         function calc(i) {
             levels += i;
         };
 
-        if (requestedIncome === "getGrainIncome") {
-            user.farms.forEach(calc);
-            income = resourceObject.incomeCalc("grain", levels);
-        } else if (requestedIncome === "getLumberIncome") {
-            user.lumberCamps.forEach(calc);
-            income = resourceObject.incomeCalc("lumber", levels);
-        } else if (requestedIncome === "getStoneIncome") {
-            user.quarries.forEach(calc);
-            income = resourceObject.incomeCalc("stone", levels);
-        } else if (requestedIncome === "getIronIncome") {
-            user.ironMines.forEach(calc);
-            income = resourceObject.incomeCalc("iron", levels);
-        } else if (requestedIncome === "getGoldIncome") {
-            user.goldMines.forEach(calc);
-            income = resourceObject.incomeCalc("gold", levels);
-        } else if (requestedIncome === "getRecruitsIncome") {
-            income = user.trainingfieldLevel * 5;
-        } else if (requestedIncome === "getHorseIncome") {
-            income = user.stablesLevel * 3;
-        } else {
-            levels = null;
+        switch (requestedIncome) {
+            case "getGrainIncome":
+                user.farms.forEach(calc);
+                return resourceObject.incomeCalc("grain", levels);
+            case "getLumberIncome":
+                user.lumberCamps.forEach(calc);
+                return resourceObject.incomeCalc("lumber", levels);
+            case "getStoneIncome":
+                user.quarries.forEach(calc);
+                return resourceObject.incomeCalc("stone", levels);
+            case "getIronIncome":
+                user.ironMines.forEach(calc);
+                return resourceObject.incomeCalc("iron", levels);
+            case "getGoldIncome":
+                user.goldMines.forEach(calc);
+                return resourceObject.incomeCalc("gold", levels);
+            case "getRecruitsIncome":
+                return user.trainingfieldLevel * 5;
+            case "getHorseIncome":
+                return user.stablesLevel * 3;
+            default:
+                return false;
         }
-        return income;
+
     },
-    getAllIncomes: async function (user) {
-        const grainIncome = await resourceObject.getIncome(user, "getGrainIncome");
-        const lumberIncome = await resourceObject.getIncome(user, "getLumberIncome");
-        const stoneIncome = await resourceObject.getIncome(user, "getStoneIncome");
-        const ironIncome = await resourceObject.getIncome(user, "getIronIncome");
-        const goldIncome = await resourceObject.getIncome(user, "getGoldIncome");
-        const recruitsIncome = await resourceObject.getIncome(user, "getRecruitsIncome");
-        const horseIncome = await resourceObject.getIncome(user, "getHorseIncome");
+    getAllIncomes: function (user) {
+        const grainIncome = resourceObject.getIncome(user, "getGrainIncome");
+        const lumberIncome = resourceObject.getIncome(user, "getLumberIncome");
+        const stoneIncome = resourceObject.getIncome(user, "getStoneIncome");
+        const ironIncome = resourceObject.getIncome(user, "getIronIncome");
+        const goldIncome = resourceObject.getIncome(user, "getGoldIncome");
+        const recruitsIncome = resourceObject.getIncome(user, "getRecruitsIncome");
+        const horseIncome = resourceObject.getIncome(user, "getHorseIncome");
 
         return { grainIncome: grainIncome, lumberIncome: lumberIncome, stoneIncome: stoneIncome, ironIncome: ironIncome, goldIncome: goldIncome, recruitsIncome: recruitsIncome, horseIncome: horseIncome }
+    },
+    getResourceBoost: function (type) {
+        switch (type) {
+            case "farm":
+                return baseGrainIncome;
+            case "lumbercamp":
+                return baseLumberIncome;
+            case "quarry":
+                return baseStoneIncome;
+            case "ironMine":
+                return baseIronIncome;
+            case "goldMine":
+                return baseGoldIncome;
+        }
     }
 };
 

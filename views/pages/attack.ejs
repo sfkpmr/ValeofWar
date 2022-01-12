@@ -2,7 +2,11 @@
 <html>
 
 <head>
-    <title>Battle log</title>
+    <title>Blacksmith</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -18,17 +22,20 @@
     There was <%= log.wallDamage %> damage to the walls!
     <br>  <br>
     
-    The attackers got their hands on <%= log.goldLoot %> gold, <%= log.grainLoot %> grain, <%= log.lumberLoot %> lumber, <%= log.stoneLoot %> stone and <%= log.ironLoot %> 
-    iron in the ensuing turmoil!
+    The attackers got their hands on <img src="../../static/images/grain.png"
+    title="Grain"> <%= log.grainLoot %> <img src="../../static/images/wood.png"
+    title="Lumber"> <%= log.lumberLoot %> <img src="../../static/images/stone.png" title="Stone"> <%= log.stoneLoot %> 
+    <img src="../../static/images/iron-ingots.png" title="Iron"> <%= log.ironLoot %> and <img src="../../static/images/gold-ingots.png" title="Gold">
+    <%= log.goldLoot %> in the ensuing turmoil!
     <br>
     <br>
     <% if (log.attacker === username) {%>
         <form action=<%=attackUrl%> method="post">
-<input type="submit" value="Attack again!">
+<input type="submit" class="submitButton" value="Attack again!">
     </form>
         <% } else { %>
             <form action=<%=attackUrl%> method="post">
-            <input type="submit" value="Attack back!">
+            <input type="submit" class="submitButton" value="Attack back!">
         </form>
         <%}%>
   

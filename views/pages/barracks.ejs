@@ -3,48 +3,109 @@
 
 <head>
     <title>Barracks</title>
-    <link rel="stylesheet" type="text/css" href="../static/style.css" />
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
 </head>
 
 <body>
-
-    <!-- TODO server check barrack exists and has levels-->
     <!-- TODO Display max number of units/armor you can afford right now -->
 
-    Barracks level: <%= user.barracksLevel %> <br><br>
-        The barracks is where you train additional foot soldiers.<br>
+    <h1>Barracks level: <%= user.barracksLevel %> </h1>
+    The barracks is where you train additional foot soldiers.<br>
+    
+ 
 
         <div class="training">
             <br>
-            <!-- Old validation: oninput="validity.valid||(value='');" -->
             <form action="/town/barracks/train" method="POST">
                 <label for="archers"><img src="../static/images/archer.png" height="35px" title="Archer">
-                    Current: <%= user.archers %> Train:</label>
-                <input type="number" id="archers" name="archers" placeholder="0" min=0 max=9999 size="10"> Attack
-                damage: <output id="archerAttackDamage">0</output> Defense damage: <output
-                    id="archerDefenseDamage">0</output><br>
+                    <div class="tooltip">Archers
+                    <span class="tooltiptext">Attack: <output id="archerAttackDamage">0</output> Defense: <output
+                            id="archerDefenseDamage">0</output> Level req: <output
+                            id="archerLevelRequirement">0</output> </span>
+                    </div></label><br>
+                    Current: <%= army.archers %> Train:
+                <input type="number" id="archers" name="archers" placeholder="0" min=0 max=9999 size="10"> <br>
                 <label for="spearmen"><img src="../static/images/spearman.png" height="35px" title="Spearman">
-                    Current: <%= user.spearmen %> Train:</label>
-                <input type="number" id="spearmen" name="spearmen" placeholder="0" min=0 max=9999> Attack damage:
-                <output id="spearmanAttackDamage">0</output> Defense damage: <output
-                    id="spearmanDefenseDamage">0</output><br>
+                <div class="tooltip">Spearmen
+                    <span class="tooltiptext">Attack: <output id="spearmanAttackDamage">0</output> Defense: <output
+                            id="spearmanDefenseDamage">0</output> Level req: <output
+                            id="spearmanLevelRequirement">0</output> </span>
+                    </div></label><br>
+                    Current: <%= army.spearmen %> Train:
+                <input type="number" id="spearmen" name="spearmen" placeholder="0" min=0 max=9999><br>
                 <label for="swordsmen"><img src="../static/images/swordsman.png" height="35px" title="Swordsman">
-                    Current: <%= user.swordsmen %> Train:
-                </label>
-                <input type="number" id="swordsmen" name="swordsmen" placeholder="0" min=0 max=9999> Attack damage:
-                <output id="swordsmanAttackDamage">0</output> Defense damage: <output
-                    id="swordsmanDefenseDamage">0</output><br><br>
-                <div class="resources">Training cost: <output id="grain">0</output> <img
-                        src="../static/images/grain.png" alt="Grain" title="Grain">, <output id="lumber">0</output> <img
-                        src="../static/images/wood.png" alt="Lumber" title="Lumber">, <output id="iron">0</output> <img
-                        src="../static/images/iron-ingots.png" alt="Iron" title="Iron">,
-                    <output id="gold">0</output> <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold">
-                    and
-                    <output id="recruits">0</output>
-                    <img src="../static/images/recruit.png" alt="Recruits" title="Recruits">
+                    <div class="tooltip">Swordsmen
+                        <span class="tooltiptext">Attack: <output id="swordsmanAttackDamage">0</output> Defense: <output
+                                id="swordsmanDefenseDamage">0</output> Level req: <output
+                                id="swordsmanLevelRequirement">0</output> </span>
+                        </div></label><br>
+                        Current: <%= army.swordsmen %> Train:
+                <% if (user.barracksLevel >= 5) { %>
+                    <input type="number" id="swordsmen" name="swordsmen" placeholder="0" min=0 max=9999> 
+                <% } else { %>
+                    <input type="number" id="swordsmen" name="swordsmen" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                <% } %><br>
+
+                   <label for="crossbowmen"><img src="../static/images/crossbow.png" height="35px" title="Crossbowman">
+                    <div class="tooltip">Crossbowmen
+                        <span class="tooltiptext">Attack: <output id="crossbowmanAttackDamage">0</output> Defense: <output
+                                id="crossbowmanDefenseDamage">0</output> Level req: <output
+                                id="crossbowmanLevelRequirement">0</output> </span>
+                        </div></label><br>
+                        Current: <%= army.crossbowmen %> Train:
+                <% if (user.barracksLevel >= 10) { %>
+                    <input type="number" id="crossbowmen" name="crossbowmen" placeholder="0" min=0 max=9999> 
+                <% } else { %>
+                    <input type="number" id="crossbowmen" name="crossbowmen" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                <% } %><br>
+                    
+                       <label for="twoHandedSwordsmen"><img src="../static/images/twoHandedSword.png" height="35px" title="Two-handed swordsman">
+                        <div class="tooltip">Two-handed swordsmen
+                            <span class="tooltiptext">Attack: <output id="twoHandedSwordsmanAttackDamage">0</output> Defense: <output
+                                    id="twoHandedSwordsmanDefenseDamage">0</output> Level req: <output
+                                    id="twoHandedSwordsmanLevelRequirement">0</output> </span>
+                            </div></label><br>
+                            Current: <%= army.twoHandedSwordsmen %> Train:
+                <% if (user.barracksLevel === 20) { %>
+                    <input type="number" id="twoHandedSwordsmen" name="twoHandedSwordsmen" placeholder="0" min=0 max=9999> 
+                <% } else { %>
+                    <input type="number" id="twoHandedSwordsmen" name="twoHandedSwordsmen" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                <% } %><br>
+
+                       <label for="halberdiers"><img src="../static/images/halberd.png" height="35px" title="Halberdier">
+                        <div class="tooltip">Halberdiers
+                            <span class="tooltiptext">Attack: <output id="halberdierAttackDamage">0</output> Defense: <output
+                                    id="halberdierDefenseDamage">0</output> Level req: <output
+                                    id="halberdierLevelRequirement">0</output> </span>
+                            </div></label><br>
+                            Current: <%= army.halberdiers %> Train:
+                <% if (user.barracksLevel >= 10) { %>
+                    <input type="number" id="halberdiers" name="halberdiers" placeholder="0" min=0 max=9999> 
+                <% } else { %>
+                    <input type="number" id="halberdiers" name="halberdiers" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                <% } %><br>
+
+                       <label for="longbowmen"><img src="../static/images/bowman.png" height="35px" title="Longbowman">
+                        <div class="tooltip">Longbowmen
+                            <span class="tooltiptext">Attack: <output id="longbowmanAttackDamage">0</output> Defense: <output
+                                    id="longbowmanDefenseDamage">0</output> Level req: <output
+                                    id="longbowmanLevelRequirement">0</output> </span>
+                            </div></label><br>
+                            Current: <%= army.longbowmen %> Train:
+                <% if (user.barracksLevel >= 10) { %>
+                    <input type="number" id="longbowmen" name="longbowmen" placeholder="0" min=0 max=9999> 
+                <% } else { %>
+                    <input type="number" id="longbowmen" name="longbowmen" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                <% } %><br><br>  
+
+                <div class="resources">Training cost:  <img src="../static/images/grain.png" alt="Grain" title="Grain"> <output id="grain">0</output>
+                    <img src="../static/images/wood.png" alt="Lumber" title="Lumber"> <output id="lumber">0</output>
+                    <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron">  <output id="iron">0</output>
+                   <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold">  <output id="gold">0</output> and
+                    <img src="../static/images/recruit.png" alt="Recruits" title="Recruits"> <output id="recruits">0</output>
 
                 </div>
                 <br>
@@ -55,12 +116,11 @@
         <br>
         <% if (user.barracksLevel <=19){ %>
             <div class="resources">
-                Upgrade cost: <%= totalCost.lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
-                        title="Lumber">, <%= totalCost.stoneCost %> <img src="../static/images/stone.png" alt="Stone"
-                            title="Stone">, <%= totalCost.ironCost %>
-                            <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> and <%=
-                                totalCost.goldCost %>
-                                <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div><br>
+                Upgrade cost: <img src="../../static/images/wood.png" height="35px" title="Lumber"> 
+                <%= totalCost.lumberCost %> <img src="../../static/images/stone.png" height="35px" title="Stone"> 
+                    <%= totalCost.stoneCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron"> 
+                    <%= totalCost.ironCost %> and <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
+                     <%= totalCost.goldCost %></div><br>
             <form action="/town/barracks/upgrade" method="POST">
                 <input type="submit" class="submitButton" value="Upgrade">
             </form>

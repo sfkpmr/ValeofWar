@@ -36,10 +36,12 @@
                             <input type="text" name="message">
                             <input type="submit" value="Reply">
                         </form>
+
+                        <form action=" /messages/inbox/<%=message._id%>/report" method="post">
+                            <input type="submit" value="Report message">
+                        </form>
+
                         <% } %>
-
-
-
 
 
 </body>

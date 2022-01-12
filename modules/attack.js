@@ -1,24 +1,31 @@
-const { setDatabaseValue } = require("../modules/database.js");
+const { setDatabaseValue, getArmyByEmail, getArmoryByEmail, setTroopsValue } = require("../modules/database.js");
 const { stealResources, loseResources } = require("../modules/resources.js");
 const { lowerWallHealth } = require("../modules/buildings.js");
 const { ObjectId } = require('mongodb');
 
-archer = { attackDamage: 10, defenseDamage: 10 };
-spearman = { attackDamage: 10, defenseDamage: 10 };
-swordsman = { attackDamage: 20, defenseDamage: 20 };
-horseman = { attackDamage: 5, defenseDamage: 5 };
-knight = { attackDamage: 20, defenseDamage: 20 };
-batteringram = { attackDamage: 25 };
-siegetower = { attackDamage: 50 };
+const archer = { attackDamage: 10, defenseDamage: 10 };
+const ballista = { attackDamage: 150, defenseDamage: 100 };
+const crossbowman = { attackDamage: 10, defenseDamage: 50 };
+const halberdier = { attackDamage: 25, defenseDamage: 25 };
+const horseArcher = { attackDamage: 25, defenseDamage: 25 };
+const longbowman = { attackDamage: 25, defenseDamage: 25 };
+const spearman = { attackDamage: 10, defenseDamage: 10 };
+const swordsman = { attackDamage: 20, defenseDamage: 20 };
+const trebuchet = { attackDamage: 250 };
+const twoHandedSwordsman = { attackDamage: 50, defenseDamage: 20 };
+const horseman = { attackDamage: 5, defenseDamage: 5 };
+const knight = { attackDamage: 20, defenseDamage: 20 };
+const batteringRam = { attackDamage: 25 };
+const siegeTower = { attackDamage: 50 };
 
-boot = { attackDamage: 10, defenseDamage: 10 };
-bracer = { attackDamage: 5, defenseDamage: 10 };
-helmet = { attackDamage: 15, defenseDamage: 15 };
-longbow = { attackDamage: 20, defenseDamage: 30 };
-lance = { attackDamage: 25, defenseDamage: 10 };
-shield = { attackDamage: 10, defenseDamage: 20 };
-spear = { attackDamage: 10, defenseDamage: 25 };
-sword = { attackDamage: 10, defenseDamage: 10 };
+const boot = { attackDamage: 10, defenseDamage: 10 };
+const bracer = { attackDamage: 5, defenseDamage: 10 };
+const helmet = { attackDamage: 15, defenseDamage: 15 };
+const longbow = { attackDamage: 20, defenseDamage: 30 };
+const lance = { attackDamage: 25, defenseDamage: 10 };
+const shield = { attackDamage: 10, defenseDamage: 20 };
+const spear = { attackDamage: 10, defenseDamage: 25 };
+const sword = { attackDamage: 10, defenseDamage: 10 };
 
 attackObject = {
     getAttackLog: async function (client, ObjectId) {
@@ -33,495 +40,321 @@ attackObject = {
         result = await client.db("gamedb").collection("attacks").insertOne(data);
         return result.insertedId;
     },
-    calculateAttack: function (attacker) {
+    calculateAttack: function (army, armory) {
 
-        //todo rename variable to user?
-        const archers = attacker.archers;
-        const spearmen = attacker.spearmen;
-        const horsemen = attacker.horsemen;
-        const knights = attacker.knights;
-        const swordsmen = attacker.swordsmen;
-        var boots = attacker.boots;
-        var bracers = attacker.bracers;
-        var helmets = attacker.helmets;
-        var lances = attacker.lances;
-        var longbows = attacker.longbows;
-        var shields = attacker.shields;
-        var spears = attacker.spears;
-        var swords = attacker.swords;
-        var batteringrams = attacker.batteringrams * 10;
-        var siegetowers = attacker.siegetowers * 25;
+        const archers = army.archers;
+        const spearmen = army.spearmen;
+        const horsemen = army.horsemen;
+        const knights = army.knights;
+        const swordsmen = army.swordsmen;
+        const crossbowmen = army.crossbowmen;
+        const twoHandedSwordsmen = army.twoHandedSwordsmen;
+        const halberdiers = army.halberdiers;
+        const longbowmen = army.longbowmen;
+        const horseArchers = army.horseArchers;
+        const totalTroops = archers + spearmen + horsemen + knights + swordsmen + crossbowmen + twoHandedSwordsmen + halberdiers + longbowmen + horseArchers;
+        const bowTroops = archers + crossbowmen + longbowmen + horseArchers;
+        const shieldTroops = swordsmen + knights;
+        const swordsTroops = swordsmen + twoHandedSwordsmen + knights;
 
-        if (boots == undefined || boots == null) {
-            boots = 0;
-        }
-        if (bracers == undefined || bracers == null) {
-            bracers = 0;
-        }
-        if (helmets == undefined || helmets == null) {
-            helmets = 0;
-        }
-        if (lances == undefined || lances == null) {
-            lances = 0;
-        }
-        if (longbows == undefined || longbows == null) {
-            longbows = 0;
-        }
-        if (shields == undefined || shields == null) {
-            shields = 0;
-        }
-        if (spears == undefined || spears == null) {
-            spears = 0;
-        }
-        if (swords == undefined || swords == null) {
-            swords = 0;
-        }
-        if (batteringrams == undefined || batteringrams == null) {
-            batteringrams = 0;
-        }
-        if (siegetowers == undefined || siegetowers == null) {
-            siegetowers = 0;
-        }
+        const boots = armory.boots;
+        const bracers = armory.bracers;
+        const helmets = armory.helmets;
+        const lances = armory.lances;
+        const longbows = armory.longbows;
+        const shields = armory.shields;
+        const spears = armory.spears;
+        const swords = armory.swords;
 
-        var archerDamage = 0, spearmenDamage = 0, swordsmenDamage = 0, horsemenDamage = 0, knightsDamage = 0;
-        const bootsDamage = boot.attackDamage, bracersDamage = bracer.attackDamage, helmetDamage = helmet.attackDamage, longbowDamage = longbow.attackDamage, lanceDamage = lance.attackDamage, shieldDamage = shield.attackDamage, spearDamage = spear.attackDamage, swordDamage = sword.attackDamage;
-        if (archers !== undefined && archers !== null) {
-            archerDamage = archers * archer.attackDamage;
-            if (boots >= archers) {
-                archerDamage += archers * bootsDamage;
-                boots = boots - archers;
-            } else {
-                archerDamage += boots * bootsDamage;
-                boots = 0;
-            }
-            if (bracers >= archers) {
-                archerDamage += archers * bracersDamage;
-                bracers = bracers - archers;
-            } else {
-                archerDamage += bracers * bracersDamage;
-                bracers = 0;
-            }
-            if (helmets >= archers) {
-                archerDamage += archers * helmetDamage;
-                helmets = helmets - archers;
-            } else {
-                archerDamage += helmets * helmetDamage;
-                helmets = 0;
-            }
+        let totalDamage = archers * archer.attackDamage;
+        totalDamage += spearmen * spearman.attackDamage;
+        totalDamage += swordsmen * swordsman.attackDamage;
+        totalDamage += horsemen * horseman.attackDamage;
+        totalDamage += knights * knight.attackDamage;
+        totalDamage += army.batteringRams * batteringRam.attackDamage;
+        totalDamage += army.siegeTowers * siegeTower.attackDamage;
+        totalDamage += crossbowmen * crossbowman.attackDamage;
+        totalDamage += twoHandedSwordsmen * twoHandedSwordsman.attackDamage;
+        totalDamage += army.ballistas * ballista.attackDamage;
+        totalDamage += halberdiers * halberdier.attackDamage;
+        totalDamage += longbowmen * longbowman.attackDamage;
+        totalDamage += horseArchers * horseArcher.attackDamage;
+        totalDamage += army.trebuchets * trebuchet.attackDamage;
 
-            if (longbows >= archers) {
-                archerDamage += archers * longbowDamage;
-                longbows = longbows - archers;
-            } else {
-                archerDamage += longbows * longbowDamage;
-                longbows = 0;
-            }
-        } if (spearmen !== undefined && spearmen !== null) {
-            spearmenDamage = spearmen * spearman.attackDamage;
-            if (boots >= spearmen) {
-                spearmenDamage += spearmen * bootsDamage;
-                boots = boots - spearmen;
-            } else {
-                spearmenDamage += boots * bootsDamage;
-                boots = 0;
-            }
-            if (helmets >= spearmen) {
-                spearmenDamage += spearmen * helmetDamage;
-                helmets = helmets - spearmen;
-            } else {
-                spearmenDamage += helmets * helmetDamage;
-                helmets = 0;
-            }
-            if (spears >= spearmen) {
-                spearmenDamage += spearmen * spearDamage;
-                spears = spears - spearmen;
-            } else {
-                spearmenDamage += spears * spearDamage;
-                spears = 0;
-            }
-        } if (swordsmen !== undefined && swordsmen !== null) {
-            swordsmenDamage = swordsmen * swordsman.attackDamage;
-            if (boots >= swordsmen) {
-                swordsmenDamage += swordsmen * bootsDamage;
-                boots = boots - swordsmen;
-            } else {
-                swordsmenDamage += boots * bootsDamage;
-                boots = 0;
-            }
-            if (helmets >= swordsmen) {
-                swordsmenDamage += swordsmen * helmetDamage;
-                helmets = helmets - swordsmen;
-            } else {
-                swordsmenDamage += helmets * helmetDamage;
-                helmets = 0;
-            }
-            if (swords >= swordsmen) {
-                swordsmenDamage += swordsmen * swordDamage;
-                swords = swords - swordsmen;
-            } else {
-                swordsmenDamage += swords * swordDamage;
-                swords = 0;
-            }
-            if (shields >= swordsmen) {
-                swordsmenDamage += swordsmen * shieldDamage;
-                shields = shields - swordsmen;
-            } else {
-                swordsmenDamage += shields * shieldDamage;
-                shields = 0;
-            }
-        } if (horsemen !== undefined && horsemen !== null) {
-            horsemenDamage = horsemen * horseman.attackDamage;
-            if (boots >= horsemen) {
-                horsemenDamage += horsemen * bootsDamage;
-                boots = boots - horsemen;
-            } else {
-                horsemenDamage += boots * bootsDamage;
-                boots = 0;
-            }
-            if (helmets >= horsemen) {
-                horsemenDamage += horsemen * helmetDamage;
-                helmets = helmets - horsemen;
-            } else {
-                horsemenDamage += helmets * helmetDamage;
-                helmets = 0;
-            }
-            if (swords >= horsemen) {
-                horsemenDamage += horsemen * swordDamage;
-                swords = swords - horsemen;
-            } else {
-                horsemenDamage += swords * swordDamage;
-                swords = 0;
-            }
-
-        } if (knights !== undefined && knights !== null) {
-            knightsDamage = knights * knight.attackDamage;
-            if (boots >= knights) {
-                knightsDamage += knights * bootsDamage;
-                boots = boots - knights;
-            } else {
-                knightsDamage += boots * bootsDamage;
-                boots = 0;
-            }
-            if (helmets >= knights) {
-                knightsDamage += knights * helmetDamage;
-                helmets = helmets - knights;
-            } else {
-                knightsDamage += helmets * helmetDamage;
-                helmets = 0;
-            }
-            if (lances >= knights) {
-                knightsDamage += knights * lanceDamage;
-                lances = lances - knights;
-            } else {
-                knightsDamage += lances * lanceDamage;
-                lances = 0;
-            }
-            if (shields >= knights) {
-                knightsDamage += knights * shieldDamage;
-                shields = shields - knights;
-            } else {
-                knightsDamage += shields * shieldDamage;
-                shields = 0;
-            }
-        } if (batteringrams !== undefined && batteringrams !== null) {
-            if ((spearmen + swordsmen) >= batteringrams) {
-                batteringramDamage = batteringrams * batteringram.attackDamage;
-            } else {
-                batteringramDamage = (spearmen + swordsmen) * batteringram.attackDamage;
-            }
-        } if (siegetowers !== undefined && siegetowers !== null) {
-            if ((archers + swordsmen) >= siegetowers) {
-                siegetowerDamage = siegetowers * siegetower.attackDamage;
-            } else {
-                siegetowerDamage = (archers + swordsmen) * siegetower.attackDamage;
-            }
+        if (totalTroops > boots) {
+            totalDamage += boots * boot.attackDamage;
+        } else {
+            totalDamage += totalTroops * boot.attackDamage;
+        }
+        if (bowTroops > bracers) {
+            totalDamage += bracers * bracer.attackDamage;
+        } else {
+            totalDamage += bowTroops * bracer.attackDamage;
+        }
+        if (totalTroops > helmets) {
+            totalDamage += helmets * helmet.attackDamage;
+        } else {
+            totalDamage += totalTroops * helmet.attackDamage;
+        }
+        if (knights > lances) {
+            totalDamage += lances * lance.attackDamage;
+        } else {
+            totalDamage += knights * lance.attackDamage;
+        }
+        if (bowTroops > longbows) {
+            totalDamage += longbows * longbow.attackDamage;
+        } else {
+            totalDamage += bowTroops * longbow.attackDamage;
+        }
+        if (shieldTroops > shields) {
+            totalDamage += boots * shield.attackDamage;
+        } else {
+            totalDamage += shieldTroops * shield.attackDamage;
+        }
+        if (spearmen > spears) {
+            totalDamage += spears * spear.attackDamage;
+        } else {
+            totalDamage += spearmen * spear.attackDamage;
+        }
+        if (swordsTroops > swords) {
+            totalDamage += swords * sword.attackDamage;
+        } else {
+            totalDamage += swordsTroops * sword.attackDamage;
         }
 
-        return archerDamage + spearmenDamage + horsemenDamage + knightsDamage + swordsmenDamage + batteringramDamage + siegetowerDamage;
+        return totalDamage;
     },
 
-    calculateDefense: function (defender) {
+    calculateDefense: function (defender, army, armory) {
 
         //todo losing armor
-        const archers = defender.archers;
-        const spearmen = defender.spearmen;
-        const horsemen = defender.horsemen;
-        const knights = defender.knights;
-        const swordsmen = defender.swordsmen;
-        const walls = defender.wallLevel;
-        var boots = defender.boots;
-        var bracers = defender.bracers;
-        var helmets = defender.helmets;
-        var lances = defender.lances;
-        var longbows = defender.longbows;
-        var shields = defender.shields;
-        var spears = defender.spears;
-        var swords = defender.swords;
+        const archers = army.archers;
+        const spearmen = army.spearmen;
+        const horsemen = army.horsemen;
+        const knights = army.knights;
+        const swordsmen = army.swordsmen;
+        const crossbowmen = army.crossbowmen;
+        const twoHandedSwordsmen = army.twoHandedSwordsmen;
+        const ballistas = army.ballistas;
+        const halberdiers = army.halberdiers;
+        const longbowmen = army.longbowmen;
+        const horseArchers = army.horseArchers;
+        const totalTroops = archers + spearmen + horsemen + knights + swordsmen + crossbowmen + twoHandedSwordsmen + halberdiers + longbowmen + horseArchers;
+        const bowTroops = archers + crossbowmen + longbowmen + horseArchers;
+        const shieldTroops = swordsmen + knights;
+        const swordsTroops = swordsmen + twoHandedSwordsmen + knights;
 
-        //todo account for nr of weapons, check nulls
+        const boots = armory.boots;
+        const bracers = armory.bracers;
+        const helmets = armory.helmets;
+        const lances = armory.lances;
+        const longbows = armory.longbows;
+        const shields = armory.shields;
+        const spears = armory.spears;
+        const swords = armory.swords;
 
-        //TODO nr of ===
-        //TODO send object, return with correct 0s? Same with dmg calc?
-        if (boots == undefined || boots == null) {
-            boots = 0;
+        let totalDamage = archers * archer.defenseDamage;
+        totalDamage += spearmen * spearman.defenseDamage;
+        totalDamage += swordsmen * swordsman.defenseDamage;
+        totalDamage += horsemen * horseman.defenseDamage;
+        totalDamage += knights * knight.defenseDamage;
+        totalDamage += crossbowmen * crossbowman.defenseDamage;
+        totalDamage += twoHandedSwordsmen * twoHandedSwordsman.defenseDamage;
+        totalDamage += ballistas * ballista.defenseDamage;
+        totalDamage += halberdiers * halberdier.defenseDamage;
+        totalDamage += longbowmen * longbowman.defenseDamage;
+        totalDamage += horseArchers * horseArcher.defenseDamage;
+
+        if (totalTroops > boots) {
+            totalDamage += boots * boot.defenseDamage;
+        } else {
+            totalDamage += totalTroops * boot.defenseDamage;
         }
-        if (bracers == undefined || bracers == null) {
-            bracers = 0;
+        if (bowTroops > bracers) {
+            totalDamage += bracers * bracer.defenseDamage;
+        } else {
+            totalDamage += bowTroops * bracer.defenseDamage;
         }
-        if (helmets == undefined || helmets == null) {
-            helmets = 0;
+        if (totalTroops > helmets) {
+            totalDamage += helmets * helmet.defenseDamage;
+        } else {
+            totalDamage += totalTroops * helmet.defenseDamage;
         }
-        if (lances == undefined || lances == null) {
-            lances = 0;
+        if (knights > lances) {
+            totalDamage += lances * lance.defenseDamage;
+        } else {
+            totalDamage += knights * lance.defenseDamage;
         }
-        if (longbows == undefined || longbows == null) {
-            longbows = 0;
+        if (bowTroops > longbows) {
+            totalDamage += longbows * longbow.defenseDamage;
+        } else {
+            totalDamage += bowTroops * longbow.defenseDamage;
         }
-        if (shields == undefined || shields == null) {
-            shields = 0;
+        if (shieldTroops > shields) {
+            totalDamage += boots * shield.defenseDamage;
+        } else {
+            totalDamage += shieldTroops * shield.defenseDamage;
         }
-        if (spears == undefined || spears == null) {
-            spears = 0;
+        if (spearmen > spears) {
+            totalDamage += spears * spear.defenseDamage;
+        } else {
+            totalDamage += spearmen * spear.defenseDamage;
         }
-        if (swords == undefined || swords == null) {
-            swords = 0;
-        }
-
-        var archerDamage = 0, spearmenDamage = 0, swordsmenDamage = 0, horsemenDamage = 0, knightsDamage = 0;
-        const bootsDamage = boot.defenseDamage, bracersDamage = bracer.defenseDamage, helmetDamage = helmet.defenseDamage, longbowDamage = longbow.defenseDamage, lanceDamage = lance.defenseDamage, shieldDamage = shield.defenseDamage, spearDamage = spear.defenseDamage, swordDamage = sword.defenseDamage;
-        if (archers !== undefined && archers !== null) {
-            archerDamage = archers * archer.defenseDamage;
-            if (boots >= archers) {
-                archerDamage += archers * bootsDamage;
-                boots = boots - archers;
-            } else {
-                archerDamage += boots * bootsDamage;
-                boots = 0;
-            }
-
-            if (bracers >= archers) {
-                archerDamage += archers * bracersDamage;
-                bracers = bracers - archers;
-            } else {
-                archerDamage += bracers * bracersDamage;
-                bracers = 0;
-            }
-
-            if (helmets >= archers) {
-                archerDamage += archers * helmetDamage;
-                helmets = helmets - archers;
-            } else {
-                archerDamage += helmets * helmetDamage;
-                helmets = 0;
-            }
-
-            if (longbows >= archers) {
-                archerDamage += archers * longbowDamage;
-                longbows = longbows - archers;
-            } else {
-                archerDamage += longbows * longbowDamage;
-                longbows = 0;
-            }
-
-        } if (spearmen !== undefined && spearmen !== null) {
-            spearmenDamage = spearmen * spearman.defenseDamage;
-            if (boots >= spearmen) {
-                spearmenDamage += spearmen * bootsDamage;
-                boots = boots - spearmen;
-            } else {
-                spearmenDamage += boots * bootsDamage;
-                boots = 0;
-            }
-            if (helmets >= spearmen) {
-                spearmenDamage += spearmen * helmetDamage;
-                helmets = helmets - spearmen;
-            } else {
-                spearmenDamage += helmets * helmetDamage;
-                helmets = 0;
-            }
-
-            if (spears >= spearmen) {
-                spearmenDamage += spearmen * spearDamage;
-                spears = spears - spearmen;
-            } else {
-                spearmenDamage += spears * spearDamage;
-                spears = 0;
-            }
-
-        } if (swordsmen !== undefined && swordsmen !== null) {
-            swordsmenDamage = swordsmen * swordsman.defenseDamage;
-            if (boots >= swordsmen) {
-                swordsmenDamage += swordsmen * bootsDamage;
-                boots = boots - swordsmen;
-            } else {
-                swordsmenDamage += boots * bootsDamage;
-                boots = 0;
-            }
-            if (helmets >= swordsmen) {
-                swordsmenDamage += swordsmen * helmetDamage;
-                helmets = helmets - swordsmen;
-            } else {
-                swordsmenDamage += helmets * helmetDamage;
-                helmets = 0;
-            }
-            if (swords >= swordsmen) {
-                swordsmenDamage += swordsmen * swordDamage;
-                swords = swords - swordsmen;
-            } else {
-                swordsmenDamage += swords * swordDamage;
-                swords = 0;
-            }
-            if (shields >= swordsmen) {
-                swordsmenDamage += swordsmen * shieldDamage;
-                shields = shields - swordsmen;
-            } else {
-                swordsmenDamage += shields * shieldDamage;
-                shields = 0;
-            }
-        } if (horsemen !== undefined && horsemen !== null) {
-            horsemenDamage = horsemen * horseman.defenseDamage;
-            if (boots >= horsemen) {
-                horsemenDamage += horsemen * bootsDamage;
-                boots = boots - horsemen;
-            } else {
-                horsemenDamage += boots * bootsDamage;
-                boots = 0;
-            }
-            if (helmets >= horsemen) {
-                horsemenDamage += horsemen * helmetDamage;
-                helmets = helmets - horsemen;
-            } else {
-                horsemenDamage += helmets * helmetDamage;
-                helmets = 0;
-            }
-            if (swords >= horsemen) {
-                horsemenDamage += horsemen * swordDamage;
-                swords = swords - horsemen;
-            } else {
-                horsemenDamage += swords * swordDamage;
-                swords = 0;
-            }
-
-        } if (knights !== undefined && knights !== null) {
-            knightsDamage = knights * knight.defenseDamage;
-            if (boots >= knights) {
-                knightsDamage += knights * bootsDamage;
-                boots = boots - knights;
-            } else {
-                knightsDamage += boots * bootsDamage;
-                boots = 0;
-            }
-            if (helmets >= knights) {
-                knightsDamage += knights * helmetDamage;
-                helmets = helmets - knights;
-            } else {
-                knightsDamage += helmets * helmetDamage;
-                helmets = 0;
-            }
-            if (lances >= knights) {
-                knightsDamage += knights * lanceDamage;
-                lances = lances - knights;
-            } else {
-                knightsDamage += lances * lanceDamage;
-                lances = 0;
-            }
-            if (shields >= knights) {
-                knightsDamage += knights * shieldDamage;
-                shields = shields - knights;
-            } else {
-                knightsDamage += shields * shieldDamage;
-                shields = 0;
-            }
-
+        if (swordsTroops > swords) {
+            totalDamage += swords * sword.defenseDamage;
+        } else {
+            totalDamage += swordsTroops * sword.defenseDamage;
         }
 
-        // console.log(("aaaaaaaaaaaaaaaa " + archerDamage + " " + spearmenDamage + " " + swordsmenDamage + " " + horsemenDamage + " " + knightsDamage + " " + walls))
-        // console.log(boots + " " + bracers + " " + helmets + " " + longbows)
-
-        wallBonus = (1 + (walls / 10));
+        let wallBonus = (1 + (defender.wallLevel / 10));
         if (defender.currentWallHealth === 0) {
             wallBonus = 1;
         }
 
-        return Math.round((archerDamage + spearmenDamage + horsemenDamage + knightsDamage + swordsmenDamage) * wallBonus);
-
+        return Math.round(totalDamage * wallBonus);
     },
 
-    armyLosses: async function (client, username, divider) {
+    armyLosses: async function (client, army, divider) {
 
-        archers = username.archers;
-        spearmen = username.spearmen;
-        swordsmen = username.swordsmen;
-        horsemen = username.horsemen;
-        knights = username.knights;
-        batteringrams = username.batteringrams;
-        siegetowers = username.siegetowers;
+        const archers = army.archers;
+        const spearmen = army.spearmen;
+        const swordsmen = army.swordsmen;
+        const horsemen = army.horsemen;
+        const knights = army.knights;
+        const batteringRams = army.batteringRams;
+        const siegeTowers = army.siegeTowers;
 
-        console.log(username.username, "has", archers, spearmen, swordsmen, horsemen, knights, batteringrams, siegetowers)
+        const crossbowmen = army.crossbowmen;
+        const halberdiers = army.halberdiers;
+        const longbowmen = army.longbowmen;
+        const twoHandedSwordsmen = army.twoHandedSwordsmen;
+        const ballistas = army.ballistas;
+        const trebuchets = army.trebuchets;
+        const horseArchers = army.horseArchers;
 
-        totalTroops = archers + spearmen + swordsmen + horsemen + knights + batteringrams + siegetowers;
-        battleLosses = Math.round(totalTroops / divider);
+        const totalTroops = archers + spearmen + swordsmen + horsemen + knights + batteringRams + siegeTowers + crossbowmen + halberdiers + longbowmen + twoHandedSwordsmen + ballistas + trebuchets + horseArchers;
 
-        lossesCounter = battleLosses;
+        const battleLosses = Math.round(totalTroops / divider);
 
-        if (lossesCounter > batteringrams) {
-            potentialBatteringramLosses = batteringrams;
+        let lossesCounter = battleLosses;
+        console.log("-----------", battleLosses, lossesCounter, totalTroops)
+
+        if (lossesCounter > batteringRams) {
+            potentialBatteringramLosses = batteringRams;
         } else {
             potentialBatteringramLosses = lossesCounter;
         }
-        batteringramLosses = Math.floor(Math.random() * potentialBatteringramLosses);
+        const batteringramLosses = Math.floor(Math.random() * potentialBatteringramLosses);
         lossesCounter = lossesCounter - batteringramLosses;
-        if (lossesCounter > siegetowers) {
-            potentialSiegtowerLosses = siegetowers;
+        if (lossesCounter > siegeTowers) {
+            potentialSiegtowerLosses = siegeTowers;
         } else {
             potentialSiegtowerLosses = lossesCounter;
         }
-        siegetowerLosses = Math.floor(Math.random() * potentialSiegtowerLosses);
+        const siegetowerLosses = Math.floor(Math.random() * potentialSiegtowerLosses);
         lossesCounter = lossesCounter - siegetowerLosses;
         if (lossesCounter > spearmen) {
             potentialSpearmenLosses = spearmen;
         } else {
             potentialSpearmenLosses = lossesCounter;
         }
-        spearmenLosses = Math.floor(Math.random() * potentialSpearmenLosses);
+        const spearmenLosses = Math.floor(Math.random() * potentialSpearmenLosses);
         lossesCounter = lossesCounter - spearmenLosses;
+        if (lossesCounter > twoHandedSwordsmen) {
+            potentialTwoHandedSwordsmenLosses = twoHandedSwordsmen;
+        } else {
+            potentialTwoHandedSwordsmenLosses = lossesCounter;
+        }
+        const twoHandedSwordsmenLosses = Math.floor(Math.random() * potentialTwoHandedSwordsmenLosses);
+        lossesCounter = lossesCounter - twoHandedSwordsmenLosses;
+        if (lossesCounter > halberdiers) {
+            potentialHalberdiersLosses = halberdiers;
+        } else {
+            potentialHalberdiersLosses = lossesCounter;
+        }
+        const halberdiersLosses = Math.floor(Math.random() * potentialHalberdiersLosses);
+        lossesCounter = lossesCounter - halberdiersLosses;
         if (lossesCounter > swordsmen) {
             potentialSwordsmenLosses = swordsmen;
         } else {
             potentialSwordsmenLosses = lossesCounter;
         }
-        swordsmenLosses = Math.floor(Math.random() * potentialSwordsmenLosses);
+        const swordsmenLosses = Math.floor(Math.random() * potentialSwordsmenLosses);
         lossesCounter = lossesCounter - swordsmenLosses;
         if (lossesCounter > horsemen) {
             potentialHorsemenLosses = horsemen;
         } else {
             potentialHorsemenLosses = lossesCounter;
         }
-        horsemenLosses = Math.floor(Math.random() * potentialHorsemenLosses);
+        const horsemenLosses = Math.floor(Math.random() * potentialHorsemenLosses);
         lossesCounter = lossesCounter - horsemenLosses;
         if (lossesCounter > knights) {
             potentialKnightsLosses = knights;
         } else {
             potentialKnightsLosses = lossesCounter;
         }
-        knightsLosses = Math.floor(Math.random() * potentialKnightsLosses);
+        const knightsLosses = Math.floor(Math.random() * potentialKnightsLosses);
         lossesCounter = lossesCounter - knightsLosses;
+        if (lossesCounter > crossbowmen) {
+            potentialCrossbowmenLosses = crossbowmen;
+        } else {
+            potentialCrossbowmenLosses = lossesCounter;
+        }
+        const crossbowmenLosses = Math.floor(Math.random() * potentialCrossbowmenLosses);
+        lossesCounter = lossesCounter - crossbowmenLosses;
+        if (lossesCounter > horseArchers) {
+            potentialHorseArchersLosses = horseArchers;
+        } else {
+            potentialHorseArchersLosses = lossesCounter;
+        }
+        const horseArchersLosses = Math.floor(Math.random() * potentialHorseArchersLosses);
+        lossesCounter = lossesCounter - horseArchersLosses;
         if (lossesCounter > archers) {
             potentialArcherLosses = archers;
         } else {
             potentialArcherLosses = lossesCounter;
         }
-        archerLosses = Math.floor(Math.random() * potentialArcherLosses);
+        const archerLosses = Math.floor(Math.random() * potentialArcherLosses);
         lossesCounter = lossesCounter - archerLosses;
-        console.log(username.username + " lost " + archerLosses, spearmenLosses, swordsmenLosses, horsemenLosses, knightsLosses, batteringramLosses, siegetowerLosses);
+        if (lossesCounter > longbowmen) {
+            potentialLongbowmenLosses = longbowmen;
+        } else {
+            potentialLongbowmenLosses = lossesCounter;
+        }
+        const longbowmenLosses = Math.floor(Math.random() * potentialLongbowmenLosses);
+        lossesCounter = lossesCounter - longbowmenLosses;
+        if (lossesCounter > trebuchets) {
+            potentialTrebuchetLosses = trebuchets;
+        } else {
+            potentialTrebuchetLosses = lossesCounter;
+        }
+        const trebuchetLosses = Math.floor(Math.random() * potentialTrebuchetLosses);
+        lossesCounter = lossesCounter - trebuchetLosses;
+        if (lossesCounter > ballistas) {
+            potentialBallistasLosses = ballistas;
+        } else {
+            potentialBallistasLosses = lossesCounter;
+        }
+        const ballistasLosses = Math.floor(Math.random() * potentialBallistasLosses);
+        lossesCounter = lossesCounter - ballistasLosses;
 
-        newArchers = archers - archerLosses;
-        newSpearmen = spearmen - spearmenLosses;
-        newSwordsmen = swordsmen - swordsmenLosses;
-        newHorsemen = horsemen - horsemenLosses;
-        newKnights = knights - knightsLosses;
-        newBatteringrams = batteringrams - batteringramLosses;
-        newSiegetowers = siegetowers - siegetowerLosses;
+        // console.log(army.username + " lost " + archerLosses, spearmenLosses, swordsmenLosses, horsemenLosses, knightsLosses, batteringramLosses, siegetowerLosses, crossbowmenLosses,
+        //     halberdiersLosses, longbowmenLosses, twoHandedSwordsmenLosses, ballistasLosses, trebuchetLosses, horseArchersLosses);
+
+        let newArchers = archers - archerLosses;
+        let newSpearmen = spearmen - spearmenLosses;
+        let newSwordsmen = swordsmen - swordsmenLosses;
+        let newHorsemen = horsemen - horsemenLosses;
+        let newKnights = knights - knightsLosses;
+        let newBatteringRams = batteringRams - batteringramLosses;
+        let newSiegeTowers = siegeTowers - siegetowerLosses;
+        let newCrossbowmen = crossbowmen - crossbowmenLosses;
+        let newHalberdiers = halberdiers - halberdiersLosses;
+        let newLongbowmen = longbowmen - longbowmenLosses;
+        let newTwoHandedSwordsmen = twoHandedSwordsmen - twoHandedSwordsmenLosses;
+        let newBallistas = ballistas - ballistasLosses;
+        let newTrebuchets = trebuchets - trebuchetLosses;
+        let newHorseArchers = horseArchers - horseArchersLosses;
 
         if (newArchers < 0) {
             newArchers = 0;
@@ -538,16 +371,42 @@ attackObject = {
         if (newKnights < 0) {
             newKnights = 0;
         }
-        if (newBatteringrams < 0) {
-            newBatteringrams = 0;
+        if (newBatteringRams < 0) {
+            newBatteringRams = 0;
         }
-        if (newSiegetowers < 0) {
-            newSiegetowers = 0;
+        if (newSiegeTowers < 0) {
+            newSiegeTowers = 0;
+        }
+        if (newCrossbowmen < 0) {
+            newCrossbowmen = 0;
+        }
+        if (newHalberdiers < 0) {
+            newHalberdiers = 0;
+        }
+        if (newLongbowmen < 0) {
+            newLongbowmen = 0;
+        }
+        if (newTwoHandedSwordsmen < 0) {
+            newTwoHandedSwordsmen = 0;
+        }
+        if (newBallistas < 0) {
+            newBallistas = 0;
+        }
+        if (newTrebuchets < 0) {
+            newTrebuchets = 0;
+        }
+        if (newHorseArchers < 0) {
+            newHorseArchers = 0;
         }
 
-        data = { archers: newArchers, spearmen: newSpearmen, swordsmen: newSwordsmen, horsemen: newHorsemen, knights: newKnights, batteringrams: newBatteringrams, siegetowers: newSiegetowers };
+        console.log(army.username, newArchers, newSpearmen, newSwordsmen, newHorsemen, newKnights, newBatteringRams, newSiegeTowers, newBallistas, newCrossbowmen, newTwoHandedSwordsmen, newLongbowmen, newHorseArchers, newHalberdiers, newTrebuchets)
 
-        await setDatabaseValue(client, username.username, data);
+        const data = {
+            "archers": newArchers, "spearmen": newSpearmen, "swordsmen": newSwordsmen, "horsemen": newHorsemen, "knights": newKnights, "batteringRams": newBatteringRams, "siegeTowers": newSiegeTowers,
+            "crossbowmen": newCrossbowmen, "ballistas": newBallistas, "twoHandedSwordsmen": newTwoHandedSwordsmen, "longbowmen": newLongbowmen, "horseArchers": newHorseArchers, "trebuchets": newTrebuchets, "halberdiers": newHalberdiers
+        };
+
+        await setTroopsValue(client, army.username, data);
 
         return battleLosses;
     },
@@ -609,8 +468,12 @@ attackObject = {
         return value;
     },
     attackFunc: async function (client, attacker, defender) {
-        const attackDamage = attackObject.calculateAttack(attacker);
-        const defenseDamage = attackObject.calculateDefense(defender);
+        const attackingArmy = await getArmyByEmail(client, attacker.email)
+        const defendingArmy = await getArmyByEmail(client, defender.email)
+        const attackingArmory = await getArmoryByEmail(client, attacker.email)
+        const defendingArmory = await getArmoryByEmail(client, defender.email)
+        const attackDamage = attackObject.calculateAttack(attackingArmy, attackingArmory);
+        const defenseDamage = attackObject.calculateDefense(defender, defendingArmy, defendingArmory);
 
         console.log("Total defense: " + defenseDamage + " Total attack: " + attackDamage);
 
@@ -630,8 +493,8 @@ attackObject = {
         stealResources(client, attacker.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
         loseResources(client, defender.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
 
-        const attackerLosses = await attackObject.armyLosses(client, attacker, attackTroopDivider);
-        const defenderLosses = await attackObject.armyLosses(client, defender, defenseTroopDivider);
+        const attackerLosses = await attackObject.armyLosses(client, attackingArmy, attackTroopDivider);
+        const defenderLosses = await attackObject.armyLosses(client, defendingArmy, defenseTroopDivider);
 
         const wallDamage = Math.floor(Math.random() * 5);
         await lowerWallHealth(client, defender, wallDamage);
@@ -654,4 +517,3 @@ attackObject = {
 };
 
 module.exports = attackObject;
-

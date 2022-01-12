@@ -34,9 +34,9 @@ const client = new MongoClient(uri);
 const { addTrade, buyTrade } = require("./modules/market.js");
 const { getAttackLog, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
 const { trainTroops } = require("./modules/troops.js");
-const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource } = require("./modules/database.js");
-const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData } = require("./modules/buildings.js");
-const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getAllIncomes } = require("./modules/resources.js");
+const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource, getArmyByEmail, getArmoryByEmail } = require("./modules/database.js");
+const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData, validateRequiredProductionLevel } = require("./modules/buildings.js");
+const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getAllIncomes, getResourceBoost } = require("./modules/resources.js");
 
 app.use(
     auth({
@@ -121,6 +121,8 @@ app.get("/", (req, res) => {
 
 app.get("/vale", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
+    const army = await getArmyByEmail(client, req.oidc.user.email);
+    const armory = await getArmoryByEmail(client, req.oidc.user.email);
 
     let grainLevels = 0, lumberLevels = 0, stoneLevels = 0, ironLevels = 0, goldLevels = 0, grainIncome = 0, lumberIncome = 0, stoneIncome = 0, ironIncome = 0, goldIncome = 0;
     function grainCalc(i) {
@@ -157,10 +159,10 @@ app.get("/vale", requiresAuth(), async (req, res) => {
     const recruitsIncome = user.trainingfieldLevel * 5;
     const horseIncome = user.stablesLevel * 3;
 
-    const attackValue = await calculateAttack(user);
-    const defenseValue = await calculateDefense(user);
+    const attackValue = await calculateAttack(army, armory);
+    const defenseValue = await calculateDefense(user, army, armory);
 
-    res.render("pages/vale", { user, grainIncome, lumberIncome, stoneIncome, ironIncome, goldIncome, recruitsIncome, horseIncome, attackValue, defenseValue })
+    res.render("pages/vale", { user, army, grainIncome, lumberIncome, stoneIncome, ironIncome, goldIncome, recruitsIncome, horseIncome, attackValue, defenseValue })
 });
 
 app.get("/settings", requiresAuth(), async (req, res) => {
@@ -169,6 +171,7 @@ app.get("/settings", requiresAuth(), async (req, res) => {
     res.render("pages/settings", { profileUser })
 });
 
+//TODO rensa alla collection
 app.delete("/settings/delete", requiresAuth(), async (req, res) => {
     //Accept prompt remains after first click, needs to click twice? Causes 'TypeError: Cannot read property '_id' of null'
     const user = await getUserByEmail(client, req.oidc.user.email);
@@ -298,23 +301,39 @@ app.get("/messages/inbox/:id", requiresAuth(), urlencodedParser, [
     }
 });
 
+app.post("/messages/inbox/:id/report", requiresAuth(), urlencodedParser, [
+    check('id').exists().isMongoId()
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const messageExists = await getMessageById(client, new ObjectId(req.params.id));
+        if (messageExists) {
+            const message = "Reported message ID: " + messageExists._id;
+            const data = { sentTo: "johanna", sentBy: "SYSTEM", message: message, time: new Date() };
+            addMessage(client, data);
+            res.redirect(`/messages/inbox`);
+        } else {
+            res.send("No such message!")
+        }
+    } else {
+        res.status(400).render('pages/400');
+    }
+});
+
 app.post("/messages/send", requiresAuth(), urlencodedParser, [
     check('recipient').exists().isAlphanumeric().isLength({ min: 5, max: 15 }),
     check('message').exists().isLength({ max: 1000 })//TODO handle ?!#%  ????
 ], async (req, res) => {
     const errors = validationResult(req)
-    if (errors.isEmpty()) {
+    const receiver = await getUserByUsername(client, req.body.recipient);
+    if (!receiver) {
+        res.send("No such user")
+    } else if (errors.isEmpty() && receiver) {
         const sender = await getUserByEmail(client, req.oidc.user.email);
-        const receiver = await getUserByUsername(client, req.body.recipient);
         const message = req.body.message;
-
-        if (receiver) {
-            const data = { sentTo: receiver.username, sentBy: sender.username, message: message, time: new Date() };
-            const result = await addMessage(client, data);
-            res.redirect(`/messages/inbox/${result}`);
-        } else {
-            res.send("No such user")
-        }
+        const data = { sentTo: receiver.username, sentBy: sender.username, message: message, time: new Date() };
+        const result = await addMessage(client, data);
+        res.redirect(`/messages/inbox/${result}`);
     } else {
         res.status(400).render('pages/400');
     }
@@ -429,8 +448,9 @@ app.get("/town", requiresAuth(), async (req, res) => {
 
 app.get("/town/barracks", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
+    const army = await getArmyByEmail(client, req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("barracks", user.barracksLevel)
-    res.render('pages/barracks', { user, totalCost });
+    res.render('pages/barracks', { user, totalCost, army });
 });
 
 app.get("/online", requiresAuth(), async (req, res) => {
@@ -490,9 +510,9 @@ app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const maxWallHealth = user.wallLevel * 100;
     if (user.currentWallHealth < maxWallHealth) {
-        const totalCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel - 1)
-        if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
-            await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
+        const totalCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel)
+        if (await checkIfCanAfford(client, user.username, totalCost.goldCost * 0.5, totalCost.lumberCost * 0.5, totalCost.stoneCost * 0.5, totalCost.ironCost * 0.5, 0, 0, 0)) {
+            await removeResources(client, user.username, totalCost.goldCost * 0.5, totalCost.lumberCost * 0.5, totalCost.stoneCost * 0.5, totalCost.ironCost * 0.5, 0, 0, 0);
             restoreWallHealth(client, user); //await?
         } else {
             console.log("bbb-3");
@@ -509,35 +529,47 @@ app.get("/credits", async (req, res) => {
 
 app.get("/town/workshop", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
+    const army = await getArmyByEmail(client, req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("workshop", user.workshopLevel)
-    res.render('pages/workshop', { user, totalCost })
+    res.render('pages/workshop', { user, totalCost, army })
 });
 
 app.post("/town/workshop/train", requiresAuth(), urlencodedParser, [
-    check('batteringram').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
-    check('siegetower').isNumeric({ no_symbols: true }).isLength({ max: 4 })
+    check('batteringRam').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('siegeTower').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('ballista').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('trebuchet').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
     const errors = validationResult(req);
-    if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const batteringrams = convertNegativeToZero(parseInt(req.body.batteringram));
-        const siegetowers = convertNegativeToZero(parseInt(req.body.siegetower));
-        const trainees = { batteringrams: batteringrams, siegetowers: siegetowers };
-        await trainTroops(client, user, trainees);
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const batteringRams = convertNegativeToZero(parseInt(req.body.batteringRam));
+    const siegeTowers = convertNegativeToZero(parseInt(req.body.siegeTower));
+    const ballistas = convertNegativeToZero(parseInt(req.body.ballista));
+    const trebuchets = convertNegativeToZero(parseInt(req.body.trebuchet));
+    const trainees = {
+        "archers": 0, "spearmen": 0, "swordsmen": 0, "horsemen": 0, "knights": 0, "batteringRams": batteringRams, "siegeTowers": siegeTowers,
+        "crossbowmen": 0, "ballistas": ballistas, "twoHandedSwordsmen": 0, "longbowmen": 0, "horseArchers": 0, "trebuchets": trebuchets, "halberdiers": 0
+    };
+
+    const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
+    if (errors.isEmpty() && requiredValidationResult) {
+        await trainTroops(client, user.username, trainees);
     }
     res.redirect('/town/workshop');
 });
 
 app.get("/town/stables", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
+    const army = await getArmyByEmail(client, req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("stables", user.stablesLevel)
-    res.render('pages/stables', { user, totalCost });
+    res.render('pages/stables', { user, totalCost, army });
 });
 
 app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
+    const armory = await getArmoryByEmail(client, req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("blacksmith", user.blacksmithLevel)
-    res.render('pages/blacksmith', { user, totalCost });
+    res.render('pages/blacksmith', { user, totalCost, armory });
 });
 
 app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
@@ -551,17 +583,18 @@ app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
     check('sword').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
     const errors = validationResult(req);
-    if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const boots = convertNegativeToZero(parseInt(req.body.boots));
-        const bracers = convertNegativeToZero(parseInt(req.body.bracers));
-        const helmets = convertNegativeToZero(parseInt(req.body.helmet));
-        const lances = convertNegativeToZero(parseInt(req.body.lance));
-        const longbows = convertNegativeToZero(parseInt(req.body.longbow));
-        const shields = convertNegativeToZero(parseInt(req.body.shield));
-        const spears = convertNegativeToZero(parseInt(req.body.spear));
-        const swords = convertNegativeToZero(parseInt(req.body.sword));
-        const craftingOrder = { boots: boots, bracers: bracers, helmets: helmets, lances: lances, longbows: longbows, shields: shields, spears: spears, swords: swords };
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const boots = convertNegativeToZero(parseInt(req.body.boots));
+    const bracers = convertNegativeToZero(parseInt(req.body.bracers));
+    const helmets = convertNegativeToZero(parseInt(req.body.helmet));
+    const lances = convertNegativeToZero(parseInt(req.body.lance));
+    const longbows = convertNegativeToZero(parseInt(req.body.longbow));
+    const shields = convertNegativeToZero(parseInt(req.body.shield));
+    const spears = convertNegativeToZero(parseInt(req.body.spear));
+    const swords = convertNegativeToZero(parseInt(req.body.sword));
+    const craftingOrder = { boots: boots, bracers: bracers, helmets: helmets, lances: lances, longbows: longbows, shields: shields, spears: spears, swords: swords };
+    const requiredValidationResult = validateRequiredProductionLevel(user, craftingOrder);
+    if (errors.isEmpty() && requiredValidationResult) {
         await craftArmor(client, user, craftingOrder);
     }
     res.redirect('/town/blacksmith');
@@ -573,15 +606,25 @@ app.get("/land", requiresAuth(), async (req, res) => {
 
 app.post("/town/stables/train", requiresAuth(), urlencodedParser, [
     check('horsemen').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
-    check('knights').isNumeric({ no_symbols: true }).isLength({ max: 4 })
+    check('knights').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('horseArchers').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
     const errors = validationResult(req)
-    if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const horsemen = convertNegativeToZero(parseInt(req.body.horsemen));
-        const knights = convertNegativeToZero(parseInt(req.body.knights));
-        const trainees = { horsemen: horsemen, knights: knights };
-        await trainTroops(client, user, trainees);
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const horsemen = convertNegativeToZero(parseInt(req.body.horsemen));
+    const knights = convertNegativeToZero(parseInt(req.body.knights));
+    const horseArchers = convertNegativeToZero(parseInt(req.body.horseArchers));
+
+    const trainees = {
+        "archers": 0, "spearmen": 0, "swordsmen": 0, "horsemen": horsemen, "knights": knights, "batteringRams": 0, "siegeTowers": 0,
+        "crossbowmen": 0, "ballistas": 0, "twoHandedSwordsmen": 0, "longbowmen": 0, "horseArchers": horseArchers, "trebuchets": 0, "halberdiers": 0
+    };
+
+    const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
+    if (errors.isEmpty() && requiredValidationResult) {
+        await trainTroops(client, user.username, trainees);
+    } else {
+        console.log("apa")
     }
     res.redirect('/town/stables');
 });
@@ -589,16 +632,31 @@ app.post("/town/stables/train", requiresAuth(), urlencodedParser, [
 app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
     check('archers').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
     check('spearmen').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
-    check('swordsmen').isNumeric({ no_symbols: true }).isLength({ max: 4 })
+    check('swordsmen').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('crossbowmen').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('twoHandedSwordsmen').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('longbowmen').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('halberdiers').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
-    const errors = validationResult(req)
-    if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const archers = convertNegativeToZero(parseInt(req.body.archers));
-        const spearmen = convertNegativeToZero(parseInt(req.body.spearmen));
-        const swordsmen = convertNegativeToZero(parseInt(req.body.swordsmen));
-        const trainees = { archers: archers, spearmen: spearmen, swordsmen: swordsmen };
-        await trainTroops(client, user, trainees);
+    const errors = validationResult(req);
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const archers = convertNegativeToZero(parseInt(req.body.archers));
+    const spearmen = convertNegativeToZero(parseInt(req.body.spearmen));
+    const swordsmen = convertNegativeToZero(parseInt(req.body.swordsmen));
+    const crossbowmen = convertNegativeToZero(parseInt(req.body.crossbowmen));
+    const twoHandedSwordsmen = convertNegativeToZero(parseInt(req.body.twoHandedSwordsmen));
+    const longbowmen = convertNegativeToZero(parseInt(req.body.longbowmen));
+    const halberdiers = convertNegativeToZero(parseInt(req.body.halberdiers));
+    const trainees = {
+        "archers": archers, "spearmen": spearmen, "swordsmen": swordsmen, "horsemen": 0, "knights": 0, "batteringRams": 0, "siegeTowers": 0,
+        "crossbowmen": crossbowmen, "ballistas": 0, "twoHandedSwordsmen": twoHandedSwordsmen, "longbowmen": longbowmen, "horseArchers": 0, "trebuchets": 0, "halberdiers": halberdiers
+    };
+
+    const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
+    if (errors.isEmpty() && requiredValidationResult) {
+        await trainTroops(client, user.username, trainees);
+    } else {
+        console.log("apa")
     }
     res.redirect('/town/barracks');
 });
@@ -606,12 +664,13 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
 app.post("/profile/:username/attack", requiresAuth(), urlencodedParser, [
     check('username').isLength({ min: 5, max: 15 }),
 ], async (req, res) => {
-    //TODO validate //TODO attack limiter? //reset all at midnight? //lose armor //TODO validate db input
+    //TODO attack limiter? //reset all at midnight? //lose armor //TODO validate db input
+    const errors = validationResult(req);
     const attacker = await getUserByEmail(client, req.oidc.user.email);
     const defender = await getUserByUsername(client, req.params.username);
     if (defender === false) {
         res.send("No such user");
-    } else {
+    } else if (errors.isEmpty() && attacker !== defender) {
         console.log(attacker.username + " tries to attack " + defender.username);
         result = await attackFunc(client, attacker, defender);
         res.redirect(`/mailbox/log/${result}`);
@@ -626,15 +685,15 @@ app.get("/land/:type/:number", requiresAuth(), urlencodedParser, [
     const type = req.params.type;
     const resourceId = parseInt(req.params.number);
     const resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
+    const incomeBoost = getResourceBoost(type);
     if (errors.isEmpty() && resources.includes(type)) {
         const user = await getUserByEmail(client, req.oidc.user.email);
         const resourceData = await getResourceFieldData(user, type, resourceId);
-
         if (resourceData.invalidId) {
             res.redirect("/land");
         } else if (resourceData.resourceLevel !== undefined && resourceData.resourceLevel > 0) {
             //use one field for all levels, none to 20
-            res.render('pages/resourcefield', { resourceData, resourceId, type });
+            res.render('pages/resourcefield', { resourceData, resourceId, type, incomeBoost });
         } else {
             res.render('pages/emptyfield', { resourceData, resourceId, type });
         }
@@ -666,16 +725,13 @@ async function checkAll() {
     });
 }
 
-app.get("/api/getAttackPower", requiresAuth(), async (req, res) => {
+app.get("/api/getPowers", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
-    const result = await calculateAttack(user);
-    res.send(JSON.stringify(result))
-});
-
-app.get("/api/getDefensePower", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const result = await calculateDefense(user);
-    res.send(JSON.stringify(result));
+    const army = await getArmyByEmail(client, req.oidc.user.email);
+    const armory = await getArmoryByEmail(client, req.oidc.user.email);
+    const attackValue = await calculateAttack(army, armory);
+    const defenseValue = await calculateDefense(user, army, armory);
+    res.send(JSON.stringify({ attack: attackValue, defense: defenseValue }))
 });
 
 app.get("/api/getIncomes", requiresAuth(), async (req, res) => {
@@ -690,7 +746,8 @@ app.get("/api/getUser/:id", requiresAuth(), urlencodedParser, [
     const errors = validationResult(req)
     if (errors.isEmpty()) {
         const user = await getUserByEmail(client, req.oidc.user.email);
-        const data = { grain: user.grain, lumber: user.lumber, stone: user.stone, iron: user.iron, gold: user.gold, recruits: user.recruits, horses: user.horses, archers: user.archers, spearmen: user.spearmen, swordsmen: user.swordsmen, horsemen: user.horsemen, knights: user.knights, batteringrams: user.batteringrams, siegetowers: user.siegetowers };
+        const army = await getArmyByEmail(client, req.oidc.user.email);
+        const data = { grain: user.grain, lumber: user.lumber, stone: user.stone, iron: user.iron, gold: user.gold, recruits: user.recruits, horses: user.horses, archers: army.archers, spearmen: army.spearmen, swordsmen: army.swordsmen, horsemen: army.horsemen, knights: army.knights, batteringrams: army.batteringRams, siegetowers: army.siegeTowers };
         userMap[user._id] = req.params.id
         res.send(JSON.stringify(data));
     } else {

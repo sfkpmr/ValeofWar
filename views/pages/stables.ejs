@@ -3,7 +3,7 @@
 
 <head>
     <title>Stables</title>
-    <link rel="stylesheet" type="text/css" href="../static/style.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
@@ -27,36 +27,53 @@
             <input type="submit" class="submitButton" value="Construct">
         </form>
 
-
-
         <% } else { %>
 
-            Stables level: <%= user.stablesLevel %> <br>
-                <br>
-                The stables is where you raise horses and train additional soldiers on horseback<br><br>
+            <h1>Stables level: <%= user.stablesLevel %> </h1>
+               
+                The stables is where you raise horses and train additional soldiers on horseback.<br><br>
+                Current horse income: <%= user.stablesLevel * 3 %> <br><br>
                 <div class="training">
                     <form action="/town/stables/train" method="POST">
                         <label for="horsemen"><img src="../static/images/horseman.png" height="35px" title="Horseman">
-                            Current: <%= user.horsemen %>
-                                Train:</label>
-                        <input type="number" id="horsemen" name="horsemen" placeholder="0" min=0 max=9999> Attack
-                        damage: <output id="horsemanAttackDamage">0</output> Defense damage: <output
-                            id="horsemanDefenseDamage">0</output><br>
-                        <label for="knights"><img src="../static/images/knight.png" height="35px" title="Knight">
-                            Current: <%= user.knights %>
-                                Train:</label>
-                        <input type="number" id="knights" name="knights" placeholder="0" min=0 max=9999> Attack damage:
-                        <output id="knightAttackDamage">0</output> Defense damage: <output
-                            id="knightDefenseDamage">0</output><br><br>
-                        <div class="resources">Training cost: <output id="grain">0</output> <img
-                                src="../static/images/grain.png" alt="Grain" title="Grain">, <output
-                                id="iron">0</output> <img src="../static/images/iron-ingots.png" alt="Iron"
-                                title="Iron">,
-                            <output id="gold">0</output> <img src="../static/images/gold-ingots.png" alt="Gold"
-                                title="Gold">, <output id="recruits">0</output>
-                            <img src="../static/images/recruit.png" alt="Recruits" title="Recruits">
-                            and <output id="horses">0</output> <img src="../static/images/horse.png" alt="Horses"
-                                title="Horses">
+                            <div class="tooltip">Horsemen
+                                <span class="tooltiptext">Attack: <output id="horsemanAttackDamage">0</output> Defense: <output
+                                        id="horsemanDefenseDamage">0</output> Level req: <output
+                                        id="horsemanLevelRequirement">0</output> </span>
+                                </div></label><br>
+                                Current: <%= army.horsemen %> Train:
+                        <input type="number" id="horsemen" name="horsemen" placeholder="0" min=0 max=9999> <br>
+                         <label for="knights"><img src="../static/images/knight.png" height="35px" title="Knight">
+                            <div class="tooltip">Knights
+                                <span class="tooltiptext">Attack: <output id="knightAttackDamage">0</output> Defense: <output
+                                        id="knightDefenseDamage">0</output> Level req: <output
+                                        id="knightLevelRequirement">0</output> </span>
+                                </div></label><br>
+                                Current: <%= army.knights %> Train:
+                        <% if (user.stablesLevel >= 5) { %>
+                        <input type="number" id="knights" name="knights" placeholder="0" min=0 max=9999> 
+                        <% } else { %>
+                            <input type="number" id="knights" name="knights" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                        <% } %><br>
+
+                            <label for="horseArcher"><img src="../static/images/horseArcher.png" height="35px" title="Horse archer">
+                                <div class="tooltip">Horse archers
+                                    <span class="tooltiptext">Attack: <output id="horseArcherAttackDamage">0</output> Defense: <output
+                                            id="horseArcherDefenseDamage">0</output> Level req: <output
+                                            id="horseArcherLevelRequirement">0</output> </span>
+                                    </div></label><br>
+                                    Current: <%= army.horseArchers %> Train:
+                            <% if (user.stablesLevel >= 15) { %>
+                            <input type="number" id="horseArchers" name="horseArchers" placeholder="0" min=0 max=9999> 
+                            <% } else { %>
+                                <input type="number" id="horseArchers" name="horseArchers" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                            <% } %><br><br>
+
+                        <div class="resources">Training cost:  <img src="../static/images/grain.png" alt="Grain" title="Grain"> <output id="grain">0</output>
+                            <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron">  <output id="iron">0</output>
+                           <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold">  <output id="gold">0</output> 
+                            <img src="../static/images/recruit.png" alt="Recruits" title="Recruits"> <output id="recruits">0</output>
+                                        and  <img src="../static/images/horse.png" alt="Horses" title="Horses"> <output id="horses">0</output>
                         </div><br>
 
                         <input type="submit" class="submitButton" value="Train">
@@ -67,12 +84,11 @@
 
                 <% if (user.stablesLevel <=19){ %>
                     <div class="resources">
-                        Upgrade cost: <%= totalCost.lumberCost %> <img src="../static/images/wood.png" alt="Lumber"
-                                title="Lumber">, <%= totalCost.stoneCost %> <img src="../static/images/stone.png"
-                                    alt="Stone" title="Stone">, <%= totalCost.ironCost %>
-                                    <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron">
-                                    and <%= totalCost.goldCost %>
-                                        <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold"></div>
+                        Upgrade cost: <img src="../../static/images/wood.png" height="35px" title="Lumber"> 
+                <%= totalCost.lumberCost %> <img src="../../static/images/stone.png" height="35px" title="Stone"> 
+                    <%= totalCost.stoneCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron"> 
+                    <%= totalCost.ironCost %> and <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
+                     <%= totalCost.goldCost %></div>
                     <br>
                     <form action="/town/stables/upgrade" method="POST">
                         <input type="submit" class="submitButton" value="Upgrade">

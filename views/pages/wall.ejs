@@ -3,7 +3,7 @@
 
 <head>
     <title>Wall</title>
-    <link rel="stylesheet" type="text/css" href="../static/style.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
@@ -11,9 +11,7 @@
 
 <body>
 
-    <!-- TODO server check barrack exists and has levels-->
-
-    Wall level: <%= user.wallLevel %> <br>
+    <h1>Wall level: <%= user.wallLevel %></h1>
         <br>
         Walls boosts your defenses and hides part of your resources from enemy raiders.<br><br>
 
@@ -28,13 +26,11 @@
                     <% if (!atMaxHealth) { %>
 
                         <div class="resources">
-                            Repair cost: <%= repairCost.lumberCost %> <img src="../static/images/wood.png"
-                                    alt="Lumber" title="Lumber">,
-                                <%= repairCost.stoneCost %> <img src="../static/images/stone.png" alt="Stone"
-                                        title="Stone">, <%= repairCost.ironCost %>
-                                        <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> and
-                                        <%= repairCost.goldCost %>
-                                            <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold">
+                            Repair cost: <img src="../../static/images/wood.png" height="35px" title="Lumber"> 
+                            <%= repairCost.lumberCost %> <img src="../../static/images/stone.png" height="35px" title="Stone"> 
+                                <%= repairCost.stoneCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron"> 
+                                <%= repairCost.ironCost %> and <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
+                                 <%= repairCost.goldCost %>
                         </div>
 
                         <form action="/town/wall/repair" method="POST">
@@ -43,13 +39,11 @@
                         <%}%>
                             <% if (user.wallLevel <=19){ %>
                                 <div class="resources">
-                                    Upgrade cost: <%= upgradeCost.lumberCost %> <img src="../static/images/wood.png"
-                                            alt="Lumber" title="Lumber">,
-                                        <%= upgradeCost.stoneCost %> <img src="../static/images/stone.png" alt="Stone"
-                                                title="Stone">, <%= upgradeCost.ironCost %>
-                                                <img src="../static/images/iron-ingots.png" alt="Iron" title="Iron"> and
-                                                <%= upgradeCost.goldCost %>
-                                                    <img src="../static/images/gold-ingots.png" alt="Gold" title="Gold">
+                                    Upgrade cost: <img src="../../static/images/wood.png" height="35px" title="Lumber"> 
+                                    <%= upgradeCost.lumberCost %> <img src="../../static/images/stone.png" height="35px" title="Stone"> 
+                                        <%= upgradeCost.stoneCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron"> 
+                                        <%= upgradeCost.ironCost %> and <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
+                                         <%= upgradeCost.goldCost %>
                                 </div>
                                 <br>
                                 <form action="/town/wall/upgrade" method="POST">

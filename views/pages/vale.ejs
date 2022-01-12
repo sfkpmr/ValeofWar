@@ -23,14 +23,14 @@
       <a href="/logout">Log out</a>
     </div>
     <div class="side">
-
       <div class="divider">
         <span class="divider-line"></span>
         <span class="divider-content">
             Resources
         </span>
         <span class="divider-line"></span>
-    </div><br>
+    </div>
+    <p class="info">Per 15 min</p>
       <t> <img src="../static/images/grain.png" alt="Grain" title="Grain"> <output id="grain">
           <%= user.grain %></output> (+<output id="grainIncome"><%= grainIncome%></output>) </t><br>
       <t> <img src="../static/images/wood.png" alt="Lumber" title="Lumber"> <output id="lumber">
@@ -62,28 +62,52 @@
         </span>
         <span class="divider-line"></span>
     </div><br>
+    <p class="troopColumns">
       <t> <img src="../static/images/archer.png" alt="Archers" title="Archers"> <output id="archers">
-          <%= user.archers %>
+          <%= army.archers %>
         </output></t><br>
       <t> <img src="../static/images/spearman.png" alt="Spearmen" title="Spearmen"> <output id="spearmen">
-          <%= user.spearmen %>
+          <%= army.spearmen %>
         </output></t><br>
       <t> <img src="../static/images/swordsman.png" alt="Swordsmen" title="Swordsmen"> <output id="swordsmen">
-          <%= user.swordsmen %>
+          <%= army.swordsmen %>
         </output></t><br>
       <t> <img src="../static/images/horseman.png" alt="Horsemen" title="Horsemen"> <output id="horsemen">
-          <%= user.horsemen %>
+          <%= army.horsemen %>
         </output></t><br>
       <t> <img src="../static/images/knight.png" alt="Knights" title="Knights"> <output id="knights">
-          <%= user.knights %>
+          <%= army.knights %>
         </output></t><br>
       <t> <img src="../static/images/batteringram.png" alt="Battering rams" title="Battering rams"> <output
           id="batteringrams">
-          <%= user.batteringrams %>
+          <%= army.batteringRams %>
         </output></t><br>
       <t> <img src="../static/images/siegetower.png" alt="Siege towers" title="Siege towers"> <output id="siegetowers">
-          <%= user.siegetowers %>
-        </output></t><br><br>
+          <%= army.siegeTowers %>
+        </output></t><br>
+        <t> <img src="../static/images/crossbow.png" alt="Crossbowmen" title="Crossbowmen"> <output id="crossbowmen">
+          <%= army.crossbowmen %>
+        </output></t><br>
+        <t> <img src="../static/images/halberd.png" alt="Halberdiers" title="Halberdiers"> <output id="halberdiers">
+          <%= army.halberdiers %>
+        </output></t><br>
+        <t> <img src="../static/images/horseArcher.png" alt="Horse archers" title="Horse archers"> <output id="horseArchers">
+          <%= army.horseArchers %>
+        </output></t><br>
+        <t> <img src="../static/images/ballista.png" alt="Ballistas" title="Ballistas"> <output id="ballistas">
+          <%= army.ballistas %>
+        </output></t><br>
+        <t> <img src="../static/images/trebuchet.png" alt="Trebuchets" title="Trebuchets"> <output id="trebuchets">
+          <%= army.trebuchets %>
+        </output></t><br>
+        <t> <img src="../static/images/twoHandedSword.png" alt="Two-handed swordsmen" title="Two-handed swordsmen"> <output id="twoHandedSwordsmen">
+          <%= army.twoHandedSwordsmen %>
+        </output></t><br>
+        <t> <img src="../static/images/bowman.png" alt="Longbowmen" title="Longbowmen"> <output id="longbowmen">
+          <%= army.longbowmen %>
+        </output></t>
+      </p>
+        <br>
         <div class="divider">
           <span class="divider-line"></span>
           <span class="divider-content">
@@ -91,17 +115,21 @@
           </span>
           <span class="divider-line"></span>
       </div>
-      <br>
+    
+      <p class="powersColumns">
       <t><img src="../static/images/attack.png" alt="Attack damage" title="Attack damage"> <output id="attackdamage">
           <output id="attack">
             <%= attackValue %>
-          </output></t><br>
+          </output></t>
       <t><img src="../static/images/defend.png" alt="Defense damage" title="Defense damage"> <output id="defensedamage">
           <output id="defense">
             <%= defenseValue %>
           </output></t><br>
-
+        </p>
       <a href="/credits">Credits</a>
+      <% if (user.username === "johanna") { %>
+        <a href="http://10.1.10.8:89/applications/61d626fc3c8b6a2cc73f09b3/pages/61d626fc3c8b6a2cc73f09b6">Admin</a>
+        <% } %>
     </div>
     <iframe src="/land" name="iframe"></iframe>
   </div>

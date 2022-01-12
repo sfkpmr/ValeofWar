@@ -5,20 +5,23 @@
     <title>
         <%= profileUser.username %>
     </title>
+        <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-    <%= profileUser.username %><br><br>
+    <h1><%= profileUser.username %></h1><br>
 
         <form action="/profile/<%= profileUser.username %>/attack" method="post">
-            <input type="submit" value="Attack">
+            <input type="submit" class="submitButton" value="Attack">
         </form>
 
         <form action="/messages/new/<%=profileUser.username%>">
-            <input type="submit" value="Message">
+            <input type="submit" class="submitButton" value="Message">
         </form>
-
 
 </body>
 

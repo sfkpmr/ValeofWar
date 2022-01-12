@@ -5,7 +5,7 @@
     <title>
         <%= resourceData.title %> - Level: <%= resourceData.resourceLevel %>
     </title>
-    <link rel="stylesheet" type="text/css" href="../../static/style.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
@@ -13,20 +13,19 @@
 
 <body>
 
-    <%= resourceData.title %> level: <%= resourceData.resourceLevel %>
-            <br>
+    <h1><%= resourceData.title %> level: <%= resourceData.resourceLevel %></h1>
+         
             <br>
             The <%= resourceData.title.toLowerCase() %> provides additional resources for your town.
                 <br> <br>
                 <% if (resourceData.resourceLevel <=19){ %>
-                    <div class="resources"> Upgrade cost: <%= resourceData.totalCost.lumberCost %> <img
-                                src="../../static/images/wood.png" height="35px" title="Lumber">
-                            <%= resourceData.totalCost.stoneCost %> <img src="../../static/images/stone.png"
-                                    height="35px" title="Stone">
-                                <%= resourceData.totalCost.ironCost %> <img src="../../static/images/iron-ingots.png"
-                                        height="35px" title="Iron">
-                                    and <%= resourceData.totalCost.goldCost %>
-                                        <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
+                    Upgrading this resource will increase our income by <%= incomeBoost%>.<br><br>
+
+                    <div class="resources"> Upgrade cost: <img src="../../static/images/wood.png" height="35px" title="Lumber"> 
+                        <%= resourceData.totalCost.lumberCost %> <img src="../../static/images/stone.png" height="35px" title="Stone"> 
+                            <%= resourceData.totalCost.stoneCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron"> 
+                            <%= resourceData.totalCost.ironCost %> and <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
+                             <%= resourceData.totalCost.goldCost %>
                     </div>
                     <br>
 
