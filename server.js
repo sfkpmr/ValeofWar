@@ -510,9 +510,9 @@ app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const maxWallHealth = user.wallLevel * 100;
     if (user.currentWallHealth < maxWallHealth) {
-        const totalCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel - 1)
-        if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
-            await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
+        const totalCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel)
+        if (await checkIfCanAfford(client, user.username, totalCost.goldCost * 0.5, totalCost.lumberCost * 0.5, totalCost.stoneCost * 0.5, totalCost.ironCost * 0.5, 0, 0, 0)) {
+            await removeResources(client, user.username, totalCost.goldCost * 0.5, totalCost.lumberCost * 0.5, totalCost.stoneCost * 0.5, totalCost.ironCost * 0.5, 0, 0, 0);
             restoreWallHealth(client, user); //await?
         } else {
             console.log("bbb-3");
