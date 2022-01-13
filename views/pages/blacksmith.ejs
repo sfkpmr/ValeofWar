@@ -11,9 +11,6 @@
 
 <body>
 
-    <!-- TODO server check barrack exists and has levels-->
-    <!-- TODO detect empty fields? Gives NaN crafting cost-->
-
     <% if (user.blacksmithLevel===0){ %>
 
         We don't have a blacksmith yet!<br>
@@ -35,7 +32,7 @@
                 <br>
                 <div class="training">
                     <form action="/town/blacksmith/craft" method="POST">
-                        <label for="boots"><img src="../static/images/boots.png" height="35px" title="Boots"><div class="tooltip">Boots
+                        <label for="boots"><img src="../static/images/boots.png" height="35px" title="Boots"><div class="tooltip"> Boots
                             <span class="tooltiptext">Attack: <output id="bootAttackDamage">0</output> Defense: <output
                                     id="bootDefenseDamage">0</output> Level req: <output
                                     id="bootLevelRequirement">0</output>  </span>
@@ -44,7 +41,7 @@
                         <input type="number" id="boots" name="boots" placeholder="0" min=0 max=9999> 
                         <br>
                         <label for="bracers"><img src="../static/images/bracers.png" height="35px" title="Bracers">
-                            <div class="tooltip">Bracers
+                            <div class="tooltip"> Bracers
                                 <span class="tooltiptext">Attack: <output id="bracerAttackDamage">0</output> Defense: <output
                                         id="bracerDefenseDamage">0</output> Level req: <output
                                         id="bracerLevelRequirement">0</output>  </span>
