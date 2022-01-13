@@ -15,7 +15,6 @@
 
     <h1><%= resourceData.title %> level: <%= resourceData.resourceLevel %></h1>
          
-            <br>
             The <%= resourceData.title.toLowerCase() %> provides additional resources for your town.
                 <br> <br>
                 <% if (resourceData.resourceLevel <=19){ %>
@@ -34,7 +33,7 @@
                     </form>
 
                     <% } else { %>
-                        The <%= resourceData.title.toLowerCase() %> is already at max level!
+                        This <%= resourceData.title.toLowerCase() %> is already at max level!
                             <% } %>
 
 </body>

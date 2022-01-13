@@ -13,7 +13,7 @@
 
     <h1>Wall level: <%= user.wallLevel %></h1>
         <br>
-        Walls boosts your defenses and hides part of your resources from enemy raiders.<br><br>
+        Walls boost your defenses and hide part of your resources from enemy raiders.<br><br>
 
         <% if (user.currentWallHealth === 0){ %>
             Current defense bonus: +0%
@@ -49,10 +49,8 @@
                                 <form action="/town/wall/upgrade" method="POST">
                                     <input type="submit" class="submitButton" value="Upgrade">
                                 </form>
-                                <% } else { %>
-                                    <br>
-                                    The walls are already at max level!
-                                    <% } %>
+                                <% }  %>
+                                   
 
 </body>
 

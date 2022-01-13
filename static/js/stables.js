@@ -47,8 +47,8 @@ function stablesTrainCost() {
     document.getElementById("grain").innerText = grainCost;
     document.getElementById("iron").innerText = ironCost;
     document.getElementById("gold").innerText = goldCost;
-    document.getElementById("recruits").innerText = horsemen + knights;
-    document.getElementById("horses").innerText = horsemen + knights;
+    document.getElementById("recruits").innerText = horsemen + knights + horseArchers;
+    document.getElementById("horses").innerText = horsemen + knights + horseArchers;
 }
 
 document.getElementById("horsemen").addEventListener("input", stablesTrainCost);
