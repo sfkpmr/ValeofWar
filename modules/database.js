@@ -183,9 +183,14 @@ databaseObject = {
         await client.db("gamedb").collection("armies").updateOne({ "username": username }, { $set: data });
     },
     incArmorValues: async function (client, username, data) {
-        console.log('apa')
         await client.db("gamedb").collection("armories").updateOne({ "username": username }, { $inc: data });
-    }
+    },
+    deleteArmy: async function (client, email) {
+        await client.db("gamedb").collection("armies").deleteOne({ "email": email });
+    },
+    deleteArmory: async function (client, email) {
+        await client.db("gamedb").collection("armories").deleteOne({ "email": email });
+    },
 
 };
 

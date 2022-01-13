@@ -34,7 +34,7 @@ const client = new MongoClient(uri);
 const { addTrade, buyTrade } = require("./modules/market.js");
 const { getAttackLog, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
 const { trainTroops } = require("./modules/troops.js");
-const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource, getArmyByEmail, getArmoryByEmail } = require("./modules/database.js");
+const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource, getArmyByEmail, getArmoryByEmail, deleteArmy, deleteArmory } = require("./modules/database.js");
 const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData, validateRequiredProductionLevel } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getAllIncomes, getResourceBoost } = require("./modules/resources.js");
 
@@ -171,13 +171,15 @@ app.get("/settings", requiresAuth(), async (req, res) => {
     res.render("pages/settings", { profileUser })
 });
 
-//TODO rensa alla collection
+//TODO radera mellanden och loggar?
 app.delete("/settings/delete", requiresAuth(), async (req, res) => {
     //Accept prompt remains after first click, needs to click twice? Causes 'TypeError: Cannot read property '_id' of null'
     const user = await getUserByEmail(client, req.oidc.user.email);
     const id = `auth0|${user._id}`
 
     await deleteUser(client, user._id);
+    await deleteArmy(client, req.oidc.user.email)
+    await deleteArmory(client, req.oidc.user.email)
 
     management.deleteUser({ id: id }, function (err) {
         if (err) {
