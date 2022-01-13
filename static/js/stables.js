@@ -1,6 +1,6 @@
-const horseman = { grain: 100, iron: 25, attackDamage: 5, defenseDamage: 5, levelRequirement: 0 };
+const horseman = { grain: 100, iron: 50, gold: 30, attackDamage: 5, defenseDamage: 5, levelRequirement: 0 };
 const knight = { grain: 100, iron: 100, gold: 50, attackDamage: 20, defenseDamage: 20, levelRequirement: 5 };
-const horseArcher = { grain: 100, lumber: 15, iron: 100, gold: 100, attackDamage: 20, defenseDamage: 20, levelRequirement: 15 };
+const horseArcher = { grain: 100, lumber: 50, iron: 100, gold: 100, attackDamage: 20, defenseDamage: 20, levelRequirement: 15 };
 
 function stablesTrainCost() {
     let grainCost = 0, lumberCost = 0, ironCost = 0, goldCost = 0;
@@ -35,16 +35,18 @@ function stablesTrainCost() {
     grainCost += knights * knight.grain;
     grainCost += horseArchers * horseArcher.grain;
 
-    lumberCost += horseArchers * horseArcher.grain;
+    lumberCost += horseArchers * horseArcher.lumber;
 
     ironCost += horsemen * horseman.iron;
     ironCost += knights * knight.iron;
-    ironCost += horseArchers * horseArcher.grain;
+    ironCost += horseArchers * horseArcher.iron;
 
+    goldCost += horsemen * horseman.gold;
     goldCost += knights * knight.gold;
-    goldCost += horseArchers * horseArcher.grain;
+    goldCost += horseArchers * horseArcher.gold;
 
     document.getElementById("grain").innerText = grainCost;
+    document.getElementById("lumber").innerText = lumberCost;
     document.getElementById("iron").innerText = ironCost;
     document.getElementById("gold").innerText = goldCost;
     document.getElementById("recruits").innerText = horsemen + knights + horseArchers;

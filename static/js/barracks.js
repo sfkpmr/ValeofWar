@@ -1,9 +1,9 @@
-const archer = { grain: 25, lumber: 50, gold: 10, attackDamage: 10, defenseDamage: 10, levelRequirement: 0 };
-const spearman = { grain: 25, lumber: 50, attackDamage: 10, defenseDamage: 10, levelRequirement: 0 };
-const swordsman = { grain: 50, iron: 50, gold: 25, attackDamage: 20, defenseDamage: 20, levelRequirement: 5 };
-const crossbowman = { grain: 15, lumber: 50, iron: 10, gold: 50, attackDamage: 20, defenseDamage: 20, levelRequirement: 10 };
-const twoHandedSwordsman = { grain: 100, lumber: 10, iron: 100, gold: 100, attackDamage: 20, defenseDamage: 20, levelRequirement: 20 };
-const halberdier = { grain: 100, lumber: 50, iron: 100, gold: 100, attackDamage: 20, defenseDamage: 20, levelRequirement: 15 };
+const archer = { grain: 10, lumber: 5, gold: 5, attackDamage: 10, defenseDamage: 10, levelRequirement: 0 };
+const spearman = { grain: 5, lumber: 5, attackDamage: 10, defenseDamage: 10, levelRequirement: 0 };
+const swordsman = { grain: 20, lumber: 20, iron: 20, gold: 20, attackDamage: 20, defenseDamage: 20, levelRequirement: 5 };
+const crossbowman = { grain: 50, lumber: 50, iron: 25, gold: 25, attackDamage: 20, defenseDamage: 20, levelRequirement: 10 };
+const twoHandedSwordsman = { grain: 200, lumber: 0, iron: 100, gold: 100, attackDamage: 20, defenseDamage: 20, levelRequirement: 20 };
+const halberdier = { grain: 50, lumber: 50, iron: 50, gold: 50, attackDamage: 20, defenseDamage: 20, levelRequirement: 15 };
 const longbowman = { grain: 15, lumber: 50, iron: 10, gold: 100, attackDamage: 20, defenseDamage: 20, levelRequirement: 10 };
 
 function barracksTrainCost() {
@@ -77,6 +77,7 @@ function barracksTrainCost() {
 
     lumberCost += archers * archer.lumber;
     lumberCost += spearmen * spearman.lumber;
+    lumberCost += swordsmen * swordsman.lumber;
     lumberCost += crossbowmen * crossbowman.lumber;
     lumberCost += twoHandedSwordsmen * twoHandedSwordsman.lumber;
     lumberCost += halberdiers * halberdier.lumber;

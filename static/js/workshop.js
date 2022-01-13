@@ -1,7 +1,7 @@
-const batteringRam = { lumber: 500, iron: 100, gold: 50, attackDamage: 250, levelRequirement: 5 };
-const siegeTower = { lumber: 1000, iron: 100, gold: 100, attackDamage: 500, levelRequirement: 10 };
-const ballista = { lumber: 1000, iron: 100, gold: 100, attackDamage: 150, defenseDamage: 100, levelRequirement: 15 };
-const trebuchet = { lumber: 1500, iron: 100, gold: 100, attackDamage: 250, levelRequirement: 20 };
+const batteringRam = { lumber: 1500, iron: 500, gold: 150, attackDamage: 250, levelRequirement: 5 };
+const siegeTower = { lumber: 3000, iron: 500, gold: 300, attackDamage: 500, levelRequirement: 10 };
+const ballista = { lumber: 400, iron: 100, gold: 100, attackDamage: 150, defenseDamage: 100, levelRequirement: 15 };
+const trebuchet = { lumber: 750, iron: 100, gold: 0, attackDamage: 250, levelRequirement: 20 };
 
 function workshopBuildCost() {
     var lumberCost = 0, ironCost = 0, goldCost = 0;
@@ -47,13 +47,13 @@ function workshopBuildCost() {
 
     ironCost += batteringRams * batteringRam.iron;
     ironCost += siegeTowers * siegeTower.iron;
-    ironCost += ballistas * ballista.lumber;
-    ironCost += trebuchets * trebuchet.lumber;
+    ironCost += ballistas * ballista.iron;
+    ironCost += trebuchets * trebuchet.iron;
 
     goldCost += batteringRams * batteringRam.gold;
     goldCost += siegeTowers * siegeTower.gold;
-    goldCost += ballistas * ballista.lumber;
-    goldCost += trebuchets * trebuchet.lumber;
+    goldCost += ballistas * ballista.gold;
+    goldCost += trebuchets * trebuchet.gold;
 
     document.getElementById("lumber").innerText = lumberCost;
     document.getElementById("iron").innerText = ironCost;

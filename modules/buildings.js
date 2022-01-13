@@ -1,21 +1,20 @@
 const { incDatabaseValue, setDatabaseValue, incArmorValues } = require("../modules/database.js");
 const { checkIfCanAfford, removeResources } = require("../modules/resources.js");
 
-const archer = { grain: 25, lumber: 50, gold: 10, levelRequirement: 0 };
-const spearman = { grain: 25, lumber: 50, levelRequirement: 0 };
-const swordsman = { grain: 50, iron: 50, gold: 25, levelRequirement: 5 };
-const horseman = { grain: 100, iron: 25, levelRequirement: 0 };
+const archer = { grain: 10, lumber: 5, gold: 5, levelRequirement: 0 };
+const spearman = { grain: 5, lumber: 5, levelRequirement: 0 };
+const swordsman = { grain: 20, lumber: 20, iron: 20, gold: 20, levelRequirement: 5 };
+const horseman = { grain: 100, iron: 50, gold: 30, levelRequirement: 0 };
 const knight = { grain: 100, iron: 100, gold: 50, levelRequirement: 5 };
-const batteringRam = { lumber: 500, iron: 100, gold: 50, levelRequirement: 5 };
-const siegeTower = { lumber: 1000, iron: 100, gold: 100, levelRequirement: 10 };
-
-const crossbowman = { grain: 15, lumber: 50, iron: 10, gold: 50, levelRequirement: 10 };
-const ballista = { grain: 0, lumber: 1000, iron: 100, gold: 100, levelRequirement: 15 };
-const twoHandedSwordsman = { grain: 100, lumber: 10, iron: 100, gold: 100, levelRequirement: 20 };
-const halberdier = { grain: 100, lumber: 50, iron: 100, gold: 100, levelRequirement: 15 };
+const batteringRam = { lumber: 1500, iron: 500, gold: 150, levelRequirement: 5 };
+const siegeTower = { lumber: 3000, iron: 500, gold: 300, levelRequirement: 10 };
+const crossbowman = { grain: 50, lumber: 50, iron: 25, gold: 25, levelRequirement: 10 };
+const ballista = { grain: 0, lumber: 400, iron: 100, gold: 100, levelRequirement: 15 };
+const twoHandedSwordsman = { grain: 200, lumber: 0, iron: 100, gold: 100, levelRequirement: 20 };
+const halberdier = { grain: 50, lumber: 50, iron: 50, gold: 50, levelRequirement: 15 };
 const longbowman = { grain: 15, lumber: 50, iron: 10, gold: 100, levelRequirement: 10 };
-const horseArcher = { grain: 100, lumber: 15, iron: 100, gold: 100, levelRequirement: 15 };
-const trebuchet = { grain: 0, lumber: 1500, iron: 100, gold: 100, levelRequirement: 20 };
+const horseArcher = { grain: 100, lumber: 50, iron: 100, gold: 100, levelRequirement: 15 };
+const trebuchet = { grain: 0, lumber: 750, iron: 100, gold: 0, levelRequirement: 20 };
 
 const boot = { iron: 25, levelRequirement: 0 };
 const bracer = { iron: 25, levelRequirement: 0 };
