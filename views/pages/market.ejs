@@ -3,10 +3,16 @@
 <head>
 
     <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
 
 </head>
 
 <body>
+
+    <h1>Make an offer</h1>
+
     <form action="/market/sell" method="post">
         <label for="sellResource">Trade</label>
         <input type="number" id="sellAmount" name="sellAmount" value="100" min=100 max=9999 required>
@@ -33,6 +39,7 @@
                 <%}%>
     </form>
 
+    <h1>Available offers</h1>
 
     <% for (let i=0; i < trades.length; i++) { %>
         <form class="form-inline" method="post">
