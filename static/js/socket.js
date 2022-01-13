@@ -21,6 +21,13 @@ socket.on('sync', async function () {
         document.getElementById("knights").innerText = json.knights;
         document.getElementById("batteringrams").innerText = json.batteringrams;
         document.getElementById("siegetowers").innerText = json.siegetowers;
+        document.getElementById("longbowmen").innerText = json.longbowmen;
+        document.getElementById("crossbowmen").innerText = json.crossbowmen;
+        document.getElementById("halberdiers").innerText = json.halberdiers;
+        document.getElementById("twoHandedSwordsmen").innerText = json.twoHandedSwordsmen;
+        document.getElementById("ballistas").innerText = json.ballistas;
+        document.getElementById("trebuchets").innerText = json.trebuchets;
+        document.getElementById("horseArchers").innerText = json.horseArchers;
     } else {
         alert("HTTP-Error: " + response.status);
     }

@@ -749,7 +749,12 @@ app.get("/api/getUser/:id", requiresAuth(), urlencodedParser, [
     if (errors.isEmpty()) {
         const user = await getUserByEmail(client, req.oidc.user.email);
         const army = await getArmyByEmail(client, req.oidc.user.email);
-        const data = { grain: user.grain, lumber: user.lumber, stone: user.stone, iron: user.iron, gold: user.gold, recruits: user.recruits, horses: user.horses, archers: army.archers, spearmen: army.spearmen, swordsmen: army.swordsmen, horsemen: army.horsemen, knights: army.knights, batteringrams: army.batteringRams, siegetowers: army.siegeTowers };
+        const data = {
+            grain: user.grain, lumber: user.lumber, stone: user.stone, iron: user.iron, gold: user.gold, recruits: user.recruits, horses: user.horses, archers: army.archers,
+            spearmen: army.spearmen, swordsmen: army.swordsmen, horsemen: army.horsemen, knights: army.knights, batteringrams: army.batteringRams, siegetowers: army.siegeTowers,
+            trebuchets: army.trebuchets, ballistas: army.ballistas, crossbowmen: army.crossbowmen, halberdiers: army.halberdiers, longbowmen: army.longbowmen,
+            twoHandedSwordsmen: army.twoHandedSwordsmen, horseArchers: army.horseArchers
+        };
         userMap[user._id] = req.params.id
         res.send(JSON.stringify(data));
     } else {
