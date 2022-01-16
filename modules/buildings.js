@@ -356,8 +356,7 @@ buildingObject = {
         return Math.round(cost / 100) * 100;
     },
     restoreWallHealth: async function (client, user) {
-        const newHealth = user.wallLevel * 100;
-        const data = { currentWallHealth: newHealth };
+        const data = { currentWallHealth: (user.wallLevel + 1) * 100 };
         await setDatabaseValue(client, user.username, data);
     },
     lowerWallHealth: async function (client, defender, amount) {
