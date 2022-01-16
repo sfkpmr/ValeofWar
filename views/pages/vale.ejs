@@ -117,15 +117,25 @@
       </div>
     
       <p class="powersColumns">
-      <t><img src="../static/images/attack.png" alt="Attack damage" title="Attack damage"> <output id="attackdamage">
+      <t><img src="../static/images/attack.png" alt="Attack damage" title="Attack"> <output id="attackdamage">
           <output id="attack">
             <%= attackValue %>
           </output></t>
-      <t><img src="../static/images/defend.png" alt="Defense damage" title="Defense damage"> <output id="defensedamage">
+      <t><img src="../static/images/defend.png" alt="Defense damage" title="Defense"> <output id="defensedamage">
           <output id="defense">
             <%= defenseValue %>
           </output></t><br>
         </p>
+        <p class="powersColumns">
+          <t><img src="../static/images/spy.png" alt="Spy attack" title="Spy attack"> <output id="spyAttack">
+              <output id="spyAttack">
+                <%= spyAttack %>
+              </output></t>
+          <t><img src="../static/images/spy.png" alt="Spy defense" title="Spy defense"> <output id="spyDefense">
+              <output id="spyDefense">
+                <%= spyDefense %>
+              </output></t><br>
+            </p>
       <a href="/credits">Credits</a>
       <% if (user.username === "johanna") { %>
         <a href="http://10.1.10.8:89/applications/61d626fc3c8b6a2cc73f09b3/pages/61d626fc3c8b6a2cc73f09b6">Admin</a>

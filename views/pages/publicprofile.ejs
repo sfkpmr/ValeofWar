@@ -19,6 +19,10 @@
             <input type="submit" class="submitButton" value="Attack">
         </form>
 
+        <form action="/profile/<%= profileUser.username %>/spy" method="post">
+            <input type="submit" class="submitButton" value="Spy">
+        </form>
+
         <form action="/messages/new/<%=profileUser.username%>">
             <input type="submit" class="submitButton" value="Message">
         </form>
