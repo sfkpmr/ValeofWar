@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Spy guild</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <% if (user.spyGuildLevel===0){ %>
+
+        We don't have a spy guild yet!<br>
+        <br>
+        <div class="resources"> Construct one for: <%= totalCost.lumberCost %> <img src="../static/images/wood.png"
+                   title="Lumber">
+                <%= totalCost.stoneCost %> <img src="../static/images/stone.png" title="Stone">
+                    <%= totalCost.ironCost %> <img src="../static/images/iron-ingots.png" title="Iron">
+                        and <%= totalCost.goldCost %>
+                            <img src="../static/images/gold-ingots.png" title="Gold"> </div>
+        <br>
+        <form action="/town/spyGuild/upgrade" method="POST">
+            <input type="submit" class="submitButton" value="Construct">
+        </form>
+
+        <% } else { %>
+            <h1>Spy guild level: <%= user.spyGuildLevel %></h1> 
+               The spy guild protects us against hostile spies, and allows us to spy on others.<br>
+                <br>Current spy bonus: +<%= user.spyGuildLevel * 10 %>% (+10% per guild level)<br><br>
+
+                <div class="training">
+                    <form action="/town/spyGuild/train" method="POST">
+                        <label for="spies"><img src="../static/images/spy.png" height="35px" title="Spy"><div class="tooltip"> Spy
+                            <span class="tooltiptext">Attack: <output id="spyAttack">0</output> Defense: <output
+                                    id="spyDefense">0</output> Level req: <output
+                                    id="spyLevelRequirement">0</output>  </span>
+                            </div></label><br>
+                            Current: <%= army.spies %> Craft:
+                       <input type="number" id="spies" name="spies" placeholder="0" min=0 max=9999> <br>
+
+                       <label for="sentries"> <img src="../static/images/spy.png" height="35px" title="Sentry">
+                        <div class="tooltip">Sentries
+                            <span class="tooltiptext">Attack: <output id="sentryAttack">0</output> Defense: <output
+                                    id="sentryDefense">0</output> Level req: <output
+                                    id="sentryLevelRequirement">0</output>  </span>
+                            </div></label><br>
+                            Current: <%= army.sentries %>  Craft:
+                    <% if (user.spyGuildLevel >= 5) { %>
+                    <input type="number" id="sentries" name="sentries" placeholder="0" min=0 max=9999> 
+                    <% } else { %>
+                        <input type="number" id="sentries" name="sentries" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                        <%}%>
+                   <br><br>
+
+
+                        <div class="resources">Training cost:  <img src="../static/images/grain.png" alt="Grain" title="Grain"> <output id="trainGrain">0</output> 
+                             <img src="../static/images/wood.png" alt="Lumber" title="Lumber"> <output id="trainLumber">0</output> <img src="../static/images/iron-ingots.png" alt="Iron"
+                            title="Iron"> <output id="trainIron">0</output>  and <img src="../static/images/gold-ingots.png" alt="Gold"
+                            title="Gold"> <output id="trainGold">0</output> 
+                        </div><br>
+                        <input type="submit" class="submitButton" value="Train">
+                    </form>
+                    <br>
+                </div>
+
+                <div class="training">
+                    <form action="/town/spyGuild/craft" method="POST">
+                        <label for="ropes"><img src="../static/images/rope.png" height="35px" title="Rope"><div class="tooltip"> Rope
+                            <span class="tooltiptext">Attack: <output id="ropeAttack">0</output> Defense: <output
+                                    id="ropeDefense">0</output> Level req: <output
+                                    id="ropeLevelRequirement">0</output>  </span>
+                            </div></label><br>
+                            Current: <%= armory.ropes %>  Craft:
+                            <input type="number" id="ropes" name="ropes" placeholder="0" min=0 max=9999> 
+                       <br>
+
+                          
+                   <label for="nets"><img src="../static/images/net.png" height="35px" title="Net"><div class="tooltip"> Net
+                    <span class="tooltiptext">Attack: <output id="netAttack">0</output> Defense: <output
+                        id="netDefense">0</output> Level req: <output
+                        id="netLevelRequirement">0</output>  </span>
+                </div></label><br>
+                    Current: <%= armory.nets %>  Craft:
+                      <% if (user.spyGuildLevel >= 5) { %>
+                 <input type="number" id="nets" name="nets" placeholder="0" min=0 max=9999> 
+                     <% } else { %>
+                    <input type="number" id="nets" name="nets" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                        <%}%>
+                     <br>
+
+                       <label for="spyglasses"><img src="../static/images/spyglass.png" height="35px" title="Spyglass"><div class="tooltip"> Spyglass
+                                <span class="tooltiptext">Attack: <output id="spyglassAttack">0</output> Defense: <output
+                                    id="spyglassDefense">0</output> Level req: <output
+                                    id="spyglassLevelRequirement">0</output>  </span>
+                            </div></label><br>
+                            Current: <%= armory.spyglasses %>  Craft:
+                    <% if (user.spyGuildLevel >= 5) { %>
+                    <input type="number" id="spyglasses" name="spyglasses" placeholder="0" min=0 max=9999> 
+                    <% } else { %>
+                        <input type="number" id="spyglasses" name="spyglasses" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                        <%}%>
+                   <br>
+
+
+
+                   <label for="poisons"> <img src="../static/images/poison.png" height="35px" title="Poison">
+                    <div class="tooltip">Sentries
+                        <span class="tooltiptext">Attack: <output id="poisonAttack">0</output> Defense: <output
+                                id="poisonDefense">0</output> Level req: <output
+                                id="poisonLevelRequirement">0</output>  </span>
+                        </div></label><br>
+                        Current: <%= armory.poisons %>  Craft:
+                <% if (user.spyGuildLevel >= 10) { %>
+                <input type="number" id="poisons" name="poisons" placeholder="0" min=0 max=9999> 
+                <% } else { %>
+                    <input type="number" id="poisons" name="poisons" placeholder="0" min=0 max=9999 readonly="readonly"> 
+                    <%}%>
+               <br><br>
+
+
+
+                        <div class="resources">Crafting cost:  <img src="../static/images/grain.png" alt="Grain" title="Grain"> <output id="craftGrain">0</output>
+                             <img src="../static/images/wood.png" alt="Lumber" title="Lumber"> <output id="craftLumber">0</output> <img src="../static/images/iron-ingots.png" alt="Iron"
+                            title="Iron"> <output id="craftIron">0</output>  and <img src="../static/images/gold-ingots.png" alt="Gold"
+                            title="Gold"> <output id="craftGold">0</output> 
+                        </div><br>
+                        <input type="submit" class="submitButton" value="Craft">
+                    </form>
+                    <br>
+                </div>
+
+                <% if (user.spyGuildLevel <=19){ %>
+
+                    <div class="resources">
+                        Upgrade cost: <img src="../../static/images/wood.png" height="35px" title="Lumber"> 
+                <%= totalCost.lumberCost %> <img src="../../static/images/stone.png" height="35px" title="Stone"> 
+                    <%= totalCost.stoneCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron"> 
+                    <%= totalCost.ironCost %> and <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
+                     <%= totalCost.goldCost %></div>
+                    <br>
+                    <form action="/town/spyGuild/upgrade" method="POST">
+                        <input type="submit" class="submitButton" value="Upgrade">
+                    </form>
+
+
+                    <% }  %>
+                            <% } %>
+                                <script type="text/javascript" src="../static/js/spyGuild.js"></script>
+</body>
+
+</html>

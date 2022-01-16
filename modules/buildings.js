@@ -31,12 +31,20 @@ const trainingFieldBaseCost = { lumber: 100, stone: 100, iron: 5, gold: 5 };
 const stablesBaseCost = { lumber: 500, stone: 100, iron: 50, gold: 50 };
 const wallBaseCost = { lumber: 250, stone: 500, iron: 100, gold: 10 };
 const workshopBaseCost = { lumber: 500, stone: 250, iron: 250, gold: 100 };
+const spyGuildBaseCost = { lumber: 500, stone: 250, iron: 250, gold: 100 };
 
 const farmBaseCost = { lumber: 500, stone: 50, iron: 10, gold: 25 };
 const lumberCampBaseCost = { lumber: 500, stone: 100, iron: 5, gold: 5 };
 const quarryBaseCost = { lumber: 500, stone: 100, iron: 100, gold: 100 };
 const ironMineBaseCost = { lumber: 750, stone: 500, iron: 100, gold: 100 };
 const goldMineBaseCost = { lumber: 1000, stone: 250, iron: 250, gold: 100 };
+
+const spy = { grain: 100, lumber: 0, iron: 50, gold: 50, attack: 10, levelRequirement: 0 };
+const sentry = { grain: 100, lumber: 0, iron: 25, gold: 15, defense: 10, levelRequirement: 5 };
+const rope = { iron: 50, attack: 30, levelRequirement: 0 };
+const net = { iron: 50, defense: 25, levelRequirement: 5 };
+const spyglass = { lumber: 0, iron: 75, gold: 10, attack: 25, defense: 10, levelRequirement: 5 };
+const poison = { lumber: 0, iron: 0, gold: 100, attack: 50, levelRequirement: 10 };
 
 const maxFarms = 4, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 4;
 
@@ -55,6 +63,8 @@ buildingObject = {
         cost += trainees.longbowmen * longbowman.gold;
         cost += trainees.horseArchers * horseArcher.gold;
         cost += trainees.trebuchets * trebuchet.gold;
+        cost += trainees.spies * spy.gold;
+        cost += trainees.sentries * sentry.gold;
 
         return Math.round(cost);
     },
@@ -67,7 +77,6 @@ buildingObject = {
         cost += trainees.knights * knight.iron;
         cost += trainees.batteringRams * batteringRam.iron;
         cost += trainees.siegeTowers * siegeTower.iron;
-
         cost += trainees.crossbowmen * crossbowman.iron;
         cost += trainees.ballistas * ballista.iron;
         cost += trainees.twoHandedSwordsmen * twoHandedSwordsman.iron;
@@ -75,6 +84,8 @@ buildingObject = {
         cost += trainees.longbowmen * longbowman.iron;
         cost += trainees.horseArchers * horseArcher.iron;
         cost += trainees.trebuchets * trebuchet.iron;
+        cost += trainees.spies * spy.iron;
+        cost += trainees.sentries * sentry.iron;
 
         return Math.round(cost);
     },
@@ -87,12 +98,13 @@ buildingObject = {
         cost += trainees.swordsmen * swordsman.grain;
         cost += trainees.horsemen * horseman.grain;
         cost += trainees.knights * knight.grain;
-
         cost += trainees.crossbowmen * crossbowman.grain;
         cost += trainees.twoHandedSwordsmen * twoHandedSwordsman.grain;
         cost += trainees.halberdiers * halberdier.grain;
         cost += trainees.longbowmen * longbowman.grain;
         cost += trainees.horseArchers * horseArcher.grain;
+        cost += trainees.spies * spy.grain;
+        cost += trainees.sentries * sentry.grain;
 
         console.log(cost)
 
@@ -111,6 +123,8 @@ buildingObject = {
         cost += trainees.halberdiers * halberdier.lumber;
         cost += trainees.longbowmen * longbowman.lumber;
         cost += trainees.trebuchets * trebuchet.lumber;
+        cost += trainees.spies * spy.lumber;
+        cost += trainees.sentries * sentry.lumber;
 
         return Math.round(cost);
     },
@@ -198,6 +212,9 @@ buildingObject = {
             case "goldMine":
                 cost = goldMineBaseCost.lumber;
                 break;
+            case "spyGuild":
+                cost = spyGuildBaseCost.lumber;
+                break;
             default:
                 console.log("ERROR " + type)
         }
@@ -246,6 +263,9 @@ buildingObject = {
                 break;
             case "goldMine":
                 cost = goldMineBaseCost.stone;
+                break;
+            case "spyGuild":
+                cost = spyGuildBaseCost.stone;
                 break;
             default:
                 console.log("ERROR " + type)
@@ -296,6 +316,9 @@ buildingObject = {
             case "goldMine":
                 cost = goldMineBaseCost.iron;
                 break;
+            case "spyGuild":
+                cost = spyGuildBaseCost.iron;
+                break;
             default:
                 console.log("ERROR " + type)
         }
@@ -344,6 +367,9 @@ buildingObject = {
             case "goldMine":
                 cost = goldMineBaseCost.gold;
                 break;
+            case "spyGuild":
+                cost = spyGuildBaseCost.gold;
+                break;
             default:
                 console.log("ERROR " + type)
         }
@@ -388,7 +414,7 @@ buildingObject = {
             await incArmorValues(client, user.username, craftingOrder);
             await resourceObject.removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0);
         } else {
-            console.log("bbbb");
+            console.log("Can't afford armor - bbbb");
         }
     },
     upgradeResourceField: async function (client, user, type, resourceId) {
@@ -487,6 +513,10 @@ buildingObject = {
             case "workshop":
                 level = user.workshopLevel;
                 buildingName = "workshopLevel";
+                break;
+            case "spyGuild":
+                level = user.workshopLevel;
+                buildingName = "spyGuildLevel";
                 break;
             default:
                 console.debug(type, "Error")
@@ -607,6 +637,18 @@ buildingObject = {
             return false;
         }
         if (data.swords > 0 && user.blacksmithLevel < sword.levelRequirement) {
+            return false;
+        }
+        if (data.sentries > 0 && user.spyGuildLevel < sentry.levelRequirement) {
+            return false;
+        }
+        if (data.nets > 0 && user.spyGuildLevel < net.levelRequirement) {
+            return false;
+        }
+        if (data.spyglasses > 0 && user.spyGuildLevel < spyglass.levelRequirement) {
+            return false;
+        }
+        if (data.poisons > 0 && user.spyGuildLevel < poison.levelRequirement) {
             return false;
         }
         return true;

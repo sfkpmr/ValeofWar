@@ -27,6 +27,13 @@ const shield = { attackDamage: 10, defenseDamage: 20 };
 const spear = { attackDamage: 10, defenseDamage: 25 };
 const sword = { attackDamage: 10, defenseDamage: 10 };
 
+const spy = { grain: 100, lumber: 0, iron: 50, gold: 50, attack: 10, levelRequirement: 0 };
+const sentry = { grain: 100, lumber: 0, iron: 25, gold: 15, defense: 10, levelRequirement: 5 };
+const rope = { iron: 50, attack: 30, levelRequirement: 0 };
+const net = { iron: 50, defense: 25, levelRequirement: 5 };
+const spyglass = { lumber: 0, iron: 75, gold: 10, attack: 25, defense: 10, levelRequirement: 5 };
+const poison = { lumber: 0, iron: 0, gold: 100, attack: 50, levelRequirement: 10 };
+
 attackObject = {
     getAttackLog: async function (client, ObjectId) {
         const result = await client.db("gamedb").collection("attacks").findOne({ "_id": ObjectId });
@@ -513,6 +520,54 @@ attackObject = {
     },
     calcWallBonus: function (defender) {
         return 1 - ((defender.wallLevel * 2.5) * 0.01);
+    },
+    calcSpyAttack: function (defender, army, armory) {
+
+        let damage = 0;
+        const spies = army.spies;
+
+        damage += spies * spy.attack;
+
+        if (spies > armory.ropes) {
+            damage += spies * rope.attack;
+        } else {
+            damage += armory.ropes * rope.attack;
+        }
+        if (spies > armory.spyglasses) {
+            damage += spies * spyglass.attack;
+        } else {
+            damage += armory.spyglasses * spyglass.attack;
+        }
+        if (spies > armory.poisons) {
+            damage += spies * poison.attack;
+        } else {
+            damage += armory.poisons * poison.attack;
+        }
+        const spyGuildBonus = 1 + (defender.spyGuildLevel / 10);
+        return damage = damage * spyGuildBonus;
+
+    },
+    calcSpyDefense: function (defender, army, armory) {
+
+        let damage = 0;
+        const sentries = army.sentries;
+
+        damage += sentries * sentry.defense;
+
+        if (sentries > armory.nets) {
+            damage += sentries * net.defense;
+        } else {
+            damage += armory.nets * net.defense;
+        }
+        if (sentries > armory.spyglasses) {
+            damage += sentries * spyglass.defense;
+        } else {
+            damage += armory.spyglasses * spyglass.defense;
+        }
+
+        const spyGuildBonus = 1 + (defender.spyGuildLevel / 10);
+        return damage = damage * spyGuildBonus;
+
     }
 };
 

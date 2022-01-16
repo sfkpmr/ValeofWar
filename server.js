@@ -466,6 +466,64 @@ app.get("/online", requiresAuth(), async (req, res) => {
     res.render('pages/online', { user, temp });
 });
 
+app.get("/town/spyGuild", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const army = await getArmyByEmail(client, req.oidc.user.email);
+    const armory = await getArmoryByEmail(client, req.oidc.user.email);
+    const totalCost = await calculateTotalBuildingUpgradeCost("spyGuild", user.spyGuildLevel);
+
+    res.render('pages/spyGuild', { user, army, armory, totalCost });
+});
+
+app.post("/town/spyGuild/train", requiresAuth(), urlencodedParser, [
+    check('spies').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('sentries').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+], async (req, res) => {
+    //dogs?
+    const errors = validationResult(req);
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const spies = convertNegativeToZero(parseInt(req.body.spies));
+    const sentries = convertNegativeToZero(parseInt(req.body.sentries));
+
+    const trainees = {
+        "spies": spies, "sentries": sentries,
+        "archers": 0, "spearmen": 0, "swordsmen": 0, "horsemen": 0, "knights": 0, "batteringRams": 0, "siegeTowers": 0,
+        "crossbowmen": 0, "ballistas": 0, "twoHandedSwordsmen": 0, "longbowmen": 0, "horseArchers": 0, "trebuchets": 0, "halberdiers": 0
+    };
+    const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
+    if (errors.isEmpty()) {
+        await trainTroops(client, user.username, trainees);
+    } else {
+        console.log(JSON.stringify(errors))
+    }
+
+    res.redirect('/town/spyGuild');
+});
+
+app.post("/town/spyGuild/craft", requiresAuth(), urlencodedParser, [
+    check('ropes').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('nets').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('spyglasses').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+    check('poisons').isNumeric({ no_symbols: true }).isLength({ max: 4 })
+], async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
+
+    const errors = validationResult(req);
+    const ropes = convertNegativeToZero(parseInt(req.body.ropes));
+    const nets = convertNegativeToZero(parseInt(req.body.nets));
+    const spyglasses = convertNegativeToZero(parseInt(req.body.spyglasses));
+    const poisons = convertNegativeToZero(parseInt(req.body.poisons));
+
+    const craftingOrder = { ropes: ropes, nets: nets, spyglasses: spyglasses, poisons: poisons, boots: 0, bracers: 0, helmets: 0, lances: 0, longbows: 0, shields: 0, spears: 0, swords: 0 };
+    const requiredValidationResult = validateRequiredProductionLevel(user, craftingOrder);
+    if (errors.isEmpty() && requiredValidationResult) {
+        await craftArmor(client, user, craftingOrder);
+    }
+    res.redirect('/town/spyGuild');
+
+
+});
+
 app.get("/town/wall", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const maxWallHealth = user.wallLevel * 100;
@@ -491,7 +549,7 @@ app.post("/town/:building/upgrade", requiresAuth(), urlencodedParser, [
     check('building').exists().isAlpha().isLength({ min: 4, max: 13 })
 ], async (req, res) => {
     const errors = validationResult(req)
-    const buildings = ['barracks', 'blacksmith', 'stables', 'trainingfield', 'wall', 'workshop'];
+    const buildings = ['barracks', 'blacksmith', 'stables', 'trainingfield', 'wall', 'workshop', 'spyGuild'];
     const type = req.params.building;
     if (errors.isEmpty() && buildings.includes(type)) {
         const user = await getUserByEmail(client, req.oidc.user.email);
@@ -550,7 +608,8 @@ app.post("/town/workshop/train", requiresAuth(), urlencodedParser, [
     const trebuchets = convertNegativeToZero(parseInt(req.body.trebuchet));
     const trainees = {
         "archers": 0, "spearmen": 0, "swordsmen": 0, "horsemen": 0, "knights": 0, "batteringRams": batteringRams, "siegeTowers": siegeTowers,
-        "crossbowmen": 0, "ballistas": ballistas, "twoHandedSwordsmen": 0, "longbowmen": 0, "horseArchers": 0, "trebuchets": trebuchets, "halberdiers": 0
+        "crossbowmen": 0, "ballistas": ballistas, "twoHandedSwordsmen": 0, "longbowmen": 0, "horseArchers": 0, "trebuchets": trebuchets, "halberdiers": 0,
+        "spies": 0, "sentries": 0
     };
 
     const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
@@ -594,7 +653,7 @@ app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
     const shields = convertNegativeToZero(parseInt(req.body.shield));
     const spears = convertNegativeToZero(parseInt(req.body.spear));
     const swords = convertNegativeToZero(parseInt(req.body.sword));
-    const craftingOrder = { boots: boots, bracers: bracers, helmets: helmets, lances: lances, longbows: longbows, shields: shields, spears: spears, swords: swords };
+    const craftingOrder = { boots: boots, bracers: bracers, helmets: helmets, lances: lances, longbows: longbows, shields: shields, spears: spears, swords: swords, ropes: 0, nets: 0, spyglasses: 0, poisons: 0 };
     const requiredValidationResult = validateRequiredProductionLevel(user, craftingOrder);
     if (errors.isEmpty() && requiredValidationResult) {
         await craftArmor(client, user, craftingOrder);
@@ -619,7 +678,8 @@ app.post("/town/stables/train", requiresAuth(), urlencodedParser, [
 
     const trainees = {
         "archers": 0, "spearmen": 0, "swordsmen": 0, "horsemen": horsemen, "knights": knights, "batteringRams": 0, "siegeTowers": 0,
-        "crossbowmen": 0, "ballistas": 0, "twoHandedSwordsmen": 0, "longbowmen": 0, "horseArchers": horseArchers, "trebuchets": 0, "halberdiers": 0
+        "crossbowmen": 0, "ballistas": 0, "twoHandedSwordsmen": 0, "longbowmen": 0, "horseArchers": horseArchers, "trebuchets": 0, "halberdiers": 0,
+        "spies": 0, "sentries": 0
     };
 
     const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
@@ -651,7 +711,8 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
     const halberdiers = convertNegativeToZero(parseInt(req.body.halberdiers));
     const trainees = {
         "archers": archers, "spearmen": spearmen, "swordsmen": swordsmen, "horsemen": 0, "knights": 0, "batteringRams": 0, "siegeTowers": 0,
-        "crossbowmen": crossbowmen, "ballistas": 0, "twoHandedSwordsmen": twoHandedSwordsmen, "longbowmen": longbowmen, "horseArchers": 0, "trebuchets": 0, "halberdiers": halberdiers
+        "crossbowmen": crossbowmen, "ballistas": 0, "twoHandedSwordsmen": twoHandedSwordsmen, "longbowmen": longbowmen, "horseArchers": 0, "trebuchets": 0, "halberdiers": halberdiers,
+        "spies": 0, "sentries": 0
     };
 
     const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
