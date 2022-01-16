@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Spy log</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <h1>Spy report </h1>
+
+    On the Faithful day of <%= log.time.toLocaleDateString() %> at <%= log.time.toLocaleTimeString() %>,<br>
+    Spies from <%= log.listedAttacker%> were discovered by <%= log.defender%>!<br>
+    <br>
+    The level of certainity is <%= log.levelOfCertainty %>, and the spies returned <br>
+    with the following information about <%= log.defender %>,
+    <br>  <br>
+    
+    <img src="../../static/images/defend.png" title="Defense"> <%= log.defenses %><br><br>
+ <img src="../../static/images/grain.png"
+    title="Grain"> <%= log.defenderGrain %> <img src="../../static/images/wood.png"
+    title="Lumber"> <%= log.defenderLumber %> <img src="../../static/images/stone.png" title="Stone"> <%= log.defenderStone %> 
+    <img src="../../static/images/iron-ingots.png" title="Iron"> <%= log.defenderIron %> and <img src="../../static/images/gold-ingots.png" title="Gold">
+    <%= log.defenderGold %> 
+    <br>
+    <br>
+    <% if (log.attacker === username) {%>
+        <form action=<%=spyUrl%> method="post">
+<input type="submit" class="submitButton" value="Infiltrate again!">
+    </form>
+        <% } else { %>
+            <form action=<%=spyUrl%> method="post">
+            <input type="submit" class="submitButton" value="Retaliate!">
+        </form>
+        <%}%>
+  
+
+</body>
+
+</html>

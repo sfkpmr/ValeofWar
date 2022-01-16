@@ -3,6 +3,10 @@
 
 <head>
     <title>Message</title>
+    <link rel="stylesheet" type="text/css" href="../../static/css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -32,13 +36,26 @@
                     <% if (message.sentBy !== "SYSTEM"){%>
 
 
-                        <form action=" /messages/send/<%=message.sentBy%>" method="post">
-                            <input type="text" name="message">
-                            <input type="submit" value="Reply">
-                        </form>
+                        <% if (message.sentBy === user.username){ %> 
+                            <form action=" /messages/send" method="post">
+                                <input type="hidden" id="recipient" name="recipient" value="<%=message.sentTo%>" maxlength="15" required>
+                                <input type="text" name="message">
+                                <input type="submit" class="submitButton" value="Send">
+                            </form>
+                        
+                        <% }else { %>
+
+                            <form action=" /messages/send" method="post">
+                                <input type="hidden" id="recipient" name="recipient" value="<%=message.sentBy%>" maxlength="15" required>
+                                <input type="text" name="message">
+                                <input type="submit" class="submitButton" value="Reply">
+                            </form>
+
+
+                            <% } %>
 
                         <form action=" /messages/inbox/<%=message._id%>/report" method="post">
-                            <input type="submit" value="Report message">
+                            <input type="submit" class="submitButton" value="Report message">
                         </form>
 
                         <% } %>

@@ -39,6 +39,8 @@ socket.on('updatePower', async function () {
         let json = await response.json();
         document.getElementById("attack").innerText = json.attack;
         document.getElementById("defense").innerText = json.defense;
+        document.getElementById("spyAttack").innerText = json.spyAttack;
+        document.getElementById("spyDefense").innerText = json.spyDefense;
     } else {
         alert("HTTP-Error: " + response.status);
     }

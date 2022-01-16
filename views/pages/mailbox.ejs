@@ -16,21 +16,29 @@
 
     <h1>Mailbox</h1> 
 
-    <a href="/mailbox/log" >Attack log</a><br>
-    <a href="/messages/inbox">Inbox</a><br>
-    <a href="/messages/new">Send message</a><br>
-    <br>
+    <form action="/mailbox/log">
+        <input type="submit" class="submitButton" value="Attack log">
+    </form>
+    <form action="/mailbox/spyLog">
+        <input type="submit" class="submitButton" value="Spy log">
+    </form>
+    <form action="/messages/inbox">
+        <input type="submit" class="submitButton" value="Inbox">
+    </form>
+    <form action="/messages/new">
+        <input type="submit" class="submitButton" value="Send message">
+    </form>
+
+    <form action="/search/random">
+        <input type="submit" class="submitButton" value="Find random player">
+    </form>
+    
     <form action="/search" method="POST">
         <label for="searchName">Name:</label>
         <input type="text" id="searchName" name="searchName" minlength=5 maxlength=15 required>
         <input type="submit" class="submitButton" value="Search">
     </form>
-    <br>
-    <form action="/search/random">
-        <input type="submit" class="submitButton" value="Find random player">
-    </form>
-    
-    <br>
+
 
 </body>
 

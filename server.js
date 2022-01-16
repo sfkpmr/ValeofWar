@@ -32,10 +32,13 @@ const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PAS
 const client = new MongoClient(uri);
 
 const { addTrade, buyTrade } = require("./modules/market.js");
-const { getAttackLog, calculateAttack, calculateDefense, attackFunc } = require("./modules/attack.js");
+const { getAttackLog, calculateAttack, calculateDefense, attackFunc, calcSpyAttack, calcSpyDefense, spyFunc } = require("./modules/attack.js");
 const { trainTroops } = require("./modules/troops.js");
-const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs, getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource, getArmyByEmail, getArmoryByEmail, deleteArmy, deleteArmory } = require("./modules/database.js");
-const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData, validateRequiredProductionLevel } = require("./modules/buildings.js");
+const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs,
+    getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource, getArmyByEmail, getArmoryByEmail, deleteArmy, deleteArmory, getInvolvedSpyLogs,
+    getSpyLog } = require("./modules/database.js");
+const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData,
+    validateRequiredProductionLevel } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getAllIncomes, getResourceBoost } = require("./modules/resources.js");
 
 app.use(
@@ -161,8 +164,10 @@ app.get("/vale", requiresAuth(), async (req, res) => {
 
     const attackValue = await calculateAttack(army, armory);
     const defenseValue = await calculateDefense(user, army, armory);
+    const spyAttack = await calcSpyAttack(user, army, armory);
+    const spyDefense = await calcSpyDefense(user, army, armory);
 
-    res.render("pages/vale", { user, army, grainIncome, lumberIncome, stoneIncome, ironIncome, goldIncome, recruitsIncome, horseIncome, attackValue, defenseValue })
+    res.render("pages/vale", { user, army, grainIncome, lumberIncome, stoneIncome, ironIncome, goldIncome, recruitsIncome, horseIncome, attackValue, defenseValue, spyAttack, spyDefense })
 });
 
 app.get("/settings", requiresAuth(), async (req, res) => {
@@ -382,6 +387,56 @@ app.get("/mailbox/log", requiresAuth(), async (req, res) => {
     }
 });
 
+//TODO no log for defender if spies were undetected
+app.get("/mailbox/spyLog", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const result = await getInvolvedSpyLogs(client, user.username)
+    if (result) {
+        res.redirect('/mailbox/spyLog/page/1')
+    } else {
+        res.send("You haven't spied on anyone yet!")
+    }
+});
+
+app.get("/mailbox/spyLog/:id", requiresAuth(), urlencodedParser, [
+    check('id').exists().isMongoId(),
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        const username = user.username;
+        const log = await getSpyLog(client, new ObjectId(req.params.id));
+        let spyUrl;
+
+        if (user.username === log.attacker) {
+            spyUrl = `/profile/${log.defender}/spy`
+        } else {
+            spyUrl = `/profile/${log.attacker}/spy`
+        }
+
+        if (log && (username === log.attacker || username === log.defender)) {
+            res.render('pages/spyLogEntry', { username, log, spyUrl })
+        } else {
+            res.send("No such log!")
+        }
+    } else {
+        res.status(400).render('pages/400');
+    }
+});
+
+app.get("/mailbox/spyLog/page/:nr", requiresAuth(), urlencodedParser, [
+    check('nr').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
+], async (req, res) => {
+    const errors = validationResult(req)
+    if (errors.isEmpty()) {
+        const user = await getUserByEmail(client, req.oidc.user.email);
+        const messages = await prepareMessagesOrLogs(client, user, parseInt(req.params.nr), "spyLog");
+        res.render('pages/spyLog', { user, messages })
+    } else {
+        res.status(400).render('pages/400');
+    }
+});
+
 app.get("/mailbox/log/:id", requiresAuth(), urlencodedParser, [
     check('id').exists().isMongoId(),
 ], async (req, res) => {
@@ -491,7 +546,7 @@ app.post("/town/spyGuild/train", requiresAuth(), urlencodedParser, [
         "crossbowmen": 0, "ballistas": 0, "twoHandedSwordsmen": 0, "longbowmen": 0, "horseArchers": 0, "trebuchets": 0, "halberdiers": 0
     };
     const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
-    if (errors.isEmpty()) {
+    if (errors.isEmpty() && requiredValidationResult) {
         await trainTroops(client, user.username, trainees);
     } else {
         console.log(JSON.stringify(errors))
@@ -735,8 +790,23 @@ app.post("/profile/:username/attack", requiresAuth(), urlencodedParser, [
         res.send("No such user");
     } else if (errors.isEmpty() && attacker !== defender) {
         console.log(attacker.username + " tries to attack " + defender.username);
-        result = await attackFunc(client, attacker, defender);
+        const result = await attackFunc(client, attacker, defender);
         res.redirect(`/mailbox/log/${result}`);
+    }
+});
+
+app.post("/profile/:username/spy", requiresAuth(), urlencodedParser, [
+    check('username').isLength({ min: 5, max: 15 }),
+], async (req, res) => {
+    const errors = validationResult(req);
+    const attacker = await getUserByEmail(client, req.oidc.user.email);
+    const defender = await getUserByUsername(client, req.params.username);
+    if (defender === false) {
+        res.send("No such user");
+    } else if (errors.isEmpty() && attacker !== defender) {
+        console.log(attacker.username + " tries to spy on " + defender.username);
+        const result = await spyFunc(client, attacker, defender);
+        res.redirect(`/mailbox/spyLog/${result}`);
     }
 });
 
@@ -794,7 +864,9 @@ app.get("/api/getPowers", requiresAuth(), async (req, res) => {
     const armory = await getArmoryByEmail(client, req.oidc.user.email);
     const attackValue = await calculateAttack(army, armory);
     const defenseValue = await calculateDefense(user, army, armory);
-    res.send(JSON.stringify({ attack: attackValue, defense: defenseValue }))
+    const spyAttackValue = await calcSpyAttack(user, army, armory);
+    const spyDefenseValue = await calcSpyDefense(user, army, armory);
+    res.send(JSON.stringify({ attack: attackValue, defense: defenseValue, spyAttack: spyAttackValue, spyDefense: spyDefenseValue }))
 });
 
 app.get("/api/getIncomes", requiresAuth(), async (req, res) => {

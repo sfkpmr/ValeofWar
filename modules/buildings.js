@@ -41,10 +41,10 @@ const goldMineBaseCost = { lumber: 1000, stone: 250, iron: 250, gold: 100 };
 
 const spy = { grain: 100, lumber: 0, iron: 50, gold: 50, attack: 10, levelRequirement: 0 };
 const sentry = { grain: 100, lumber: 0, iron: 25, gold: 15, defense: 10, levelRequirement: 5 };
-const rope = { iron: 50, attack: 30, levelRequirement: 0 };
-const net = { iron: 50, defense: 25, levelRequirement: 5 };
-const spyglass = { lumber: 0, iron: 75, gold: 10, attack: 25, defense: 10, levelRequirement: 5 };
-const poison = { lumber: 0, iron: 0, gold: 100, attack: 50, levelRequirement: 10 };
+const rope = { lumber: 50, iron: 25, attack: 30, levelRequirement: 0 };
+const net = { lumber: 100, iron: 50, defense: 25, levelRequirement: 5 };
+const spyglass = { lumber: 15, iron: 50, gold: 25, attack: 25, defense: 10, levelRequirement: 5 };
+const poison = { grain: 100, gold: 100, attack: 50, levelRequirement: 10 };
 
 const maxFarms = 4, maxGoldMines = 2, maxIronMines = 3, maxQuarries = 4, maxLumberCamps = 4;
 
@@ -135,6 +135,9 @@ buildingObject = {
         cost += armorOrder.longbows * longbow.lumber;
         cost += armorOrder.shields * shield.lumber;
         cost += armorOrder.spears * spear.lumber;
+        cost += armorOrder.ropes * rope.lumber;
+        cost += armorOrder.nets * net.lumber;
+        cost += armorOrder.spyglasses * spyglass.lumber;
 
         return Math.round(cost);
     },
@@ -149,6 +152,9 @@ buildingObject = {
         cost += armorOrder.shields * shield.iron;
         cost += armorOrder.spears * spear.iron;
         cost += armorOrder.swords * sword.iron;
+        cost += armorOrder.ropes * rope.iron;
+        cost += armorOrder.nets * net.iron;
+        cost += armorOrder.spyglasses * spyglass.iron;
 
         return Math.round(cost);
     },
@@ -158,15 +164,23 @@ buildingObject = {
 
         cost += armorOrder.lances * lance.gold;
         cost += armorOrder.swords * sword.gold;
+        cost += armorOrder.spyglasses * spyglass.gold;
+        cost += armorOrder.poisons * poison.gold;
 
         return Math.round(cost);
     },
     calcTotalCraftCost: function (armorOrder) {
+
+        let grainCost = 0;
+        if (armorOrder.poisons > 0) {
+            grainCost = armorOrder.poisons * poison.grain;
+        }
+
         const lumberCost = buildingObject.calcLumberCraftCost(armorOrder);
         const ironCost = buildingObject.calcIronCraftCost(armorOrder);
         const goldCost = buildingObject.calcGoldCraftCost(armorOrder);
 
-        return { lumberCost: lumberCost, ironCost: ironCost, goldCost: goldCost };
+        return { grainCost: grainCost, lumberCost: lumberCost, ironCost: ironCost, goldCost: goldCost };
     },
     upgradeBuilding: async function (client, username, building) {
         const updatedUser = { [building]: 1 };
@@ -515,14 +529,16 @@ buildingObject = {
                 buildingName = "workshopLevel";
                 break;
             case "spyGuild":
-                level = user.workshopLevel;
+                level = user.spyGuildLevel;
                 buildingName = "spyGuildLevel";
                 break;
             default:
                 console.debug(type, "Error")
         }
+        console.log(buildingName, type)
 
         if (level >= 20) {
+            console.debug("Can't upgrade beyond level 20")
             return false;
         } else {
             const totalCost = await buildingObject.calculateTotalBuildingUpgradeCost(type, level)

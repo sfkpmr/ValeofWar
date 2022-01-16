@@ -91,12 +91,22 @@ databaseObject = {
         }
         return result;
     },
+    getInvolvedSpyLogs: async function (client, username) {
+        const cursor = client.db("gamedb").collection("intrusions").find({ $or: [{ "attacker": username }, { "defender": username }] })
+        const result = await cursor.toArray();
+        if (result[0] === undefined) {
+            return false;
+        }
+        return result;
+    },
     prepareMessagesOrLogs: async function (client, user, nr, type) {
         let result;
         if (type === "log") {
             result = await databaseObject.getInvolvedAttackLogs(client, user.username)
         } else if (type === "message") {
             result = await databaseObject.getUserMessages(client, user.username)
+        } else if (type === "spyLog") {
+            result = await databaseObject.getInvolvedSpyLogs(client, user.username)
         } else {
             console.debug(type, "Invalid object")
         }
@@ -190,6 +200,14 @@ databaseObject = {
     },
     deleteArmory: async function (client, email) {
         await client.db("gamedb").collection("armories").deleteOne({ "email": email });
+    },
+    getSpyLog: async function (client, ObjectId) {
+        const result = await client.db("gamedb").collection("intrusions").findOne({ "_id": ObjectId });
+        if (result === null) {
+            return false;
+        } else {
+            return result;
+        }
     },
 
 };

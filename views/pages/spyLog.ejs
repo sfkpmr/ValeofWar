@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Log</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+</head>
+
+<body>
+
+    <% if (messages.result.length> 0 ){ %>
+        <% for (var i=0; i < messages.filteredResult.length; i++ ) { %>
+            <a href="/mailbox/spyLog/<%= messages.filteredResult[i]._id %>">
+
+                <% if (messages.filteredResult[i].attacker===user.username) { %>
+                    We spied on <%=messages.filteredResult[i].defender%>
+                        <% } else { %>
+                            <%=messages.filteredResult[i].attacker %> spied on us<%}%>
+            </a> at <%= messages.filteredResult[i].time.toLocaleDateString() %>
+                <%= messages.filteredResult[i].time.toLocaleTimeString() %><br>
+                    <% } %>
+
+                        <div class="pagination">
+
+                            <% if ( messages.currentPage> 4){%>
+                                <a href="/mailbox/spyLog/page/<%= messages.currentPage -4%>">&laquo;</a>
+                                <%}%>
+                                    <% if (messages.currentPage> 3) {%>
+                                        <a href="/mailbox/spyLog/page/<%= messages.currentPage -3%>">
+                                            <%= messages.currentPage -3 %>
+                                        </a>
+                                        <%}%>
+                                            <% if (messages.currentPage> 2) {%>
+                                                <a href="/mailbox/spyLog/page/<%= messages.currentPage -2%>">
+                                                    <%= messages.currentPage -2 %>
+                                                </a>
+                                                <%}%>
+                                                    <% if (messages.currentPage> 1) {%>
+                                                        <a href="/mailbox/spyLog/page/<%= messages.currentPage -1%>">
+                                                            <%= messages.currentPage -1 %>
+                                                        </a>
+                                                        <%}%>
+                                                            <a href="#" class="active">
+                                                                <%= messages.currentPage %>
+                                                            </a>
+
+                                                            <% if (messages.currentPage<messages.maxPages ) {%>
+                                                                <a
+                                                                    href="/mailbox/spyLog/page/<%= messages.currentPage +1%>">
+                                                                    <%= messages.currentPage +1%>
+                                                                </a>
+                                                                <%}%>
+                                                                    <% if (messages.currentPage+1<messages.maxPages )
+                                                                        {%>
+                                                                        <a
+                                                                            href="/mailbox/spyLog/page/<%= messages.currentPage +2%>">
+                                                                            <%= messages.currentPage +2%>
+                                                                        </a>
+                                                                        <%}%>
+                                                                            <% if
+                                                                                (messages.currentPage+2<messages.maxPages
+                                                                                ) {%>
+                                                                                <a
+                                                                                    href="/mailbox/spyLog/page/<%= messages.currentPage +3%>">
+                                                                                    <%= messages.currentPage +3%>
+                                                                                </a>
+                                                                                <%}%>
+                                                                                    <% if
+                                                                                        (messages.currentPage+3<messages.maxPages
+                                                                                        ) {%>
+                                                                                        <a
+                                                                                            href="/mailbox/spyLog/page/<%= messages.currentPage +4%>">&raquo;</a>
+                                                                                        <%}%>
+                                                                                            <%} else {%>
+                                                                                                No attacks made
+                                                                                                <% } %>
+
+                        </div>
+                        <br>
+
+
+
+</body>
+
+</html>

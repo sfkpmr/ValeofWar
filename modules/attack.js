@@ -29,10 +29,10 @@ const sword = { attackDamage: 10, defenseDamage: 10 };
 
 const spy = { grain: 100, lumber: 0, iron: 50, gold: 50, attack: 10, levelRequirement: 0 };
 const sentry = { grain: 100, lumber: 0, iron: 25, gold: 15, defense: 10, levelRequirement: 5 };
-const rope = { iron: 50, attack: 30, levelRequirement: 0 };
-const net = { iron: 50, defense: 25, levelRequirement: 5 };
-const spyglass = { lumber: 0, iron: 75, gold: 10, attack: 25, defense: 10, levelRequirement: 5 };
-const poison = { lumber: 0, iron: 0, gold: 100, attack: 50, levelRequirement: 10 };
+const rope = { lumber: 50, iron: 25, attack: 30, levelRequirement: 0 };
+const net = { lumber: 100, iron: 50, defense: 25, levelRequirement: 5 };
+const spyglass = { lumber: 15, iron: 50, gold: 25, attack: 25, defense: 10, levelRequirement: 5 };
+const poison = { grain: 100, gold: 100, attack: 50, levelRequirement: 10 };
 
 attackObject = {
     getAttackLog: async function (client, ObjectId) {
@@ -45,6 +45,10 @@ attackObject = {
     },
     createAttackLog: async function (client, data) {
         result = await client.db("gamedb").collection("attacks").insertOne(data);
+        return result.insertedId;
+    },
+    createSpyLog: async function (client, data) {
+        result = await client.db("gamedb").collection("intrusions").insertOne(data);
         return result.insertedId;
     },
     calculateAttack: function (army, armory) {
@@ -510,6 +514,7 @@ attackObject = {
             "grainLoot": grainLoot, "lumberLoot": lumberLoot, "stoneLoot": stoneLoot, "ironLoot": ironLoot, "wallDamage": wallDamage
         };
 
+        //TODO return immediately
         const result = await attackObject.createAttackLog(client, data);
 
         return result;
@@ -529,22 +534,22 @@ attackObject = {
         damage += spies * spy.attack;
 
         if (spies > armory.ropes) {
-            damage += spies * rope.attack;
-        } else {
             damage += armory.ropes * rope.attack;
+        } else {
+            damage += spies * rope.attack;
         }
         if (spies > armory.spyglasses) {
-            damage += spies * spyglass.attack;
-        } else {
             damage += armory.spyglasses * spyglass.attack;
+        } else {
+            damage += spies * spyglass.attack;
         }
         if (spies > armory.poisons) {
-            damage += spies * poison.attack;
-        } else {
             damage += armory.poisons * poison.attack;
+        } else {
+            damage += spies * poison.attack;
         }
         const spyGuildBonus = 1 + (defender.spyGuildLevel / 10);
-        return damage = damage * spyGuildBonus;
+        return Math.round(damage = damage * spyGuildBonus);
 
     },
     calcSpyDefense: function (defender, army, armory) {
@@ -555,18 +560,61 @@ attackObject = {
         damage += sentries * sentry.defense;
 
         if (sentries > armory.nets) {
-            damage += sentries * net.defense;
-        } else {
             damage += armory.nets * net.defense;
+        } else {
+            damage += sentries * net.defense;
         }
         if (sentries > armory.spyglasses) {
-            damage += sentries * spyglass.defense;
-        } else {
             damage += armory.spyglasses * spyglass.defense;
+        } else {
+            damage += sentries * spyglass.defense;
         }
 
         const spyGuildBonus = 1 + (defender.spyGuildLevel / 10);
-        return damage = damage * spyGuildBonus;
+        return Math.round(damage = damage * spyGuildBonus);
+
+    },
+    spyFunc: async function (client, attacker, defender) {
+
+        const attackingArmy = await getArmyByEmail(client, attacker.email);
+        const defendingArmy = await getArmyByEmail(client, defender.email);
+        const attackingArmory = await getArmoryByEmail(client, attacker.email);
+        const defendingArmory = await getArmoryByEmail(client, defender.email);
+        const defenderArmyDefense = attackObject.calculateDefense(defender, defendingArmy, defendingArmory);
+
+        const attackingSpyValue = attackObject.calcSpyAttack(attacker, attackingArmy, attackingArmory);
+        const defendingSpyValue = attackObject.calcSpyDefense(defender, defendingArmy, defendingArmory);
+
+        const closeness = attackingSpyValue / (attackingSpyValue + defendingSpyValue)
+
+
+        let attackerName = attacker.username;
+
+        let certaintyModifier, levelOfCertainty;
+        if (closeness <= 0.4) {
+            certaintyModifier = Math.random() * 0.4 + 0.2;
+            levelOfCertainty = "Low";
+        } else if (closeness <= 0.6) {
+            certaintyModifier = Math.random() * 0.6 + 0.3;
+            levelOfCertainty = "Fair"
+        } else if (closeness <= 0.8) {
+            certaintyModifier = Math.random() * 0.8 + 0.4;
+            levelOfCertainty = "Quite sure"
+        } else {
+            certaintyModifier = 1;
+            levelOfCertainty = "Absolute"
+            attackerName = "Unknown"
+        }
+
+        //they have at least x stuff, the spies are sure/not sure/quite sure etc
+
+        const data = {
+            "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "listedAttacker": attackerName, "defender": defender.username, "defenses": defenderArmyDefense * certaintyModifier,
+            "defenderGrain": defender.grain * certaintyModifier, "defenderLumber": defender.lumber * certaintyModifier, "defenderStone": defender.stone * certaintyModifier,
+            "defenderIron": defender.iron * certaintyModifier, "defenderGold": defender.gold * certaintyModifier, "levelOfCertainty": levelOfCertainty
+        };
+
+        return await attackObject.createSpyLog(client, data);
 
     }
 };

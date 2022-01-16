@@ -34,8 +34,7 @@
                 <div class="training">
                     <form action="/town/spyGuild/train" method="POST">
                         <label for="spies"><img src="../static/images/spy.png" height="35px" title="Spy"><div class="tooltip"> Spy
-                            <span class="tooltiptext">Attack: <output id="spyAttack">0</output> Defense: <output
-                                    id="spyDefense">0</output> Level req: <output
+                            <span class="tooltiptext">Attack: <output id="spyAttack">0</output><br> Level req: <output
                                     id="spyLevelRequirement">0</output>  </span>
                             </div></label><br>
                             Current: <%= army.spies %> Craft:
@@ -43,8 +42,7 @@
 
                        <label for="sentries"> <img src="../static/images/spy.png" height="35px" title="Sentry">
                         <div class="tooltip">Sentries
-                            <span class="tooltiptext">Attack: <output id="sentryAttack">0</output> Defense: <output
-                                    id="sentryDefense">0</output> Level req: <output
+                            <span class="tooltiptext">Defense: <output id="sentryDefense">0</output> Level req: <output
                                     id="sentryLevelRequirement">0</output>  </span>
                             </div></label><br>
                             Current: <%= army.sentries %>  Craft:
@@ -69,8 +67,7 @@
                 <div class="training">
                     <form action="/town/spyGuild/craft" method="POST">
                         <label for="ropes"><img src="../static/images/rope.png" height="35px" title="Rope"><div class="tooltip"> Rope
-                            <span class="tooltiptext">Attack: <output id="ropeAttack">0</output> Defense: <output
-                                    id="ropeDefense">0</output> Level req: <output
+                            <span class="tooltiptext">Attack: <output id="ropeAttack">0</output><br> Level req: <output
                                     id="ropeLevelRequirement">0</output>  </span>
                             </div></label><br>
                             Current: <%= armory.ropes %>  Craft:
@@ -79,7 +76,7 @@
 
                           
                    <label for="nets"><img src="../static/images/net.png" height="35px" title="Net"><div class="tooltip"> Net
-                    <span class="tooltiptext">Attack: <output id="netAttack">0</output> Defense: <output
+                    <span class="tooltiptext">Defense: <output
                         id="netDefense">0</output> Level req: <output
                         id="netLevelRequirement">0</output>  </span>
                 </div></label><br>
@@ -107,9 +104,8 @@
 
 
                    <label for="poisons"> <img src="../static/images/poison.png" height="35px" title="Poison">
-                    <div class="tooltip">Sentries
-                        <span class="tooltiptext">Attack: <output id="poisonAttack">0</output> Defense: <output
-                                id="poisonDefense">0</output> Level req: <output
+                    <div class="tooltip">Poison
+                        <span class="tooltiptext">Attack: <output id="poisonAttack">0</output><br> Level req: <output
                                 id="poisonLevelRequirement">0</output>  </span>
                         </div></label><br>
                         Current: <%= armory.poisons %>  Craft:

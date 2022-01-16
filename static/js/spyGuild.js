@@ -1,9 +1,9 @@
 const spy = { grain: 100, lumber: 0, iron: 50, gold: 50, attack: 10, levelRequirement: 0 };
 const sentry = { grain: 100, lumber: 0, iron: 25, gold: 15, defense: 10, levelRequirement: 5 };
-const rope = { iron: 50, attack: 30, levelRequirement: 0 };
-const net = { iron: 50, defense: 25, levelRequirement: 5 };
-const spyglass = { lumber: 0, iron: 75, gold: 10, attack: 25, defense: 10, levelRequirement: 5 };
-const poison = { lumber: 0, iron: 0, gold: 100, attack: 50, levelRequirement: 10 };
+const rope = { lumber: 50, iron: 25, attack: 30, levelRequirement: 0 };
+const net = { lumber: 100, iron: 50, defense: 25, levelRequirement: 5 };
+const spyglass = { lumber: 15, iron: 50, gold: 25, attack: 25, defense: 10, levelRequirement: 5 };
+const poison = { grain: 100, gold: 100, attack: 50, levelRequirement: 10 };
 
 function trainingCost() {
     let grainCost = 0, lumberCost = 0, ironCost = 0, goldCost = 0;
@@ -107,20 +107,15 @@ document.getElementById("nets").addEventListener("input", craftingCost);
 document.getElementById("spyglasses").addEventListener("input", craftingCost);
 document.getElementById("poisons").addEventListener("input", craftingCost);
 document.getElementById("spyAttack").innerText = spy.attack;
-document.getElementById("spyDefense").innerText = spy.defense;
 document.getElementById("spyLevelRequirement").innerText = spy.levelRequirement;
-document.getElementById("sentryAttack").innerText = sentry.attack;
 document.getElementById("sentryDefense").innerText = sentry.defense;
 document.getElementById("sentryLevelRequirement").innerText = sentry.levelRequirement;
 document.getElementById("ropeAttack").innerText = rope.attack;
-document.getElementById("ropeDefense").innerText = rope.defense;
 document.getElementById("ropeLevelRequirement").innerText = rope.levelRequirement;
-document.getElementById("netAttack").innerText = net.attack;
 document.getElementById("netDefense").innerText = net.defense;
 document.getElementById("netLevelRequirement").innerText = net.levelRequirement;
 document.getElementById("spyglassAttack").innerText = spyglass.attack;
 document.getElementById("spyglassDefense").innerText = spyglass.defense;
 document.getElementById("spyglassLevelRequirement").innerText = spyglass.levelRequirement;
 document.getElementById("poisonAttack").innerText = poison.attack;
-document.getElementById("poisonDefense").innerText = poison.defense;
 document.getElementById("poisonLevelRequirement").innerText = poison.levelRequirement;
