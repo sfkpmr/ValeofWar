@@ -200,10 +200,11 @@ app.get("/profile/:username", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
+        const currentUser = await getUserByEmail(client, req.oidc.user.email);
         const profileUser = await getUserByUsername(client, req.params.username);
 
         if (profileUser === false) {
-            res.send("No such user");
+            io.to(userMap[currentUser._id]).emit("error", "No user by that name!");
         } else {
             if (req.oidc.user.email === profileUser.email) {
                 res.render('pages/settings', { profileUser });
@@ -238,7 +239,7 @@ app.post("/market/sell", requiresAuth(), urlencodedParser, [
     const resources = ['Grain', 'Lumber', 'Stone', 'Iron', 'Gold'];
     const user = await getUserByEmail(client, req.oidc.user.email);
     const allowedToTrade = await userAllowedToTrade(client, user);
-    const alreadyTradingResource = await checkIfAlreadyTradingResource(client, user, sellResource)
+    const alreadyTradingResource = await checkIfAlreadyTradingResource(client, user, sellResource);
     if (errors.isEmpty() && resources.includes(sellResource) && resources.includes(buyResource) && allowedToTrade && !alreadyTradingResource) {
         await addTrade(client, user, sellAmount, sellResource, buyAmount, buyResource);
     }
@@ -269,7 +270,7 @@ app.get("/messages/inbox", requiresAuth(), async (req, res) => {
     if (messages) {
         res.redirect('/messages/inbox/page/1')
     } else {
-        res.send("No messages")
+        io.to(userMap[user._id]).emit("error", "No messages yet!");
     }
 });
 
@@ -332,11 +333,12 @@ app.post("/messages/send", requiresAuth(), urlencodedParser, [
     check('message').exists().isLength({ max: 1000 })//TODO handle ?!#%  ????
 ], async (req, res) => {
     const errors = validationResult(req)
+    const sender = await getUserByEmail(client, req.oidc.user.email);
     const receiver = await getUserByUsername(client, req.body.recipient);
     if (!receiver) {
-        res.send("No such user")
+        io.to(userMap[sender._id]).emit("error", "No user by that name!");
     } else if (errors.isEmpty() && receiver) {
-        const sender = await getUserByEmail(client, req.oidc.user.email);
+
         const message = req.body.message;
         const data = { sentTo: receiver.username, sentBy: sender.username, message: message, time: new Date() };
         const result = await addMessage(client, data);
@@ -385,7 +387,7 @@ app.get("/mailbox/log", requiresAuth(), async (req, res) => {
     if (result) {
         res.redirect('/mailbox/log/page/1')
     } else {
-        res.send("You haven't attacked anyone yet!")
+        io.to(userMap[user._id]).emit("error", "You haven't attacked anyone yet!");
     }
 });
 
@@ -396,7 +398,7 @@ app.get("/mailbox/spyLog", requiresAuth(), async (req, res) => {
     if (result) {
         res.redirect('/mailbox/spyLog/page/1')
     } else {
-        res.send("You haven't spied on anyone yet!")
+        io.to(userMap[user._id]).emit("error", "You haven't spied on anyone yet!");
     }
 });
 
