@@ -41,16 +41,17 @@
 
     <h1>Available offers</h1>
 
+
     <% for (let i=0; i < trades.length; i++) { %>
         <form class="form-inline" method="post">
-            <label>Trading</label>
+            <label>Offer:</label>
             <label for="sellAmount">
                 <%= trades[i].sellAmount %>
             </label>
             <label for="sellResource">
                 <%= trades[i].sellResource.toLowerCase() %>
             </label>
-            <label>for</label>
+            <label>Price:</label>
             <label for="buyAmount">
                 <%= trades[i].buyAmount %>
             </label>
@@ -62,7 +63,7 @@
                 <button type="submit" formaction="/market/cancel/<%= trades[i]._id %>">Cancel trade</button>
                 <br>
                 <%} else {%>
-                    <button type="submit" formaction="/market/buy/<%= trades[i]._id %>">Make trade</button>
+                    <button type="submit" formaction="/market/buy/<%= trades[i]._id %>">Accept</button>
                     <%}%>
         </form>
 

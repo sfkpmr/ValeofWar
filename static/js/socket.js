@@ -61,3 +61,52 @@ socket.on('getIncomes', async function () {
         alert("HTTP-Error: " + response.status);
     }
 });
+socket.on('updateCountDown', async function () {
+    let response = await fetch("/api/getTimeToNextUpdate");
+    if (response.ok) {
+        let json = await response.json();
+        const date = new Date().getTime();
+        countDownDate = new Date(date + json);
+        timerFunction();
+    } else {
+        alert("HTTP-Error: " + response.status);
+    }
+});
+
+async function main() {
+    let response = await fetch("/api/getTimeToNextUpdate");
+    if (response.ok) {
+        let json = await response.json();
+        const date = new Date().getTime();
+        countDownDate = new Date(date + json);
+        timerFunction();
+    } else {
+        alert("HTTP-Error: " + response.status);
+    }
+}
+
+main();
+
+var countDownDate;
+
+function timerFunction() {
+
+    //console.log("pelle", countDownDate)
+    // Update every second
+    var x = setInterval(function () {
+        // Get current time
+        var now = new Date().getTime();
+
+        var distance = countDownDate - now;
+
+        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById("time").innerHTML = minutes + "m " + seconds + "s ";
+
+        if (distance < 0) {
+            clearInterval(x);
+            document.getElementById("time").innerHTML = "Per 15 min";
+        }
+    }, 1000);
+}

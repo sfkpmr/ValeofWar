@@ -779,6 +779,7 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
     res.redirect('/town/barracks');
 });
 
+//TODO require at least 1 soldier
 app.post("/profile/:username/attack", requiresAuth(), urlencodedParser, [
     check('username').isLength({ min: 5, max: 15 }),
 ], async (req, res) => {
@@ -795,6 +796,7 @@ app.post("/profile/:username/attack", requiresAuth(), urlencodedParser, [
     }
 });
 
+//TODO require at least 1 spy
 app.post("/profile/:username/spy", requiresAuth(), urlencodedParser, [
     check('username').isLength({ min: 5, max: 15 }),
 ], async (req, res) => {
@@ -895,12 +897,22 @@ app.get("/api/getUser/:id", requiresAuth(), urlencodedParser, [
     }
 });
 
+app.get("/api/getTimeToNextUpdate", requiresAuth(), async (req, res) => {
+    const time = Math.abs(new Date() - the_interval - startTime);
+    res.send(JSON.stringify(time));
+});
+
 //måste köra för alla så folk kan anfalla folk som är afk //ev kör när någon interagerar med afk folk
 const minutes = 15, the_interval = minutes * 60 * 1000;
+let startTime = new Date();
 setInterval(function () {
+    startTime = new Date();
     const date = new Date();
     console.log(date.toLocaleDateString(), date.toLocaleTimeString() + " Adding resources for everyone!");
     checkAll();
+    for (var i in userMap) {
+        io.to(userMap[i]).emit("updateCountDown");
+    }
 }, the_interval);
 
 const port = process.env.PORT || 3000;
