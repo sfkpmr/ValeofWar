@@ -365,8 +365,10 @@ app.post("/market/buy/:id", requiresAuth(), urlencodedParser, [
     const errors = validationResult(req)
     if (errors.isEmpty()) {
         const buyer = await getUserByEmail(client, req.oidc.user.email);
-        await buyTrade(client, buyer, req.params.id);
-
+        const result = await buyTrade(client, buyer, req.params.id);
+        if (!result) {
+            io.to(userMap[buyer._id]).emit("error", "You can't afford that!");
+        }
         res.redirect('/market')
     } else {
         res.status(400).render('pages/400');
@@ -547,7 +549,10 @@ app.post("/town/spyGuild/train", requiresAuth(), urlencodedParser, [
     };
     const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
     if (errors.isEmpty() && requiredValidationResult) {
-        await trainTroops(client, user.username, trainees);
+        const result = await trainTroops(client, user.username, trainees);
+        if (!result) {
+            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        }
     } else {
         console.log(JSON.stringify(errors))
     }
@@ -572,7 +577,10 @@ app.post("/town/spyGuild/craft", requiresAuth(), urlencodedParser, [
     const craftingOrder = { ropes: ropes, nets: nets, spyglasses: spyglasses, poisons: poisons, boots: 0, bracers: 0, helmets: 0, lances: 0, longbows: 0, shields: 0, spears: 0, swords: 0 };
     const requiredValidationResult = validateRequiredProductionLevel(user, craftingOrder);
     if (errors.isEmpty() && requiredValidationResult) {
-        await craftArmor(client, user, craftingOrder);
+        const result = await craftArmor(client, user, craftingOrder);
+        if (!result) {
+            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        }
     }
     res.redirect('/town/spyGuild');
 
@@ -608,7 +616,10 @@ app.post("/town/:building/upgrade", requiresAuth(), urlencodedParser, [
     const type = req.params.building;
     if (errors.isEmpty() && buildings.includes(type)) {
         const user = await getUserByEmail(client, req.oidc.user.email);
-        await fullUpgradeBuildingFunc(client, user, type);
+        const result = await fullUpgradeBuildingFunc(client, user, type);
+        if (!result) {
+            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        }
         res.redirect(`/town/${req.params.building}`);
     } else {
         res.status(400).render('pages/400');
@@ -669,7 +680,10 @@ app.post("/town/workshop/train", requiresAuth(), urlencodedParser, [
 
     const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
     if (errors.isEmpty() && requiredValidationResult) {
-        await trainTroops(client, user.username, trainees);
+        const result = await trainTroops(client, user.username, trainees);
+        if (!result) {
+            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        }
     }
     res.redirect('/town/workshop');
 });
@@ -711,7 +725,10 @@ app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
     const craftingOrder = { boots: boots, bracers: bracers, helmets: helmets, lances: lances, longbows: longbows, shields: shields, spears: spears, swords: swords, ropes: 0, nets: 0, spyglasses: 0, poisons: 0 };
     const requiredValidationResult = validateRequiredProductionLevel(user, craftingOrder);
     if (errors.isEmpty() && requiredValidationResult) {
-        await craftArmor(client, user, craftingOrder);
+        const result = await craftArmor(client, user, craftingOrder);
+        if (!result) {
+            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        }
     }
     res.redirect('/town/blacksmith');
 });
@@ -739,7 +756,10 @@ app.post("/town/stables/train", requiresAuth(), urlencodedParser, [
 
     const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
     if (errors.isEmpty() && requiredValidationResult) {
-        await trainTroops(client, user.username, trainees);
+        const result = await trainTroops(client, user.username, trainees);
+        if (!result) {
+            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        }
     } else {
         console.log("apa")
     }
@@ -772,7 +792,10 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
 
     const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
     if (errors.isEmpty() && requiredValidationResult) {
-        await trainTroops(client, user.username, trainees);
+        const result = await trainTroops(client, user.username, trainees);
+        if (!result) {
+            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        }
     } else {
         console.log("apa")
     }
@@ -847,7 +870,10 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
     if (errors.isEmpty() && resources.includes(type)) {
         const resourceId = parseInt(req.params.number);
         const user = await getUserByEmail(client, req.oidc.user.email);
-        await upgradeResourceField(client, user, type, resourceId)
+        const result = await upgradeResourceField(client, user, type, resourceId);
+        if (!result) {
+            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        }
         res.redirect(`/land/${type}/${resourceId}`);
     } else {
         res.status(400).render('pages/400');

@@ -96,6 +96,9 @@ resourceObject = {
             await setDatabaseValue(client, seller.username, dataToSeller);
             await setDatabaseValue(client, buyer.username, dataToBuyer);
             await deleteTrade(client, new ObjectId(id));
+            return true;
+        } else {
+            return false;
         }
     }
 };
