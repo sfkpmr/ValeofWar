@@ -18,8 +18,10 @@ troopsObject = {
         if (await checkIfCanAfford(client, username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost)) {
             await incTroopValues(client, username, trainees);
             await removeResources(client, username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost);
+            return true;
         } else {
             console.log("Can't afford troops bbbb");
+            return false;
         }
 
     },
@@ -35,8 +37,7 @@ troopsObject = {
         } else if (trainees.spies > 0 || trainees.sentries > 0) {
             return trainees.spies + trainees.sentries;
         } else {
-            console.debug("Caluclation error")
-            return -1;
+            return 0;
         }
     },
     calcHorseCost: function (trainees) {

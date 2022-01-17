@@ -426,8 +426,10 @@ buildingObject = {
         if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0)) {
             await incArmorValues(client, user.username, craftingOrder);
             await resourceObject.removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0);
+            return true;
         } else {
             console.log("Can't afford armor - bbbb");
+            return false;
         }
     },
     upgradeResourceField: async function (client, user, type, resourceId) {
@@ -493,6 +495,7 @@ buildingObject = {
         if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
             await buildingObject.upgradeResource(client, user.username, upgradedFieldData, resource);
             await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
+            return true;
         } else {
             console.debug("bbb-1");
             return false;
@@ -547,6 +550,7 @@ buildingObject = {
                 if (type === "wall") {
                     await buildingObject.restoreWallHealth(client, user);
                 }
+                return true;
             } else {
                 console.log("bbb-2");
                 return false;
