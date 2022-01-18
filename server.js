@@ -661,6 +661,7 @@ app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
         }
     } else {
         console.log("Already at max HP");
+        res.status(400).render('pages/400');
     }
 });
 
@@ -679,6 +680,7 @@ app.post("/town/wall/repairPartial", requiresAuth(), async (req, res) => {
         }
     } else {
         console.log("Already at max HP");
+        res.status(400).render('pages/400');
     }
 });
 
@@ -848,16 +850,20 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
 
 });
 
-//TODO require at least 1 soldier
 app.post("/profile/:username/attack", requiresAuth(), urlencodedParser, [
     check('username').isLength({ min: 5, max: 15 }),
 ], async (req, res) => {
     //TODO attack limiter? //reset all at midnight? //lose armor //TODO validate db input
     const errors = validationResult(req);
     const attacker = await getUserByEmail(client, req.oidc.user.email);
+    const attackingArmy = await getArmyByEmail(client, req.oidc.user.email);
+    const attackingArmory = await getArmoryByEmail(client, req.oidc.user.email);
+    const attackValue = await calculateAttack(attackingArmy, attackingArmory);
     const defender = await getUserByUsername(client, req.params.username);
     if (defender === false) {
-        res.send("No such user");
+        res.status(400).render('pages/400');
+    } else if (attackValue === 0) {
+        io.to(userMap[attacker._id]).emit("error", "We have no army!");
     } else if (errors.isEmpty() && attacker !== defender) {
         console.log(attacker.username + " tries to attack " + defender.username);
         const result = await attackFunc(client, attacker, defender);
@@ -873,7 +879,7 @@ app.post("/profile/:username/spy", requiresAuth(), urlencodedParser, [
     const attacker = await getUserByEmail(client, req.oidc.user.email);
     const defender = await getUserByUsername(client, req.params.username);
     if (defender === false) {
-        res.send("No such user");
+        res.status(400).render('pages/400');
     } else if (errors.isEmpty() && attacker !== defender) {
         console.log(attacker.username + " tries to spy on " + defender.username);
         const result = await spyFunc(client, attacker, defender);
