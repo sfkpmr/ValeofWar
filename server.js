@@ -514,6 +514,7 @@ app.get("/town", requiresAuth(), async (req, res) => {
     res.render('pages/town');
 });
 
+// TODO Display max number of units/armor you can afford right now 
 app.get("/town/barracks", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(client, req.oidc.user.email);
     const army = await getArmyByEmail(client, req.oidc.user.email);
