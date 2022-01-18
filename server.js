@@ -244,9 +244,13 @@ app.post("/market/sell", requiresAuth(), urlencodedParser, [
     const allowedToTrade = await userAllowedToTrade(client, user);
     const alreadyTradingResource = await checkIfAlreadyTradingResource(client, user, sellResource);
     if (errors.isEmpty() && resources.includes(sellResource) && resources.includes(buyResource) && allowedToTrade && !alreadyTradingResource) {
-        await addTrade(client, user, sellAmount, sellResource, buyAmount, buyResource);
+        const result = await addTrade(client, user, sellAmount, sellResource, buyAmount, buyResource);
+        if (result) {
+            res.redirect("/market");
+        } else {
+            io.to(userMap[user._id]).emit("error", "We can't afford that!");
+        }
     }
-    res.redirect("/market");
 });
 
 app.post("/market/cancel/:id", requiresAuth(), urlencodedParser, [//change to delete request

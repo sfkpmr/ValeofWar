@@ -27,6 +27,9 @@ resourceObject = {
         if (sellResource !== buyResource && makeTrade) {
             data = { seller: user.username, sellAmount: sellAmount, sellResource: sellResource, buyAmount: buyAmount, buyResource: buyResource }
             addTrade(client, data);
+            return true;
+        } else {
+            return false;
         }
 
     },
