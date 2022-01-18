@@ -167,8 +167,12 @@ app.get("/vale", requiresAuth(), async (req, res) => {
     const spyAttack = await calcSpyAttack(user, army, armory);
     const spyDefense = await calcSpyDefense(user, army, armory);
 
+    const timeLeftToUpdate = Math.abs(new Date() - the_interval - startTime);
+    var minutes = Math.floor((timeLeftToUpdate % (1000 * 60 * 60)) / (1000 * 60));
+    var seconds = Math.floor((timeLeftToUpdate % (1000 * 60)) / 1000);
+
     res.render("pages/vale", {
-        user, army, grainIncome, lumberIncome, stoneIncome, ironIncome, goldIncome, recruitsIncome, horseIncome,
+        minutes, seconds, user, army, grainIncome, lumberIncome, stoneIncome, ironIncome, goldIncome, recruitsIncome, horseIncome,
         attackValue, defenseValue, spyAttack, spyDefense
     })
 });
@@ -594,7 +598,7 @@ app.post("/town/spyGuild/craft", requiresAuth(), urlencodedParser, [
         } else {
             res.redirect('/town/spyGuild');
         }
-    } 
+    }
 });
 
 app.get("/town/wall", requiresAuth(), async (req, res) => {
@@ -839,7 +843,7 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
         } else {
             res.redirect('/town/barracks');
         }
-    } 
+    }
 });
 
 app.post("/profile/:username/attack", requiresAuth(), urlencodedParser, [
