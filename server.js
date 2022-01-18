@@ -37,7 +37,7 @@ const { trainTroops } = require("./modules/troops.js");
 const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs,
     getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource, getArmyByEmail, getArmoryByEmail, deleteArmy, deleteArmory, getInvolvedSpyLogs,
     getSpyLog } = require("./modules/database.js");
-const { fullUpgradeBuildingFunc, craftArmor, restoreWallHealth, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData,
+const { fullUpgradeBuildingFunc, craftArmor, repairWallHealth,repairWallHealthPartially, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData,
     validateRequiredProductionLevel } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getAllIncomes, getResourceBoost } = require("./modules/resources.js");
 
@@ -595,19 +595,24 @@ app.get("/town/wall", requiresAuth(), async (req, res) => {
     const defenseBonus = user.wallLevel * 10;
 
     let atMaxHealth;
-    if (maxWallHealth === user.currentWallHealth) {
+    if (maxWallHealth <= user.currentWallHealth) {
         atMaxHealth = true;
     } else {
         atMaxHealth = false;
     }
     const upgradeCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel);
-    const repairCost = {};
-    repairCost.lumberCost = upgradeCost.lumberCost * 0.5;
-    repairCost.stoneCost = upgradeCost.stoneCost * 0.5;
-    repairCost.ironCost = upgradeCost.ironCost * 0.5;
-    repairCost.goldCost = upgradeCost.goldCost * 0.5;
+    const fullRepairCost = {};
+    fullRepairCost.lumberCost = upgradeCost.lumberCost * 0.5;
+    fullRepairCost.stoneCost = upgradeCost.stoneCost * 0.5;
+    fullRepairCost.ironCost = upgradeCost.ironCost * 0.5;
+    fullRepairCost.goldCost = upgradeCost.goldCost * 0.5;
+    const partialRepairCost = {};
+    partialRepairCost.lumberCost = (upgradeCost.lumberCost * 0.5) / 10;
+    partialRepairCost.stoneCost = (upgradeCost.stoneCost * 0.5) / 10;
+    partialRepairCost.ironCost = (upgradeCost.ironCost * 0.5) / 10;
+    partialRepairCost.goldCost = (upgradeCost.goldCost * 0.5) / 10;
 
-    res.render('pages/wall', { user, maxWallHealth, atMaxHealth, repairCost, upgradeCost, defenseBonus })
+    res.render('pages/wall', { user, maxWallHealth, atMaxHealth, fullRepairCost, partialRepairCost, upgradeCost, defenseBonus })
 });
 
 app.post("/town/:building/upgrade", requiresAuth(), urlencodedParser, [
@@ -621,8 +626,9 @@ app.post("/town/:building/upgrade", requiresAuth(), urlencodedParser, [
         const result = await fullUpgradeBuildingFunc(client, user, type);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        } else {
+            res.redirect(`/town/${req.params.building}`);
         }
-        res.redirect(`/town/${req.params.building}`);
     } else {
         res.status(400).render('pages/400');
     }
@@ -641,14 +647,33 @@ app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
         const totalCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel)
         if (await checkIfCanAfford(client, user.username, totalCost.goldCost * 0.5, totalCost.lumberCost * 0.5, totalCost.stoneCost * 0.5, totalCost.ironCost * 0.5, 0, 0, 0)) {
             await removeResources(client, user.username, totalCost.goldCost * 0.5, totalCost.lumberCost * 0.5, totalCost.stoneCost * 0.5, totalCost.ironCost * 0.5, 0, 0, 0);
-            restoreWallHealth(client, user); //await?
+            repairWallHealth(client, user); //await?
+            res.redirect(`/town/wall`);
         } else {
-            console.log("bbb-3");
+            console.log("Can't afford to repair wall");
+            io.to(userMap[user._id]).emit("error", "You can't afford that!");
         }
     } else {
         console.log("Already at max HP");
     }
-    res.redirect(`/town/wall`);
+});
+
+app.post("/town/wall/repairPartial", requiresAuth(), async (req, res) => {
+    const user = await getUserByEmail(client, req.oidc.user.email);
+    const maxWallHealth = user.wallLevel * 100;
+    if (user.currentWallHealth < maxWallHealth) {
+        const totalCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel)
+        if (await checkIfCanAfford(client, user.username, (totalCost.goldCost * 0.5)/10, (totalCost.lumberCost * 0.5)/10, (totalCost.stoneCost * 0.5)/10, (totalCost.ironCost * 0.5)/10, 0, 0, 0)) {
+            await removeResources(client, user.username, (totalCost.goldCost * 0.5)/10, (totalCost.lumberCost * 0.5)/10, (totalCost.stoneCost * 0.5)/10, (totalCost.ironCost * 0.5)/10, 0, 0, 0);
+            repairWallHealthPartially(client, user); //await?
+            res.redirect(`/town/wall`);
+        } else {
+            console.log("Can't afford to repair wall");
+            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        }
+    } else {
+        console.log("Already at max HP");
+    }
 });
 
 app.get("/credits", async (req, res) => {
@@ -875,8 +900,9 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
         const result = await upgradeResourceField(client, user, type, resourceId);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        } else {
+            res.redirect(`/land/${type}/${resourceId}`);
         }
-        res.redirect(`/land/${type}/${resourceId}`);
     } else {
         res.status(400).render('pages/400');
     }

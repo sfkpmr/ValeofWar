@@ -399,6 +399,14 @@ buildingObject = {
         const data = { currentWallHealth: (user.wallLevel + 1) * 100 };
         await setDatabaseValue(client, user.username, data);
     },
+    repairWallHealth: async function (client, user) {
+        const data = { currentWallHealth: user.wallLevel * 100 };
+        await setDatabaseValue(client, user.username, data);
+    },
+    repairWallHealthPartially: async function (client, user) {
+        const data = { currentWallHealth: (user.currentWallHealth + user.wallLevel * 10) };
+        await setDatabaseValue(client, user.username, data);
+    },
     lowerWallHealth: async function (client, defender, amount) {
         let newHealth = defender.currentWallHealth - amount;
         if (newHealth < 0) {

@@ -25,16 +25,29 @@
 
                     <% if (!atMaxHealth) { %>
 
-                        <div class="resources">
-                            Repair cost: <img src="../../static/images/wood.png" height="35px" title="Lumber"> 
-                            <%= repairCost.lumberCost %> <img src="../../static/images/stone.png" height="35px" title="Stone"> 
-                                <%= repairCost.stoneCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron"> 
-                                <%= repairCost.ironCost %> and <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
-                                 <%= repairCost.goldCost %>
-                        </div>
 
+                        <div class="resources">
+                            Cost to repair 10% of wall: <img src="../../static/images/wood.png" height="35px" title="Lumber"> 
+                            <%= partialRepairCost.lumberCost %> <img src="../../static/images/stone.png" height="35px" title="Stone"> 
+                                <%= partialRepairCost.stoneCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron"> 
+                                <%= partialRepairCost.ironCost %> and <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
+                                 <%= partialRepairCost.goldCost %>
+                        </div>
+                        <br>
+                        <form action="/town/wall/repairPartial" method="POST">
+                            <input type="submit" class="submitButton" value="Repair partially">
+                        </form><br>
+
+                        <div class="resources">
+                            Full repair cost: <img src="../../static/images/wood.png" height="35px" title="Lumber"> 
+                            <%= fullRepairCost.lumberCost %> <img src="../../static/images/stone.png" height="35px" title="Stone"> 
+                                <%= fullRepairCost.stoneCost %> <img src="../../static/images/iron-ingots.png" height="35px" title="Iron"> 
+                                <%= fullRepairCost.ironCost %> and <img src="../../static/images/gold-ingots.png" height="35px" title="Gold">
+                                 <%= fullRepairCost.goldCost %>
+                        </div>
+                        <br>
                         <form action="/town/wall/repair" method="POST">
-                            <input type="submit" class="submitButton" value="Repair">
+                            <input type="submit" class="submitButton" value="Repair completely">
                         </form><br>
                         <%}%>
                             <% if (user.wallLevel <=19){ %>
