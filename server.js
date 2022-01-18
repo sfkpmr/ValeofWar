@@ -565,8 +565,6 @@ app.post("/town/spyGuild/train", requiresAuth(), urlencodedParser, [
         } else {
             res.redirect('/town/spyGuild');
         }
-    } else {
-        res.status(400).render('pages/400');
     }
 });
 
@@ -596,9 +594,7 @@ app.post("/town/spyGuild/craft", requiresAuth(), urlencodedParser, [
         } else {
             res.redirect('/town/spyGuild');
         }
-    } else {
-        res.status(400).render('pages/400');
-    }
+    } 
 });
 
 app.get("/town/wall", requiresAuth(), async (req, res) => {
@@ -726,8 +722,6 @@ app.post("/town/workshop/train", requiresAuth(), urlencodedParser, [
         } else {
             res.redirect('/town/workshop');
         }
-    } else {
-        res.status(400).render('pages/400');
     }
 
 });
@@ -778,8 +772,6 @@ app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
         } else {
             res.redirect('/town/blacksmith');
         }
-    } else {
-        res.status(400).render('pages/400');
     }
 });
 
@@ -812,8 +804,6 @@ app.post("/town/stables/train", requiresAuth(), urlencodedParser, [
         } else {
             res.redirect('/town/stables');
         }
-    } else {
-        res.status(400).render('pages/400');
     }
 });
 
@@ -849,10 +839,7 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
         } else {
             res.redirect('/town/barracks');
         }
-    } else {
-        res.status(400).render('pages/400');
-    }
-
+    } 
 });
 
 app.post("/profile/:username/attack", requiresAuth(), urlencodedParser, [
