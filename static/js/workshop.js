@@ -1,6 +1,6 @@
-const batteringRam = { lumber: 1500, iron: 500, gold: 150, attackDamage: 250, levelRequirement: 5 };
-const siegeTower = { lumber: 3000, iron: 500, gold: 300, attackDamage: 500, levelRequirement: 10 };
-const ballista = { lumber: 400, iron: 100, gold: 100, attackDamage: 150, defenseDamage: 100, levelRequirement: 15 };
+const batteringRam = { lumber: 1500, iron: 500, gold: 150, attackDamage: 75, levelRequirement: 5 };
+const siegeTower = { lumber: 3000, iron: 500, gold: 300, attackDamage: 150, levelRequirement: 10 };
+const ballista = { lumber: 400, iron: 100, gold: 100, attackDamage: 150, defenseDamage: 300, levelRequirement: 15 };
 const trebuchet = { lumber: 750, iron: 100, gold: 0, attackDamage: 250, levelRequirement: 20 };
 
 function workshopBuildCost() {

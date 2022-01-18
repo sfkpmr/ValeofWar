@@ -1,6 +1,6 @@
-const horseman = { grain: 100, iron: 50, gold: 30, attackDamage: 5, defenseDamage: 5, levelRequirement: 0 };
-const knight = { grain: 100, iron: 100, gold: 50, attackDamage: 20, defenseDamage: 20, levelRequirement: 5 };
-const horseArcher = { grain: 100, lumber: 50, iron: 100, gold: 100, attackDamage: 20, defenseDamage: 20, levelRequirement: 15 };
+const horseman = { grain: 100, iron: 50, gold: 30, attackDamage: 15, defenseDamage: 5, levelRequirement: 0 };
+const knight = { grain: 100, iron: 100, gold: 50, attackDamage: 25, defenseDamage: 15, levelRequirement: 5 };
+const horseArcher = { grain: 100, lumber: 50, iron: 100, gold: 100, attackDamage: 50, defenseDamage: 10, levelRequirement: 15 };
 
 function stablesTrainCost() {
     let grainCost = 0, lumberCost = 0, ironCost = 0, goldCost = 0;
