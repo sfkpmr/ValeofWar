@@ -37,8 +37,8 @@ const { trainTroops } = require("./modules/troops.js");
 const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs,
     getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource, getArmyByEmail, getArmoryByEmail, deleteArmy, deleteArmory, getInvolvedSpyLogs,
     getSpyLog } = require("./modules/database.js");
-const { fullUpgradeBuildingFunc, craftArmor, repairWallHealth, repairWallHealthPartially, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData,
-    validateRequiredProductionLevel } = require("./modules/buildings.js");
+const { fullUpgradeBuildingFunc, craftArmor, repairWallHealth, repairWallHealthPartially, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField,
+    getResourceFieldData, validateRequiredProductionLevel } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getAllIncomes, getResourceBoost } = require("./modules/resources.js");
 
 app.use(
@@ -167,7 +167,10 @@ app.get("/vale", requiresAuth(), async (req, res) => {
     const spyAttack = await calcSpyAttack(user, army, armory);
     const spyDefense = await calcSpyDefense(user, army, armory);
 
-    res.render("pages/vale", { user, army, grainIncome, lumberIncome, stoneIncome, ironIncome, goldIncome, recruitsIncome, horseIncome, attackValue, defenseValue, spyAttack, spyDefense })
+    res.render("pages/vale", {
+        user, army, grainIncome, lumberIncome, stoneIncome, ironIncome, goldIncome, recruitsIncome, horseIncome,
+        attackValue, defenseValue, spyAttack, spyDefense
+    })
 });
 
 app.get("/settings", requiresAuth(), async (req, res) => {
@@ -576,7 +579,10 @@ app.post("/town/spyGuild/craft", requiresAuth(), urlencodedParser, [
     const spyglasses = convertNegativeToZero(parseInt(req.body.spyglasses));
     const poisons = convertNegativeToZero(parseInt(req.body.poisons));
 
-    const craftingOrder = { ropes: ropes, nets: nets, spyglasses: spyglasses, poisons: poisons, boots: 0, bracers: 0, helmets: 0, lances: 0, longbows: 0, shields: 0, spears: 0, swords: 0 };
+    const craftingOrder = {
+        ropes: ropes, nets: nets, spyglasses: spyglasses, poisons: poisons, boots: 0, bracers: 0, helmets: 0, lances: 0, longbows: 0,
+        shields: 0, spears: 0, swords: 0
+    };
     const requiredValidationResult = validateRequiredProductionLevel(user, craftingOrder);
     if (errors.isEmpty() && requiredValidationResult) {
         const result = await craftArmor(client, user, craftingOrder);
@@ -753,7 +759,10 @@ app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
     const shields = convertNegativeToZero(parseInt(req.body.shield));
     const spears = convertNegativeToZero(parseInt(req.body.spear));
     const swords = convertNegativeToZero(parseInt(req.body.sword));
-    const craftingOrder = { boots: boots, bracers: bracers, helmets: helmets, lances: lances, longbows: longbows, shields: shields, spears: spears, swords: swords, ropes: 0, nets: 0, spyglasses: 0, poisons: 0 };
+    const craftingOrder = {
+        boots: boots, bracers: bracers, helmets: helmets, lances: lances, longbows: longbows, shields: shields, spears: spears,
+        swords: swords, ropes: 0, nets: 0, spyglasses: 0, poisons: 0
+    };
     const requiredValidationResult = validateRequiredProductionLevel(user, craftingOrder);
     if (errors.isEmpty() && requiredValidationResult) {
         const result = await craftArmor(client, user, craftingOrder);
