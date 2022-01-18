@@ -88,6 +88,7 @@ function craftingCost() {
     lumberCost += nets * net.lumber;
     lumberCost += spyglasses * spyglass.lumber;
 
+    ironCost += ropes * rope.iron;
     ironCost += nets * net.iron;
     ironCost += spyglasses * spyglass.iron;
 
