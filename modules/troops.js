@@ -20,7 +20,7 @@ troopsObject = {
             await removeResources(client, username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost);
             return true;
         } else {
-            console.log("Can't afford troops bbbb");
+            console.log("Can't afford troops");
             return false;
         }
 

@@ -436,7 +436,7 @@ buildingObject = {
             await resourceObject.removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0);
             return true;
         } else {
-            console.log("Can't afford armor - bbbb");
+            console.log("Can't afford armor");
             return false;
         }
     },
