@@ -587,7 +587,6 @@ attackObject = {
 
         const closeness = attackingSpyValue / (attackingSpyValue + defendingSpyValue)
 
-
         let attackerName = attacker.username;
 
         let certaintyModifier, levelOfCertainty;
@@ -606,12 +605,11 @@ attackObject = {
             attackerName = "Unknown"
         }
 
-        //they have at least x stuff, the spies are sure/not sure/quite sure etc
-
         const data = {
-            "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "listedAttacker": attackerName, "defender": defender.username, "defenses": defenderArmyDefense * certaintyModifier,
-            "defenderGrain": defender.grain * certaintyModifier, "defenderLumber": defender.lumber * certaintyModifier, "defenderStone": defender.stone * certaintyModifier,
-            "defenderIron": defender.iron * certaintyModifier, "defenderGold": defender.gold * certaintyModifier, "levelOfCertainty": levelOfCertainty
+            "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "listedAttacker": attackerName, "defender": defender.username, 
+            "defenses": Math.round(defenderArmyDefense * certaintyModifier), "defenderGrain": Math.round(defender.grain * certaintyModifier), 
+            "defenderLumber": Math.round(defender.lumber * certaintyModifier), "defenderStone": Math.round(defender.stone * certaintyModifier),
+            "defenderIron": Math.round(defender.iron * certaintyModifier), "defenderGold": Math.round(defender.gold * certaintyModifier), "levelOfCertainty": levelOfCertainty
         };
 
         return await attackObject.createSpyLog(client, data);
