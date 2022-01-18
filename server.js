@@ -37,7 +37,7 @@ const { trainTroops } = require("./modules/troops.js");
 const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs,
     getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource, getArmyByEmail, getArmoryByEmail, deleteArmy, deleteArmory, getInvolvedSpyLogs,
     getSpyLog } = require("./modules/database.js");
-const { fullUpgradeBuildingFunc, craftArmor, repairWallHealth,repairWallHealthPartially, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData,
+const { fullUpgradeBuildingFunc, craftArmor, repairWallHealth, repairWallHealthPartially, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField, getResourceFieldData,
     validateRequiredProductionLevel } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getAllIncomes, getResourceBoost } = require("./modules/resources.js");
 
@@ -554,12 +554,12 @@ app.post("/town/spyGuild/train", requiresAuth(), urlencodedParser, [
         const result = await trainTroops(client, user.username, trainees);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        } else {
+            res.redirect('/town/spyGuild');
         }
     } else {
-        console.log(JSON.stringify(errors))
+        res.status(400).render('pages/400');
     }
-
-    res.redirect('/town/spyGuild');
 });
 
 app.post("/town/spyGuild/craft", requiresAuth(), urlencodedParser, [
@@ -582,11 +582,12 @@ app.post("/town/spyGuild/craft", requiresAuth(), urlencodedParser, [
         const result = await craftArmor(client, user, craftingOrder);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        } else {
+            res.redirect('/town/spyGuild');
         }
+    } else {
+        res.status(400).render('pages/400');
     }
-    res.redirect('/town/spyGuild');
-
-
 });
 
 app.get("/town/wall", requiresAuth(), async (req, res) => {
@@ -650,7 +651,6 @@ app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
             repairWallHealth(client, user); //await?
             res.redirect(`/town/wall`);
         } else {
-            console.log("Can't afford to repair wall");
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
         }
     } else {
@@ -663,8 +663,8 @@ app.post("/town/wall/repairPartial", requiresAuth(), async (req, res) => {
     const maxWallHealth = user.wallLevel * 100;
     if (user.currentWallHealth < maxWallHealth) {
         const totalCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel)
-        if (await checkIfCanAfford(client, user.username, (totalCost.goldCost * 0.5)/10, (totalCost.lumberCost * 0.5)/10, (totalCost.stoneCost * 0.5)/10, (totalCost.ironCost * 0.5)/10, 0, 0, 0)) {
-            await removeResources(client, user.username, (totalCost.goldCost * 0.5)/10, (totalCost.lumberCost * 0.5)/10, (totalCost.stoneCost * 0.5)/10, (totalCost.ironCost * 0.5)/10, 0, 0, 0);
+        if (await checkIfCanAfford(client, user.username, (totalCost.goldCost * 0.5) / 10, (totalCost.lumberCost * 0.5) / 10, (totalCost.stoneCost * 0.5) / 10, (totalCost.ironCost * 0.5) / 10, 0, 0, 0)) {
+            await removeResources(client, user.username, (totalCost.goldCost * 0.5) / 10, (totalCost.lumberCost * 0.5) / 10, (totalCost.stoneCost * 0.5) / 10, (totalCost.ironCost * 0.5) / 10, 0, 0, 0);
             repairWallHealthPartially(client, user); //await?
             res.redirect(`/town/wall`);
         } else {
@@ -710,9 +710,13 @@ app.post("/town/workshop/train", requiresAuth(), urlencodedParser, [
         const result = await trainTroops(client, user.username, trainees);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        } else {
+            res.redirect('/town/workshop');
         }
+    } else {
+        res.status(400).render('pages/400');
     }
-    res.redirect('/town/workshop');
+
 });
 
 app.get("/town/stables", requiresAuth(), async (req, res) => {
@@ -755,9 +759,12 @@ app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
         const result = await craftArmor(client, user, craftingOrder);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        } else {
+            res.redirect('/town/blacksmith');
         }
+    } else {
+        res.status(400).render('pages/400');
     }
-    res.redirect('/town/blacksmith');
 });
 
 app.get("/land", requiresAuth(), async (req, res) => {
@@ -786,11 +793,12 @@ app.post("/town/stables/train", requiresAuth(), urlencodedParser, [
         const result = await trainTroops(client, user.username, trainees);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        } else {
+            res.redirect('/town/stables');
         }
     } else {
-        console.log("apa")
+        res.status(400).render('pages/400');
     }
-    res.redirect('/town/stables');
 });
 
 app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
@@ -822,11 +830,13 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
         const result = await trainTroops(client, user.username, trainees);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
+        } else {
+            res.redirect('/town/barracks');
         }
     } else {
-        console.log("apa")
+        res.status(400).render('pages/400');
     }
-    res.redirect('/town/barracks');
+
 });
 
 //TODO require at least 1 soldier
