@@ -112,10 +112,8 @@ document.getElementById("halberdiers").addEventListener("input", barracksTrainCo
 document.getElementById("longbowmen").addEventListener("input", barracksTrainCost);
 document.getElementById("archerAttackDamage").innerText = archer.attackDamage;
 document.getElementById("archerDefenseDamage").innerText = archer.defenseDamage;
-document.getElementById("archerLevelRequirement").innerText = archer.levelRequirement;
 document.getElementById("spearmanAttackDamage").innerText = spearman.attackDamage;
 document.getElementById("spearmanDefenseDamage").innerText = spearman.defenseDamage;
-document.getElementById("spearmanLevelRequirement").innerText = spearman.levelRequirement;
 document.getElementById("swordsmanAttackDamage").innerText = swordsman.attackDamage;
 document.getElementById("swordsmanDefenseDamage").innerText = swordsman.defenseDamage;
 document.getElementById("swordsmanLevelRequirement").innerText = swordsman.levelRequirement;

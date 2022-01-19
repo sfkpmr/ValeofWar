@@ -34,8 +34,7 @@
                 <div class="training">
                     <form action="/town/spyGuild/train" method="POST">
                         <label for="spies"><img src="../static/images/spy.png" height="35px" title="Spy"><div class="tooltip"> Spy
-                            <span class="tooltiptext">Attack: <output id="spyAttack">0</output><br> Level req: <output
-                                    id="spyLevelRequirement">0</output>  </span>
+                            <span class="tooltiptext">Attack: <output id="spyAttack">0</output></span>
                             </div></label><br>
                             Current: <%= army.spies %> Craft:
                        <input type="number" id="spies" name="spies" placeholder="0" min=0 max=9999> <br>
@@ -67,8 +66,7 @@
                 <div class="training">
                     <form action="/town/spyGuild/craft" method="POST">
                         <label for="ropes"><img src="../static/images/rope.png" height="35px" title="Rope"><div class="tooltip"> Rope
-                            <span class="tooltiptext">Attack: <output id="ropeAttack">0</output><br> Level req: <output
-                                    id="ropeLevelRequirement">0</output>  </span>
+                            <span class="tooltiptext">Attack: <output id="ropeAttack">0</output></span>
                             </div></label><br>
                             Current: <%= armory.ropes %>  Craft:
                             <input type="number" id="ropes" name="ropes" placeholder="0" min=0 max=9999> 

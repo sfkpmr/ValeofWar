@@ -58,7 +58,6 @@ document.getElementById("knights").addEventListener("input", stablesTrainCost);
 document.getElementById("horseArchers").addEventListener("input", stablesTrainCost);
 document.getElementById("horsemanAttackDamage").innerText = horseman.attackDamage;
 document.getElementById("horsemanDefenseDamage").innerText = horseman.defenseDamage;
-document.getElementById("horsemanLevelRequirement").innerText = horseman.levelRequirement;
 document.getElementById("knightAttackDamage").innerText = knight.attackDamage;
 document.getElementById("knightDefenseDamage").innerText = knight.defenseDamage;
 document.getElementById("knightLevelRequirement").innerText = knight.levelRequirement;
