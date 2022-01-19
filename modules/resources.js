@@ -58,10 +58,13 @@ resourceObject = {
 
     checkIfCanAfford: async function (client, username, goldCost, lumberCost, stoneCost, ironCost, grainCost, recruitCost, horseCost) {
         const user = await getUserByUsername(client, username);
-        console.log(grainCost, lumberCost, stoneCost, ironCost, goldCost, recruitCost, horseCost)
+        console.log(user.username, "tries to use", grainCost, lumberCost, stoneCost, ironCost, goldCost, recruitCost, horseCost, ". Currently has",
+            user.grain, user.lumber, user.stone, user.iron, user.gold, user.recruits, user.horses)
         if (user.gold >= goldCost && user.lumber >= lumberCost && user.stone >= stoneCost && user.iron >= ironCost && user.grain >= grainCost && user.recruits >= recruitCost && user.horses >= horseCost) {
+            console.log(user.username + "'s resource use request accepted!");
             return true;
         }
+        console.log(user.username + "'s resource use request rejected!");
         return false;
     },
 
