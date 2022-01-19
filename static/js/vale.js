@@ -73,8 +73,7 @@ socket.on('updateCountDown', async function () {
     }
 });
 socket.on('error', async function (message) {
-    console.log(message)
-    myFunction(message);
+    displayError(message);
 });
 
 async function main() {
@@ -91,20 +90,18 @@ async function main() {
 
 main();
 
-var countDownDate;
+let countDownDate;
 
 function timerFunction() {
-
-    //console.log("pelle", countDownDate)
     // Update every second
-    var x = setInterval(function () {
+    let x = setInterval(function () {
         // Get current time
-        var now = new Date().getTime();
+        let now = new Date().getTime();
 
-        var distance = countDownDate - now;
+        let distance = countDownDate - now;
 
-        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        let seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
         document.getElementById("time").innerHTML = minutes + "m " + seconds + "s ";
 
@@ -115,10 +112,10 @@ function timerFunction() {
     }, 1000);
 }
 
-function myFunction(message) {
+function displayError(message) {
     // Get the snackbar DIV
     document.getElementById("error").innerText = message;
-    var x = document.getElementById("snackbar");
+    let x = document.getElementById("snackbar");
   
     // Add the "show" class to DIV
     x.className = "show";
