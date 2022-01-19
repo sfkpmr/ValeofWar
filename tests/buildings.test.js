@@ -1,37 +1,46 @@
-const { validateRequiredProductionLevel, convertNegativeToZero, calcTotalCraftCost, calcIronCraftCost, calcGoldCraftCost, calcLumberCraftCost, calcGoldTrainCost, calcLumberTrainCost, calcIronTrainCost, calcGrainTrainCost } = require("../modules/buildings.js");
+const { validateRequiredProductionLevel, convertNegativeToZero, calcTotalCraftCost, calcIronCraftCost, calcGoldCraftCost, calcLumberCraftCost, calcGoldTrainCost, calcLumberTrainCost,
+    calcIronTrainCost, calcGrainTrainCost, calcGrainCraftCost } = require("../modules/buildings.js");
 
-const armor = { boots: 2, bracers: 3, helmets: 0, lances: 2, longbows: 2, shields: 2, spears: 3, swords: 1 };
+const armor = { ropes: 1, nets: 1, spyglasses: 1, poisons: 1, boots: 1, bracers: 1, helmets: 1, lances: 1, longbows: 1, shields: 1, spears: 1, swords: 1 };
 const nullArmor = { boots: null, bracers: null, helmets: null, lances: null, longbows: null, shields: null, spears: null, swords: null };
 const user = { barracksLevel: 3, stablesLevel: 4 };
 const data = { archer: 2, spearmen: 0, swordsmen: 4 };
 const data2 = { archer: 2, spearmen: 0, swordsmen: 0 };
+army = {
+    "archers": 1, "spearmen": 1, "swordsmen": 1, "horsemen": 1, "knights": 1, "batteringRams": 1, "siegeTowers": 1,
+    "crossbowmen": 1, "ballistas": 1, "twoHandedSwordsmen": 1, "longbowmen": 1, "horseArchers": 1, "trebuchets": 1, "halberdiers": 1,
+    "spies": 1, "sentries": 1
+}
 
 test("calcGoldTrainCost", () => {
-    expect(calcGoldTrainCost(3, 2, 4, 2, 1, 4, 4)).toBe(780)
+    expect(calcGoldTrainCost(army)).toBe(1095)
 })
 test("calcIronTrainCost", () => {
-    expect(calcIronTrainCost(3, 2, 4, 2, 1, 4, 4)).toBe(1150)
+    expect(calcIronTrainCost(army)).toBe(1730)
 })
 test("calcGrainTrainCost", () => {
-    expect(calcGrainTrainCost(3, 2, 4, 2, 1, 4, 4)).toBe(625)
+    expect(calcGrainTrainCost(army)).toBe(850)
 })
 test("calcLumberTrainCost", () => {
-    expect(calcLumberTrainCost(3, 2, 4, 2, 1, 4, 4)).toBe(6250)
+    expect(calcLumberTrainCost(army)).toBe(5880)
 })
 test("calcIronCraftCost", () => {
-    expect(calcIronCraftCost(3, 2, 4, 2, 1, 4, 4, 0)).toBe(555)
+    expect(calcIronCraftCost(armor)).toBe(365)
 })
 test("calcGoldCraftCost", () => {
-    expect(calcGoldCraftCost(3, 2, 4, 2, 1, 4, 4, 0)).toBe(20)
+    expect(calcGoldCraftCost(armor)).toBe(150)
 })
 test("calcLumberCraftCost", () => {
-    expect(calcLumberCraftCost(3, 2, 4, 2, 1, 4, 4, 0)).toBe(850)
+    expect(calcLumberCraftCost(armor)).toBe(465)
+})
+test("calcLumberCraftCost", () => {
+    expect(calcGrainCraftCost(armor)).toBe(100)
 })
 test("calcTotalCraftCost", () => {
-    expect(calcTotalCraftCost(armor)).toEqual({ lumberCost: 700, ironCost: 360, goldCost: 35 })
+    expect(calcTotalCraftCost(armor)).toEqual({ lumberCost: 465, ironCost: 365, goldCost: 150, grainCost: 100 })
 })
 test("emptyArmor", () => {
-    expect(calcTotalCraftCost(nullArmor)).toEqual({ lumberCost: 0, ironCost: 0, goldCost: 0 })
+    expect(calcTotalCraftCost(nullArmor)).toEqual({ lumberCost: 0, ironCost: 0, goldCost: 0, grainCost: 0 })
 })
 test("convertNegativeToZero", () => {
     expect(convertNegativeToZero(-5)).toBe(0);

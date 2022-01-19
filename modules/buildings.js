@@ -54,18 +54,22 @@ buildingObject = {
 
         cost += trainees.archers * archer.gold;
         cost += trainees.swordsmen * swordsman.gold;
+        cost += trainees.horsemen * horseman.gold;
         cost += trainees.knights * knight.gold;
         cost += trainees.batteringRams * batteringRam.gold;
         cost += trainees.siegeTowers * siegeTower.gold;
         cost += trainees.crossbowmen * crossbowman.gold;
         cost += trainees.ballistas * ballista.gold;
         cost += trainees.twoHandedSwordsmen * twoHandedSwordsman.gold;
+        cost += trainees.halberdiers * halberdier.gold;
         cost += trainees.longbowmen * longbowman.gold;
         cost += trainees.horseArchers * horseArcher.gold;
         cost += trainees.trebuchets * trebuchet.gold;
         cost += trainees.spies * spy.gold;
         cost += trainees.sentries * sentry.gold;
-
+        if (isNaN(cost)) {
+            return 0;
+        }
         return Math.round(cost);
     },
 
@@ -86,7 +90,9 @@ buildingObject = {
         cost += trainees.trebuchets * trebuchet.iron;
         cost += trainees.spies * spy.iron;
         cost += trainees.sentries * sentry.iron;
-
+        if (isNaN(cost)) {
+            return 0;
+        }
         return Math.round(cost);
     },
 
@@ -105,9 +111,9 @@ buildingObject = {
         cost += trainees.horseArchers * horseArcher.grain;
         cost += trainees.spies * spy.grain;
         cost += trainees.sentries * sentry.grain;
-
-        console.log(cost)
-
+        if (isNaN(cost)) {
+            return 0;
+        }
         return Math.round(cost);
     },
     calcLumberTrainCost: function (trainees) {
@@ -115,6 +121,7 @@ buildingObject = {
 
         cost += trainees.archers * archer.lumber;
         cost += trainees.spearmen * spearman.lumber;
+        cost += trainees.swordsmen * swordsman.lumber;
         cost += trainees.batteringRams * batteringRam.lumber;
         cost += trainees.siegeTowers * siegeTower.lumber;
         cost += trainees.crossbowmen * crossbowman.lumber;
@@ -122,10 +129,13 @@ buildingObject = {
         cost += trainees.twoHandedSwordsmen * twoHandedSwordsman.lumber;
         cost += trainees.halberdiers * halberdier.lumber;
         cost += trainees.longbowmen * longbowman.lumber;
+        cost += trainees.horseArchers * horseArcher.lumber;
         cost += trainees.trebuchets * trebuchet.lumber;
         cost += trainees.spies * spy.lumber;
         cost += trainees.sentries * sentry.lumber;
-
+        if (isNaN(cost)) {
+            return 0;
+        }
         return Math.round(cost);
     },
     calcLumberCraftCost: function (armorOrder) {
@@ -139,7 +149,13 @@ buildingObject = {
         cost += armorOrder.nets * net.lumber;
         cost += armorOrder.spyglasses * spyglass.lumber;
 
+        if (isNaN(cost)) {
+            return 0;
+        }
         return Math.round(cost);
+    },
+    calcGrainCraftCost: function (armorOrder) {
+        return Math.round(armorOrder.poisons * poison.grain);
     },
     calcIronCraftCost: function (armorOrder) {
         let cost = 0;
@@ -155,7 +171,9 @@ buildingObject = {
         cost += armorOrder.ropes * rope.iron;
         cost += armorOrder.nets * net.iron;
         cost += armorOrder.spyglasses * spyglass.iron;
-
+        if (isNaN(cost)) {
+            return 0;
+        }
         return Math.round(cost);
     },
     //pass object instead
@@ -166,11 +184,14 @@ buildingObject = {
         cost += armorOrder.swords * sword.gold;
         cost += armorOrder.spyglasses * spyglass.gold;
         cost += armorOrder.poisons * poison.gold;
-
+        if (isNaN(cost)) {
+            return 0;
+        }
         return Math.round(cost);
     },
     calcTotalCraftCost: function (armorOrder) {
 
+        //hur fungerar med test?
         let grainCost = 0;
         if (armorOrder.poisons > 0) {
             grainCost = armorOrder.poisons * poison.grain;

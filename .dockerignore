@@ -4,3 +4,6 @@ npm-debug.log
 .cache
 .github
 tests
+globalConfig.json
+jest-mongodb-config.json
+jest.config.js
