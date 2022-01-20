@@ -6,7 +6,7 @@ troopsObject = {
     // addToDb: async function (client, username, data) {//ta bort?
     //     await incDatabaseValue(client, username, data);
     // },
-    trainTroops: async function (client, username, trainees) {
+    trainTroops: async function (username, trainees) {
 
         const grainCost = calcGrainTrainCost(trainees);
         const lumberCost = calcLumberTrainCost(trainees);
@@ -15,9 +15,9 @@ troopsObject = {
         const recruitsCost = troopsObject.calcRecruitsCost(trainees);
         const horseCost = troopsObject.calcHorseCost(trainees);
 
-        if (await checkIfCanAfford(client, username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost)) {
-            await incTroopValues(client, username, trainees);
-            await removeResources(client, username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost);
+        if (await checkIfCanAfford(username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost)) {
+            await incTroopValues(username, trainees);
+            await removeResources(username, goldCost, lumberCost, 0, ironCost, grainCost, recruitsCost, horseCost);
             return true;
         } else {
             console.log("Can't afford troops");

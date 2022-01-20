@@ -2,7 +2,8 @@ const { addTrade, getTrade, getUserByUsername, hasTrades, getUserTrades, deleteT
 const { ObjectId } = require('mongodb');
 
 resourceObject = {
-    addTrade: async function (client, user, sellAmount, sellResource, buyAmount, buyResource) {
+    addTrade: async function (user, sellAmount, sellResource, buyAmount, buyResource) {
+
 
         const currentGrain = user.grain;
         const currentLumber = user.lumber;
@@ -26,21 +27,21 @@ resourceObject = {
 
         if (sellResource !== buyResource && makeTrade) {
             data = { seller: user.username, sellAmount: sellAmount, sellResource: sellResource, buyAmount: buyAmount, buyResource: buyResource }
-            addTrade(client, data);
+            addTrade(data);
             return true;
         } else {
             return false;
         }
 
     },
-    buyTrade: async function (client, buyer, id) {
+    buyTrade: async function (buyer, id) {
         const currentBuyerGrain = buyer.grain;
         const currentBuyerLumber = buyer.lumber;
         const currentBuyerStone = buyer.stone;
         const currentBuyerIron = buyer.iron;
         const currentBuyerGold = buyer.gold;
-        const trade = await getTrade(client, id);
-        const seller = await getUserByUsername(client, trade.seller);
+        const trade = await getTrade(id);
+        const seller = await getUserByUsername(trade.seller);
         const buyResource = trade.buyResource.toString().toLowerCase();;
         const buyAmount = trade.buyAmount;
         const sellResource = trade.sellResource.toString().toLowerCase();
@@ -96,9 +97,9 @@ resourceObject = {
         const dataToBuyer = { [sellResource]: buyerNewSellResourceAmount, [buyResource]: buyerNewBuyResourceAmount };
 
         if (saleIsOk && buyer.username != seller.username) {
-            await setDatabaseValue(client, seller.username, dataToSeller);
-            await setDatabaseValue(client, buyer.username, dataToBuyer);
-            await deleteTrade(client, new ObjectId(id));
+            await setDatabaseValue(seller.username, dataToSeller);
+            await setDatabaseValue(buyer.username, dataToBuyer);
+            await deleteTrade(new ObjectId(id));
             return true;
         } else {
             return false;

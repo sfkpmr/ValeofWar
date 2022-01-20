@@ -1,4 +1,4 @@
-const { getUserByUsername, incDatabaseValue, getUserById, hasTrades, getUserTrades, deleteTrade, addMessage } = require("../modules/database.js");
+const { setDatabaseValue, getUserByUsername, incDatabaseValue, getUserById, hasTrades, getUserTrades, deleteTrade, addMessage } = require("../modules/database.js");
 
 const baseGrainIncome = 7, baseLumberIncome = 6, baseStoneIncome = 3, baseIronIncome = 2, baseGoldIncome = 1;
 
@@ -41,8 +41,8 @@ resourceObject = {
         await incDatabaseValue(client, username, updatedUser);
     },
 
-    removeResources: async function (client, username, gold, lumber, stone, iron, grain, recruits, horses) {
-        const user = await getUserByUsername(client, username);
+    removeResources: async function (username, gold, lumber, stone, iron, grain, recruits, horses) {
+        const user = await getUserByUsername(username);
 
         const newGold = user.gold - gold;
         const newLumber = user.lumber - lumber;
@@ -53,11 +53,13 @@ resourceObject = {
         const newHorses = user.horses - horses;
         const updatedUser = { "grain": newGrain, "lumber": newLumber, "stone": newStone, "gold": newGold, "iron": newIron, "recruits": newRecruits, "horses": newHorses };
 
-        await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
+
+        await setDatabaseValue(username, updatedUser);
+        //await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
     },
 
-    checkIfCanAfford: async function (client, username, goldCost, lumberCost, stoneCost, ironCost, grainCost, recruitCost, horseCost) {
-        const user = await getUserByUsername(client, username);
+    checkIfCanAfford: async function (username, goldCost, lumberCost, stoneCost, ironCost, grainCost, recruitCost, horseCost) {
+        const user = await getUserByUsername(username);
         console.log(user.username, "tries to use", grainCost, lumberCost, stoneCost, ironCost, goldCost, recruitCost, horseCost, ". Currently has",
             user.grain, user.lumber, user.stone, user.iron, user.gold, user.recruits, user.horses)
         if (user.gold >= goldCost && user.lumber >= lumberCost && user.stone >= stoneCost && user.iron >= ironCost && user.grain >= grainCost && user.recruits >= recruitCost && user.horses >= horseCost) {

@@ -10,7 +10,7 @@ var options = {
 const path = require('path');
 const app = express();
 var server = https.createServer(options, app);
-const { MongoClient, ObjectId } = require('mongodb');
+const { ObjectId } = require('mongodb');
 require("dotenv").config();
 const { auth, requiresAuth } = require('express-openid-connect');
 const ejs = require('ejs');
@@ -28,15 +28,15 @@ const urlencodedParser = bodyParser.urlencoded({ extended: false });
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
-const client = new MongoClient(uri);
+// const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
+// const client = new MongoClient(uri);
 
 const { addTrade, buyTrade } = require("./modules/market.js");
 const { getAttackLog, calculateAttack, calculateDefense, attackFunc, calcSpyAttack, calcSpyDefense, spyFunc } = require("./modules/attack.js");
 const { trainTroops } = require("./modules/troops.js");
-const { getUserByUsername, getUserByEmail, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs,
+const { getUserByEmail, getUserByUsername, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs,
     getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource, getArmyByEmail, getArmoryByEmail, deleteArmy, deleteArmory, getInvolvedSpyLogs,
-    getSpyLog } = require("./modules/database.js");
+    getSpyLog, connectDb } = require("./modules/database.js");
 const { fullUpgradeBuildingFunc, craftArmor, repairWallHealth, repairWallHealthPartially, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField,
     getResourceFieldData, validateRequiredProductionLevel } = require("./modules/buildings.js");
 const { addResources, removeResources, checkIfCanAfford, incomeCalc, validateUserTrades, getAllIncomes, getResourceBoost } = require("./modules/resources.js");
@@ -62,6 +62,11 @@ var management = new ManagementClient({
 });
 
 const userMap = new Map();
+//exports = userMap;
+// function getUserMap() {
+//     return userMap;
+// }
+// exports.getUserMap = getUserMap;
 
 io.on('connection', (socket) => {
     let date = new Date();
@@ -86,8 +91,8 @@ main().catch(console.error);
 async function main() {
 
     try {
-        await client.connect();
-        await checkDb(client, 15000);
+        await connectDb();
+        // await checkDb(client, 15000);
     } catch (e) {
         console.error(e);
     }
@@ -123,9 +128,9 @@ app.get("/", (req, res) => {
 });
 
 app.get("/vale", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const army = await getArmyByEmail(client, req.oidc.user.email);
-    const armory = await getArmoryByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
+    const army = await getArmyByEmail(req.oidc.user.email);
+    const armory = await getArmoryByEmail(req.oidc.user.email);
 
     let grainLevels = 0, lumberLevels = 0, stoneLevels = 0, ironLevels = 0, goldLevels = 0, grainIncome = 0, lumberIncome = 0, stoneIncome = 0, ironIncome = 0, goldIncome = 0;
     function grainCalc(i) {
@@ -179,19 +184,19 @@ app.get("/vale", requiresAuth(), async (req, res) => {
 
 app.get("/settings", requiresAuth(), async (req, res) => {
     //Test user: johanna@test.com, saodhgi-9486y-(WYTH
-    const profileUser = await getUserByEmail(client, req.oidc.user.email)
+    const profileUser = await getUserByEmail(req.oidc.user.email)
     res.render("pages/settings", { profileUser })
 });
 
-//TODO radera mellanden och loggar?
+//TODO radera medellanden och loggar?
 app.delete("/settings/delete", requiresAuth(), async (req, res) => {
     //Accept prompt remains after first click, needs to click twice? Causes 'TypeError: Cannot read property '_id' of null'
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
     const id = `auth0|${user._id}`
 
-    await deleteUser(client, user._id);
-    await deleteArmy(client, req.oidc.user.email)
-    await deleteArmory(client, req.oidc.user.email)
+    await deleteUser(user._id);
+    await deleteArmy(req.oidc.user.email)
+    await deleteArmory(req.oidc.user.email)
 
     management.deleteUser({ id: id }, function (err) {
         if (err) {
@@ -207,8 +212,8 @@ app.get("/profile/:username", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
-        const currentUser = await getUserByEmail(client, req.oidc.user.email);
-        const profileUser = await getUserByUsername(client, req.params.username);
+        const currentUser = await getUserByEmail(req.oidc.user.email);
+        const profileUser = await getUserByUsername(req.params.username);
 
         if (profileUser === false) {
             io.to(userMap[currentUser._id]).emit("error", "No user by that name!");
@@ -226,9 +231,9 @@ app.get("/profile/:username", requiresAuth(), urlencodedParser, [
 
 //verifiera att alla säljare har tillräckligt mycket resurser för att sälja, annars avbryt trade -- skicka meddelande om försäljning avbryts
 app.get("/market", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const trades = await getAllTrades(client);
-    const allowedToTrade = await userAllowedToTrade(client, user);
+    const user = await getUserByEmail(req.oidc.user.email);
+    const trades = await getAllTrades();
+    const allowedToTrade = await userAllowedToTrade(user);
     res.render('pages/market', { user, trades, allowedToTrade });
 });
 
@@ -244,11 +249,11 @@ app.post("/market/sell", requiresAuth(), urlencodedParser, [
     const buyAmount = parseInt(req.body.buyAmount);
     const buyResource = req.body.buyResource;
     const resources = ['Grain', 'Lumber', 'Stone', 'Iron', 'Gold'];
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const allowedToTrade = await userAllowedToTrade(client, user);
-    const alreadyTradingResource = await checkIfAlreadyTradingResource(client, user, sellResource);
+    const user = await getUserByEmail(req.oidc.user.email);
+    const allowedToTrade = await userAllowedToTrade(user);
+    const alreadyTradingResource = await checkIfAlreadyTradingResource(user, sellResource);
     if (errors.isEmpty() && resources.includes(sellResource) && resources.includes(buyResource) && allowedToTrade && !alreadyTradingResource) {
-        const result = await addTrade(client, user, sellAmount, sellResource, buyAmount, buyResource);
+        const result = await addTrade(user, sellAmount, sellResource, buyAmount, buyResource);
         if (result) {
             res.redirect("/market");
         } else {
@@ -262,11 +267,11 @@ app.post("/market/cancel/:id", requiresAuth(), urlencodedParser, [//change to de
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const trade = await getTrade(client, req.params.id);
+        const user = await getUserByEmail(req.oidc.user.email);
+        const trade = await getTrade(req.params.id);
 
         if (user.username === trade.seller) {
-            await deleteTrade(client, new ObjectId(trade._id));
+            await deleteTrade(new ObjectId(trade._id));
         }
 
         res.redirect('/market')
@@ -276,8 +281,8 @@ app.post("/market/cancel/:id", requiresAuth(), urlencodedParser, [//change to de
 });
 
 app.get("/messages/inbox", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const messages = await getUserMessages(client, user.username);
+    const user = await getUserByEmail(req.oidc.user.email);
+    const messages = await getUserMessages(user.username);
     if (messages) {
         res.redirect('/messages/inbox/page/1')
     } else {
@@ -307,8 +312,8 @@ app.get("/messages/inbox/:id", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const message = await getMessageById(client, new ObjectId(req.params.id));
+        const user = await getUserByEmail(req.oidc.user.email);
+        const message = await getMessageById(new ObjectId(req.params.id));
 
         if (message && (user.username === message.sentBy || user.username === message.sentTo)) {
             res.render('pages/message', { user, message })
@@ -325,11 +330,11 @@ app.post("/messages/inbox/:id/report", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
-        const messageExists = await getMessageById(client, new ObjectId(req.params.id));
+        const messageExists = await getMessageById(new ObjectId(req.params.id));
         if (messageExists) {
             const message = "Reported message ID: " + messageExists._id;
             const data = { sentTo: "johanna", sentBy: "SYSTEM", message: message, time: new Date() };
-            addMessage(client, data);
+            addMessage(data);
             res.redirect(`/messages/inbox`);
         } else {
             res.send("No such message!")
@@ -344,15 +349,15 @@ app.post("/messages/send", requiresAuth(), urlencodedParser, [
     check('message').exists().isLength({ max: 1000 })//TODO handle ?!#%  ????
 ], async (req, res) => {
     const errors = validationResult(req)
-    const sender = await getUserByEmail(client, req.oidc.user.email);
-    const receiver = await getUserByUsername(client, req.body.recipient);
+    const sender = await getUserByEmail(req.oidc.user.email);
+    const receiver = await getUserByUsername(req.body.recipient);
     if (!receiver) {
         io.to(userMap[sender._id]).emit("error", "No user by that name!");
     } else if (errors.isEmpty() && receiver) {
 
         const message = req.body.message;
         const data = { sentTo: receiver.username, sentBy: sender.username, message: message, time: new Date() };
-        const result = await addMessage(client, data);
+        const result = await addMessage(data);
         res.redirect(`/messages/inbox/${result}`);
     } else {
         res.status(400).render('pages/400');
@@ -364,8 +369,8 @@ app.get("/messages/inbox/page/:nr", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const messages = await prepareMessagesOrLogs(client, user, parseInt(req.params.nr), "message");
+        const user = await getUserByEmail(req.oidc.user.email);
+        const messages = await prepareMessagesOrLogs(user, parseInt(req.params.nr), "message");
         res.render('pages/inbox', { user, messages })
     } else {
         res.status(400).render('pages/400');
@@ -377,8 +382,8 @@ app.post("/market/buy/:id", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
-        const buyer = await getUserByEmail(client, req.oidc.user.email);
-        const result = await buyTrade(client, buyer, req.params.id);
+        const buyer = await getUserByEmail(req.oidc.user.email);
+        const result = await buyTrade(buyer, req.params.id);
         if (!result) {
             io.to(userMap[buyer._id]).emit("error", "You can't afford that!");
         }
@@ -393,8 +398,8 @@ app.get("/mailbox", requiresAuth(), async (req, res) => {
 });
 
 app.get("/mailbox/log", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const result = await getInvolvedAttackLogs(client, user.username)
+    const user = await getUserByEmail(req.oidc.user.email);
+    const result = await getInvolvedAttackLogs(user.username)
     if (result) {
         res.redirect('/mailbox/log/page/1')
     } else {
@@ -404,8 +409,8 @@ app.get("/mailbox/log", requiresAuth(), async (req, res) => {
 
 //TODO no log for defender if spies were undetected
 app.get("/mailbox/spyLog", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const result = await getInvolvedSpyLogs(client, user.username)
+    const user = await getUserByEmail(req.oidc.user.email);
+    const result = await getInvolvedSpyLogs(user.username)
     if (result) {
         res.redirect('/mailbox/spyLog/page/1')
     } else {
@@ -418,9 +423,9 @@ app.get("/mailbox/spyLog/:id", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
+        const user = await getUserByEmail(req.oidc.user.email);
         const username = user.username;
-        const log = await getSpyLog(client, new ObjectId(req.params.id));
+        const log = await getSpyLog(new ObjectId(req.params.id));
         let spyUrl;
 
         if (user.username === log.attacker) {
@@ -444,8 +449,8 @@ app.get("/mailbox/spyLog/page/:nr", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const messages = await prepareMessagesOrLogs(client, user, parseInt(req.params.nr), "spyLog");
+        const user = await getUserByEmail(req.oidc.user.email);
+        const messages = await prepareMessagesOrLogs(user, parseInt(req.params.nr), "spyLog");
         res.render('pages/spyLog', { user, messages })
     } else {
         res.status(400).render('pages/400');
@@ -457,9 +462,9 @@ app.get("/mailbox/log/:id", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
+        const user = await getUserByEmail(req.oidc.user.email);
         const username = user.username;
-        const log = await getAttackLog(client, new ObjectId(req.params.id));
+        const log = await getAttackLog(new ObjectId(req.params.id));
         let attackUrl;
 
         if (user.username === log.attacker) {
@@ -484,8 +489,8 @@ app.get("/mailbox/log/page/:nr", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const messages = await prepareMessagesOrLogs(client, user, parseInt(req.params.nr), "log");
+        const user = await getUserByEmail(req.oidc.user.email);
+        const messages = await prepareMessagesOrLogs(user, parseInt(req.params.nr), "log");
         res.render('pages/log', { user, messages })
     } else {
         res.status(400).render('pages/400');
@@ -504,7 +509,7 @@ app.post("/search", requiresAuth(), urlencodedParser, [
 });
 
 app.get("/search/random", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
     const result = await client.db("gamedb").collection("players").aggregate([{ $sample: { size: 1 } }]).toArray();
 
     if (user.username === result[0].username) {
@@ -520,27 +525,27 @@ app.get("/town", requiresAuth(), async (req, res) => {
 
 // TODO Display max number of units/armor you can afford right now 
 app.get("/town/barracks", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const army = await getArmyByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
+    const army = await getArmyByEmail(req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("barracks", user.barracksLevel)
     res.render('pages/barracks', { user, totalCost, army });
 });
 
 app.get("/online", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
     const temp = [];
 
     for (let i in userMap) {
-        let result = await getUserById(client, i);
+        let result = await getUserById(i);
         temp.push(result.username);
     }
     res.render('pages/online', { user, temp });
 });
 
 app.get("/town/spyGuild", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const army = await getArmyByEmail(client, req.oidc.user.email);
-    const armory = await getArmoryByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
+    const army = await getArmyByEmail(req.oidc.user.email);
+    const armory = await getArmoryByEmail(req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("spyGuild", user.spyGuildLevel);
 
     res.render('pages/spyGuild', { user, army, armory, totalCost });
@@ -552,7 +557,7 @@ app.post("/town/spyGuild/train", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     //dogs?
     const errors = validationResult(req);
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
     const spies = convertNegativeToZero(parseInt(req.body.spies));
     const sentries = convertNegativeToZero(parseInt(req.body.sentries));
 
@@ -563,7 +568,7 @@ app.post("/town/spyGuild/train", requiresAuth(), urlencodedParser, [
     };
     const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
     if (errors.isEmpty() && requiredValidationResult) {
-        const result = await trainTroops(client, user.username, trainees);
+        const result = await trainTroops(user.username, trainees);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
         } else {
@@ -578,7 +583,7 @@ app.post("/town/spyGuild/craft", requiresAuth(), urlencodedParser, [
     check('spyglasses').isNumeric({ no_symbols: true }).isLength({ max: 4 }),
     check('poisons').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
 
     const errors = validationResult(req);
     const ropes = convertNegativeToZero(parseInt(req.body.ropes));
@@ -592,7 +597,7 @@ app.post("/town/spyGuild/craft", requiresAuth(), urlencodedParser, [
     };
     const requiredValidationResult = validateRequiredProductionLevel(user, craftingOrder);
     if (errors.isEmpty() && requiredValidationResult) {
-        const result = await craftArmor(client, user, craftingOrder);
+        const result = await craftArmor(user, craftingOrder);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
         } else {
@@ -602,7 +607,7 @@ app.post("/town/spyGuild/craft", requiresAuth(), urlencodedParser, [
 });
 
 app.get("/town/wall", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
     const maxWallHealth = user.wallLevel * 100;
     const defenseBonus = user.wallLevel * 10;
 
@@ -634,8 +639,8 @@ app.post("/town/:building/upgrade", requiresAuth(), urlencodedParser, [
     const buildings = ['barracks', 'blacksmith', 'stables', 'trainingfield', 'wall', 'workshop', 'spyGuild'];
     const type = req.params.building;
     if (errors.isEmpty() && buildings.includes(type)) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const result = await fullUpgradeBuildingFunc(client, user, type);
+        const user = await getUserByEmail(req.oidc.user.email);
+        const result = await fullUpgradeBuildingFunc(user, type);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
         } else {
@@ -647,19 +652,19 @@ app.post("/town/:building/upgrade", requiresAuth(), urlencodedParser, [
 });
 
 app.get("/town/trainingfield", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("trainingfield", user.trainingfieldLevel)
     res.render('pages/trainingField', { user, totalCost })
 });
 
 app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
     const maxWallHealth = user.wallLevel * 100;
     if (user.currentWallHealth < maxWallHealth) {
         const totalCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel)
-        if (await checkIfCanAfford(client, user.username, totalCost.goldCost * 0.5, totalCost.lumberCost * 0.5, totalCost.stoneCost * 0.5, totalCost.ironCost * 0.5, 0, 0, 0)) {
-            await removeResources(client, user.username, totalCost.goldCost * 0.5, totalCost.lumberCost * 0.5, totalCost.stoneCost * 0.5, totalCost.ironCost * 0.5, 0, 0, 0);
-            repairWallHealth(client, user); //await?
+        if (await checkIfCanAfford(user.username, totalCost.goldCost * 0.5, totalCost.lumberCost * 0.5, totalCost.stoneCost * 0.5, totalCost.ironCost * 0.5, 0, 0, 0)) {
+            await removeResources(user.username, totalCost.goldCost * 0.5, totalCost.lumberCost * 0.5, totalCost.stoneCost * 0.5, totalCost.ironCost * 0.5, 0, 0, 0);
+            repairWallHealth(user); //await?
             res.redirect(`/town/wall`);
         } else {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
@@ -671,13 +676,13 @@ app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
 });
 
 app.post("/town/wall/repairPartial", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
     const maxWallHealth = user.wallLevel * 100;
     if (user.currentWallHealth < maxWallHealth) {
         const totalCost = await calculateTotalBuildingUpgradeCost("wall", user.wallLevel)
-        if (await checkIfCanAfford(client, user.username, (totalCost.goldCost * 0.5) / 10, (totalCost.lumberCost * 0.5) / 10, (totalCost.stoneCost * 0.5) / 10, (totalCost.ironCost * 0.5) / 10, 0, 0, 0)) {
-            await removeResources(client, user.username, (totalCost.goldCost * 0.5) / 10, (totalCost.lumberCost * 0.5) / 10, (totalCost.stoneCost * 0.5) / 10, (totalCost.ironCost * 0.5) / 10, 0, 0, 0);
-            repairWallHealthPartially(client, user); //await?
+        if (await checkIfCanAfford(user.username, (totalCost.goldCost * 0.5) / 10, (totalCost.lumberCost * 0.5) / 10, (totalCost.stoneCost * 0.5) / 10, (totalCost.ironCost * 0.5) / 10, 0, 0, 0)) {
+            await removeResources(user.username, (totalCost.goldCost * 0.5) / 10, (totalCost.lumberCost * 0.5) / 10, (totalCost.stoneCost * 0.5) / 10, (totalCost.ironCost * 0.5) / 10, 0, 0, 0);
+            repairWallHealthPartially(user); //await?
             res.redirect(`/town/wall`);
         } else {
             console.log("Can't afford to repair wall");
@@ -694,8 +699,8 @@ app.get("/credits", async (req, res) => {
 });
 
 app.get("/town/workshop", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const army = await getArmyByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
+    const army = await getArmyByEmail(req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("workshop", user.workshopLevel)
     res.render('pages/workshop', { user, totalCost, army })
 });
@@ -707,7 +712,7 @@ app.post("/town/workshop/train", requiresAuth(), urlencodedParser, [
     check('trebuchet').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
     const errors = validationResult(req);
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
     const batteringRams = convertNegativeToZero(parseInt(req.body.batteringRam));
     const siegeTowers = convertNegativeToZero(parseInt(req.body.siegeTower));
     const ballistas = convertNegativeToZero(parseInt(req.body.ballista));
@@ -720,7 +725,7 @@ app.post("/town/workshop/train", requiresAuth(), urlencodedParser, [
 
     const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
     if (errors.isEmpty() && requiredValidationResult) {
-        const result = await trainTroops(client, user.username, trainees);
+        const result = await trainTroops(user.username, trainees);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
         } else {
@@ -731,15 +736,15 @@ app.post("/town/workshop/train", requiresAuth(), urlencodedParser, [
 });
 
 app.get("/town/stables", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const army = await getArmyByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
+    const army = await getArmyByEmail(req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("stables", user.stablesLevel)
     res.render('pages/stables', { user, totalCost, army });
 });
 
 app.get("/town/blacksmith", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const armory = await getArmoryByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
+    const armory = await getArmoryByEmail(req.oidc.user.email);
     const totalCost = await calculateTotalBuildingUpgradeCost("blacksmith", user.blacksmithLevel)
     res.render('pages/blacksmith', { user, totalCost, armory });
 });
@@ -755,7 +760,7 @@ app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
     check('sword').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
     const errors = validationResult(req);
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
     const boots = convertNegativeToZero(parseInt(req.body.boots));
     const bracers = convertNegativeToZero(parseInt(req.body.bracers));
     const helmets = convertNegativeToZero(parseInt(req.body.helmet));
@@ -770,7 +775,7 @@ app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
     };
     const requiredValidationResult = validateRequiredProductionLevel(user, craftingOrder);
     if (errors.isEmpty() && requiredValidationResult) {
-        const result = await craftArmor(client, user, craftingOrder);
+        const result = await craftArmor(user, craftingOrder);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
         } else {
@@ -789,7 +794,7 @@ app.post("/town/stables/train", requiresAuth(), urlencodedParser, [
     check('horseArchers').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
     const errors = validationResult(req)
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
     const horsemen = convertNegativeToZero(parseInt(req.body.horsemen));
     const knights = convertNegativeToZero(parseInt(req.body.knights));
     const horseArchers = convertNegativeToZero(parseInt(req.body.horseArchers));
@@ -802,7 +807,7 @@ app.post("/town/stables/train", requiresAuth(), urlencodedParser, [
 
     const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
     if (errors.isEmpty() && requiredValidationResult) {
-        const result = await trainTroops(client, user.username, trainees);
+        const result = await trainTroops(user.username, trainees);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
         } else {
@@ -821,7 +826,7 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
     check('halberdiers').isNumeric({ no_symbols: true }).isLength({ max: 4 })
 ], async (req, res) => {
     const errors = validationResult(req);
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
     const archers = convertNegativeToZero(parseInt(req.body.archers));
     const spearmen = convertNegativeToZero(parseInt(req.body.spearmen));
     const swordsmen = convertNegativeToZero(parseInt(req.body.swordsmen));
@@ -837,7 +842,7 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
 
     const requiredValidationResult = validateRequiredProductionLevel(user, trainees);
     if (errors.isEmpty() && requiredValidationResult) {
-        const result = await trainTroops(client, user.username, trainees);
+        const result = await trainTroops(user.username, trainees);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
         } else {
@@ -851,18 +856,18 @@ app.post("/profile/:username/attack", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     //TODO attack limiter? //reset all at midnight? //lose armor //TODO validate db input
     const errors = validationResult(req);
-    const attacker = await getUserByEmail(client, req.oidc.user.email);
-    const attackingArmy = await getArmyByEmail(client, req.oidc.user.email);
-    const attackingArmory = await getArmoryByEmail(client, req.oidc.user.email);
+    const attacker = await getUserByEmail(req.oidc.user.email);
+    const attackingArmy = await getArmyByEmail(req.oidc.user.email);
+    const attackingArmory = await getArmoryByEmail(req.oidc.user.email);
     const attackValue = await calculateAttack(attackingArmy, attackingArmory);
-    const defender = await getUserByUsername(client, req.params.username);
+    const defender = await getUserByUsername(req.params.username);
     if (defender === false) {
         res.status(400).render('pages/400');
     } else if (attackValue === 0) {
         io.to(userMap[attacker._id]).emit("error", "We have no army!");
     } else if (errors.isEmpty() && attacker !== defender) {
         console.log(attacker.username + " tries to attack " + defender.username);
-        const result = await attackFunc(client, attacker, defender);
+        const result = await attackFunc(attacker, defender);
         res.redirect(`/mailbox/log/${result}`);
     }
 });
@@ -872,13 +877,13 @@ app.post("/profile/:username/spy", requiresAuth(), urlencodedParser, [
     check('username').isLength({ min: 5, max: 15 }),
 ], async (req, res) => {
     const errors = validationResult(req);
-    const attacker = await getUserByEmail(client, req.oidc.user.email);
-    const defender = await getUserByUsername(client, req.params.username);
+    const attacker = await getUserByEmail(req.oidc.user.email);
+    const defender = await getUserByUsername(req.params.username);
     if (defender === false) {
         res.status(400).render('pages/400');
     } else if (errors.isEmpty() && attacker !== defender) {
         console.log(attacker.username + " tries to spy on " + defender.username);
-        const result = await spyFunc(client, attacker, defender);
+        const result = await spyFunc(attacker, defender);
         res.redirect(`/mailbox/spyLog/${result}`);
     }
 });
@@ -893,7 +898,7 @@ app.get("/land/:type/:number", requiresAuth(), urlencodedParser, [
     const resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
     const incomeBoost = getResourceBoost(type);
     if (errors.isEmpty() && resources.includes(type)) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
+        const user = await getUserByEmail(req.oidc.user.email);
         const resourceData = await getResourceFieldData(user, type, resourceId);
         if (resourceData.invalidId) {
             res.redirect("/land");
@@ -917,8 +922,8 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
     const resources = ['farm', 'lumbercamp', 'quarry', 'ironMine', 'goldMine'];
     if (errors.isEmpty() && resources.includes(type)) {
         const resourceId = parseInt(req.params.number);
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const result = await upgradeResourceField(client, user, type, resourceId);
+        const user = await getUserByEmail(req.oidc.user.email);
+        const result = await upgradeResourceField(user, type, resourceId);
         if (!result) {
             io.to(userMap[user._id]).emit("error", "You can't afford that!");
         } else {
@@ -930,15 +935,15 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
 });
 
 async function checkAll() {
-    await client.db("gamedb").collection("players").find().forEach(function (user) {
-        addResources(client, user.username);
-    });
+    // await client.db("gamedb").collection("players").find().forEach(function (user) {
+    //     addResources( user.username);
+    // });
 }
 
 app.get("/api/getPowers", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
-    const army = await getArmyByEmail(client, req.oidc.user.email);
-    const armory = await getArmoryByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
+    const army = await getArmyByEmail(req.oidc.user.email);
+    const armory = await getArmoryByEmail(req.oidc.user.email);
     const attackValue = await calculateAttack(army, armory);
     const defenseValue = await calculateDefense(user, army, armory);
     const spyAttackValue = await calcSpyAttack(user, army, armory);
@@ -947,7 +952,7 @@ app.get("/api/getPowers", requiresAuth(), async (req, res) => {
 });
 
 app.get("/api/getIncomes", requiresAuth(), async (req, res) => {
-    const user = await getUserByEmail(client, req.oidc.user.email);
+    const user = await getUserByEmail(req.oidc.user.email);
     const incomes = await getAllIncomes(user);
     res.send(JSON.stringify(incomes));
 });
@@ -957,8 +962,8 @@ app.get("/api/getUser/:id", requiresAuth(), urlencodedParser, [
 ], async (req, res) => {
     const errors = validationResult(req)
     if (errors.isEmpty()) {
-        const user = await getUserByEmail(client, req.oidc.user.email);
-        const army = await getArmyByEmail(client, req.oidc.user.email);
+        const user = await getUserByEmail(req.oidc.user.email);
+        const army = await getArmyByEmail(req.oidc.user.email);
         const data = {
             grain: user.grain, lumber: user.lumber, stone: user.stone, iron: user.iron, gold: user.gold, recruits: user.recruits, horses: user.horses, archers: army.archers,
             spearmen: army.spearmen, swordsmen: army.swordsmen, horsemen: army.horsemen, knights: army.knights, batteringrams: army.batteringRams, siegetowers: army.siegeTowers,
