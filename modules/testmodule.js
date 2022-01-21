@@ -1,1 +1,0 @@
-const getUserMap = require("../server.js");

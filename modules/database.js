@@ -1,11 +1,18 @@
 const { ObjectId, MongoClient } = require('mongodb');
 require("dotenv").config();
 
+//korta ner database commands
+
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
 const client = new MongoClient(uri);
 
-async function connectDb() {
+const baseGrainIncome = 7, baseLumberIncome = 6, baseStoneIncome = 3, baseIronIncome = 2, baseGoldIncome = 1;
+let userMap, io;
+
+async function connectDb(socketServer) {
     await client.connect();
+    userMap = new Map();
+    io = socketServer;
 }
 
 async function getUserByEmail(email) {
@@ -218,6 +225,169 @@ async function getSpyLog(ObjectId) {
     }
 }
 
+async function updateAllResources() {
+    await client.db("gamedb").collection("players").find().forEach(function (user) {
+        addResources(user.username);
+    });
+};
+
+async function addResources(username) {
+    const user = await getUserByUsername(username);
+    const recruitsIncome = user.trainingfieldLevel * 5;
+    const horseIncome = user.stablesLevel * 3;
+    let farmLevels = 0, lumberLevels = 0, stoneLevels = 0, ironLevels = 0, goldLevels = 0;
+
+    user.farms.forEach(grainCalc);
+    user.lumberCamps.forEach(lumberCalc);
+    user.quarries.forEach(stoneCalc);
+    user.ironMines.forEach(ironCalc);
+    user.goldMines.forEach(goldCalc);
+
+    function grainCalc(i) {
+        farmLevels += i;
+    };
+    function lumberCalc(i) {
+        lumberLevels += i;
+    };
+    function stoneCalc(i) {
+        stoneLevels += i;
+    };
+    function ironCalc(i) {
+        ironLevels += i;
+    };
+    function goldCalc(i) {
+        goldLevels += i;
+    };
+
+    const grainIncome = incomeCalc("grain", farmLevels);
+    const lumberIncome = incomeCalc("lumber", lumberLevels);
+    const stoneIncome = incomeCalc("stone", stoneLevels);
+    const ironIncome = incomeCalc("iron", ironLevels);
+    const goldIncome = incomeCalc("gold", goldLevels);
+    const updatedUser = { "grain": grainIncome, "lumber": lumberIncome, "stone": stoneIncome, "gold": goldIncome, "iron": ironIncome, "recruits": recruitsIncome, "horses": horseIncome };
+
+    await incDatabaseValue(username, updatedUser);
+}
+
+function incomeCalc(type, levels) {
+    let baseIncome = 0;
+
+    switch (type) {
+        case "grain":
+            baseIncome = baseGrainIncome;
+            break;
+        case "lumber":
+            baseIncome = baseLumberIncome;
+            break;
+        case "stone":
+            baseIncome = baseStoneIncome;
+            break;
+        case "iron":
+            baseIncome = baseIronIncome;
+            break;
+        case "gold":
+            baseIncome = baseGoldIncome;
+            break;
+    }
+    return income = levels * baseIncome;
+}
+
+async function checkDb(timeInMs = 60000, pipeline = []) {
+    console.log('hello1')
+
+    //console.log(getUserMap)
+
+
+
+    const collection = client.db("gamedb").collection("players");
+    const changeStream = collection.watch(pipeline);
+
+    changeStream.on('change', (next) => {
+
+        validateUserTrades(next.documentKey._id);
+        for (var i in userMap) {
+            if (i === next.documentKey._id && next.operationType != "delete") {
+                //https://stackoverflow.com/questions/17476294/how-to-send-a-message-to-a-particular-client-with-socket-io
+                io.to(userMap[i]).emit("sync");
+                io.to(userMap[i]).emit("getIncomes");
+                io.to(userMap[i]).emit("updatePower");
+            }
+        }
+    })
+}
+
+function addUserToMap(userId, socketId) {
+    userMap[userId] = socketId;
+
+    for (var i in userMap) {
+        console.log(i)
+    }
+}
+
+function getUserMap() {
+    return userMap;
+}
+
+function removeFromMap(socketId) {
+    // console.log('deleting', socketId)
+    // console.log('current map')
+    // for (var i in userMap) {
+    //     console.log(i)
+    // }
+
+    for (var i in userMap) {
+        if (userMap[i] === socketId) {
+            delete userMap[i]
+        }
+    }
+
+    // console.log('updated map')
+    // for (var i in userMap) {
+    //     console.log(i)
+    // }
+}
+
+
+async function validateUserTrades(id) {
+    const user = await getUserById(id);
+    const currentGrain = user.grain;
+    const currentLumber = user.lumber;
+    const currentStone = user.stone;
+    const currentIron = user.iron;
+    const currentGold = user.gold;
+
+    if (await hasTrades(user.username)) {
+        const trades = await getUserTrades(user.username);
+        for (let i = 0; i < trades.length; i++) {
+            let cancelTrade = false;
+            if (trades[i].sellResource === "Grain" && trades[i].sellAmount > currentGrain) {
+                cancelTrade = true;
+            } else if (trades[i].sellResource === "Lumber" && trades[i].sellAmount > currentLumber) {
+                cancelTrade = true;
+            } else if (trades[i].sellResource === "Stone" && trades[i].sellAmount > currentStone) {
+                cancelTrade = true;
+            } else if (trades[i].sellResource === "Iron" && trades[i].sellAmount > currentIron) {
+                cancelTrade = true;
+            } else if (trades[i].sellResource === "Gold" && trades[i].sellAmount > currentGold) {
+                cancelTrade = true;
+            }
+
+            if (cancelTrade) {
+                const data = { sentTo: user.username, sentBy: "SYSTEM", message: `Your trade offer of ${trades[i].sellResource} was canceled due to insufficient stockpiles.`, time: new Date() };
+                await deleteTrade(trades[i]._id);
+                addMessage(data);
+            }
+        }
+    };
+}
+
+async function getRandomPlayer() {
+    const result = await client.db("gamedb").collection("players").aggregate([{ $sample: { size: 1 } }]).toArray();
+    return result[0];
+}
+
+
+
 //behöver alla exporteras?
 module.exports.getUserByEmail = getUserByEmail;
 module.exports.incDatabaseValue = incDatabaseValue;
@@ -249,3 +419,10 @@ module.exports.deleteArmory = deleteArmory;
 module.exports.getSpyLog = getSpyLog;
 module.exports.getUserById = getUserById;
 module.exports.connectDb = connectDb;
+module.exports.updateAllResources = updateAllResources;
+module.exports.incomeCalc = incomeCalc;
+module.exports.checkDb = checkDb;
+module.exports.addUserToMap = addUserToMap;
+module.exports.getUserMap = getUserMap;
+module.exports.removeFromMap = removeFromMap;
+module.exports.getRandomPlayer = getRandomPlayer;

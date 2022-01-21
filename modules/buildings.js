@@ -203,12 +203,12 @@ buildingObject = {
 
         return { grainCost: grainCost, lumberCost: lumberCost, ironCost: ironCost, goldCost: goldCost };
     },
-    upgradeBuilding: async function (client, username, building) {
+    upgradeBuilding: async function (username, building) {
         const updatedUser = { [building]: 1 };
-        await incDatabaseValue(client, username, updatedUser);
+        await incDatabaseValue(username, updatedUser);
     },
-    upgradeResource: async function (client, username, data) {
-        await setDatabaseValue(client, username, data);
+    upgradeResource: async function (username, data) {
+        await setDatabaseValue(username, data);
     },
     calcBuildingLumberCost: function (type, buildingLevel) {
         let cost;
@@ -416,25 +416,25 @@ buildingObject = {
         }
         return Math.round(cost / 100) * 100;
     },
-    restoreWallHealth: async function (client, user) {
+    restoreWallHealth: async function (user) {
         const data = { currentWallHealth: (user.wallLevel + 1) * 100 };
-        await setDatabaseValue(client, user.username, data);
+        await setDatabaseValue(user.username, data);
     },
-    repairWallHealth: async function (client, user) {
+    repairWallHealth: async function (user) {
         const data = { currentWallHealth: user.wallLevel * 100 };
-        await setDatabaseValue(client, user.username, data);
+        await setDatabaseValue(user.username, data);
     },
-    repairWallHealthPartially: async function (client, user) {
+    repairWallHealthPartially: async function (user) {
         const data = { currentWallHealth: (user.currentWallHealth + user.wallLevel * 10) };
-        await setDatabaseValue(client, user.username, data);
+        await setDatabaseValue(user.username, data);
     },
-    lowerWallHealth: async function (client, defender, amount) {
+    lowerWallHealth: async function (defender, amount) {
         let newHealth = defender.currentWallHealth - amount;
         if (newHealth < 0) {
             newHealth = 0;
         }
         const data = { currentWallHealth: newHealth };
-        await setDatabaseValue(client, defender.username, data);
+        await setDatabaseValue(defender.username, data);
     },
     convertNegativeToZero: function (amount) {
         if (amount < 0) {
@@ -450,18 +450,18 @@ buildingObject = {
         const goldCost = await buildingObject.calcBuildingGoldCost(type, buildingLevel + 1);
         return { lumberCost: lumberCost, stoneCost: stoneCost, ironCost: ironCost, goldCost: goldCost };
     },
-    craftArmor: async function (client, user, craftingOrder) {
+    craftArmor: async function (user, craftingOrder) {
         const totalCost = buildingObject.calcTotalCraftCost(craftingOrder);
-        if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0)) {
-            await incArmorValues(client, user.username, craftingOrder);
-            await resourceObject.removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0);
+        if (await checkIfCanAfford(user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0)) {
+            await incArmorValues(user.username, craftingOrder);
+            await removeResources(user.username, totalCost.goldCost, totalCost.lumberCost, 0, totalCost.ironCost, 0, 0, 0);
             return true;
         } else {
             console.log("Can't afford armor");
             return false;
         }
     },
-    upgradeResourceField: async function (client, user, type, resourceId) {
+    upgradeResourceField: async function (user, type, resourceId) {
         let upgradedFieldData, resourceLevel, resource;
 
         if (resourceLevel >= 20 || resourceId < 0) {
@@ -521,9 +521,9 @@ buildingObject = {
 
         const totalCost = await buildingObject.calculateTotalBuildingUpgradeCost(type, resourceLevel)
 
-        if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
-            await buildingObject.upgradeResource(client, user.username, upgradedFieldData, resource);
-            await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
+        if (await checkIfCanAfford(user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
+            await buildingObject.upgradeResource(user.username, upgradedFieldData, resource);
+            await removeResources(user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
             return true;
         } else {
             console.debug("bbb-1");
@@ -531,7 +531,7 @@ buildingObject = {
         }
 
     },
-    fullUpgradeBuildingFunc: async function (client, user, type) {
+    fullUpgradeBuildingFunc: async function (user, type) {
         let buildingName, level;
 
         switch (type) {
@@ -573,11 +573,11 @@ buildingObject = {
             return false;
         } else {
             const totalCost = await buildingObject.calculateTotalBuildingUpgradeCost(type, level)
-            if (await checkIfCanAfford(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
-                await buildingObject.upgradeBuilding(client, user.username, buildingName);
-                await removeResources(client, user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
+            if (await checkIfCanAfford(user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0)) {
+                await buildingObject.upgradeBuilding(user.username, buildingName);
+                await removeResources(user.username, totalCost.goldCost, totalCost.lumberCost, totalCost.stoneCost, totalCost.ironCost, 0, 0, 0);
                 if (type === "wall") {
-                    await buildingObject.restoreWallHealth(client, user);
+                    await buildingObject.restoreWallHealth(user);
                 }
                 return true;
             } else {
