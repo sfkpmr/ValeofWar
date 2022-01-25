@@ -1,10 +1,14 @@
 const { ObjectId, MongoClient } = require('mongodb');
 require("dotenv").config();
 
-//korta ner database commands
-
 const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_URI}`;
 const client = new MongoClient(uri);
+const db = client.db("gamedb");
+const players = db.collection("players");
+const trades = db.collection("trades");
+const armies = db.collection("armies");
+const armories = db.collection("armories");
+const messages = db.collection("messages");
 
 const baseGrainIncome = 7, baseLumberIncome = 6, baseStoneIncome = 3, baseIronIncome = 2, baseGoldIncome = 1;
 let userMap, io;
@@ -16,17 +20,17 @@ async function connectDb(socketServer) {
 }
 
 async function getUserByEmail(email) {
-    return await client.db("gamedb").collection("players").findOne({ "email": email });
+    return await players.findOne({ "email": email });
 }
 
 async function incDatabaseValue(username, data) {
-    await client.db("gamedb").collection("players").updateOne({ "username": username }, { $inc: data });
+    await players.updateOne({ "username": username }, { $inc: data });
 }
 async function setDatabaseValue(username, data) {
-    await client.db("gamedb").collection("players").updateOne({ "username": username }, { $set: data });
+    await players.updateOne({ "username": username }, { $set: data });
 }
 async function getUserByUsername(username) {
-    const result = await client.db("gamedb").collection("players").findOne({ "username": username });
+    const result = await players.findOne({ "username": username });
     if (result === null) {
         return false;
     } else {
@@ -34,32 +38,32 @@ async function getUserByUsername(username) {
     }
 }
 async function getUserById(id) {
-    return await client.db("gamedb").collection("players").findOne({ "_id": id });
+    return await players.findOne({ "_id": id });
 }
 async function deleteUser(id) {
-    return await client.db("gamedb").collection("players").deleteOne({ "_id": id });
+    return await players.deleteOne({ "_id": id });
 }
 async function getAllTrades() {
-    const cursor = await client.db("gamedb").collection("trades").find();
+    const cursor = await trades.find();
     const result = await cursor.toArray();
     return result;
 }
 async function addTrade(data) {
     try {
-        return await client.db("gamedb").collection("trades").insertOne(data);
+        return await trades.insertOne(data);
     } catch (e) {
         console.log(e);
     }
 }
 async function getTrade(id) {
     console.log(id)
-    return await client.db("gamedb").collection("trades").findOne({ "_id": new ObjectId(id) });
+    return await trades.findOne({ "_id": new ObjectId(id) });
 }
 async function deleteTrade(id) {
-    return await client.db("gamedb").collection("trades").deleteOne({ "_id": id });
+    return await trades.deleteOne({ "_id": id });
 }
 async function hasTrades(username) {
-    const cursor = client.db("gamedb").collection("trades").find({ "seller": username })
+    const cursor = trades.find({ "seller": username })
     const result = await cursor.toArray();
     if (result[0] === undefined) {
         return false;
@@ -67,7 +71,7 @@ async function hasTrades(username) {
     return true;
 }
 async function getUserTrades(username) {
-    const cursor = client.db("gamedb").collection("trades").find({ "seller": username })
+    const cursor = trades.find({ "seller": username })
     const result = await cursor.toArray();
     if (result[0] === undefined) {
         return false;
@@ -75,7 +79,7 @@ async function getUserTrades(username) {
     return result;
 }
 async function getUserMessages(username) {
-    const cursor = client.db("gamedb").collection("messages").find({ $or: [{ "sentBy": username }, { "sentTo": username }] })
+    const cursor = messages.find({ $or: [{ "sentBy": username }, { "sentTo": username }] })
     const result = await cursor.toArray();
     if (result[0] === undefined) {
         return false;
@@ -83,7 +87,7 @@ async function getUserMessages(username) {
     return result;
 }
 async function getMessageById(id) {
-    const result = client.db("gamedb").collection("messages").findOne({ "_id": id });
+    const result = messages.findOne({ "_id": id });
     if (result === undefined) {
         return false;
     }
@@ -92,14 +96,14 @@ async function getMessageById(id) {
 async function addMessage(data) {
     //alltid?
     try {
-        result = await client.db("gamedb").collection("messages").insertOne(data);
+        result = await messages.insertOne(data);
     } catch (e) {
         console.log(e);
     }
     return result.insertedId;
 }
 async function getInvolvedAttackLogs(username) {
-    const cursor = client.db("gamedb").collection("attacks").find({ $or: [{ "attacker": username }, { "defender": username }] })
+    const cursor = db.collection("attacks").find({ $or: [{ "attacker": username }, { "defender": username }] })
     const result = await cursor.toArray();
     if (result[0] === undefined) {
         return false;
@@ -107,7 +111,7 @@ async function getInvolvedAttackLogs(username) {
     return result;
 }
 async function getInvolvedSpyLogs(username) {
-    const cursor = client.db("gamedb").collection("intrusions").find({ $or: [{ "attacker": username }, { "defender": username }] })
+    const cursor = db.collection("intrusions").find({ $or: [{ "attacker": username }, { "defender": username }] })
     const result = await cursor.toArray();
     if (result[0] === undefined) {
         return false;
@@ -128,10 +132,10 @@ async function prepareMessagesOrLogs(user, nr, type) {
     const maxPages = Math.ceil(Object.keys(result).length / 20);
 
     if (nr < 1 || nr > maxPages || isNaN(nr)) {
-        return false;//res.redirect('/messages/inbox/page/1')
+        return false;
     } else {
         if (result.length === 0) {
-            return 0;//res.render('pages/inbox')
+            return 0;
         }
 
         const currentPage = nr;
@@ -195,29 +199,29 @@ async function checkIfAlreadyTradingResource(user, type) {
     return false;
 }
 async function getArmyByEmail(email) {
-    return await client.db("gamedb").collection("armies").findOne({ "email": email });
+    return await armies.findOne({ "email": email });
 }
 async function getArmoryByEmail(email) {
-    return await client.db("gamedb").collection("armories").findOne({ "email": email });
+    return await armories.findOne({ "email": email });
 }
 //remove plural s
 async function incTroopValues(username, data) {
-    await client.db("gamedb").collection("armies").updateOne({ "username": username }, { $inc: data });
+    await armies.updateOne({ "username": username }, { $inc: data });
 }
 async function setTroopsValue(username, data) {
-    await client.db("gamedb").collection("armies").updateOne({ "username": username }, { $set: data });
+    await armies.updateOne({ "username": username }, { $set: data });
 }
 async function incArmorValues(username, data) {
-    await client.db("gamedb").collection("armories").updateOne({ "username": username }, { $inc: data });
+    await armories.updateOne({ "username": username }, { $inc: data });
 }
 async function deleteArmy(email) {
-    await client.db("gamedb").collection("armies").deleteOne({ "email": email });
+    await armies.deleteOne({ "email": email });
 }
 async function deleteArmory(email) {
-    await client.db("gamedb").collection("armories").deleteOne({ "email": email });
+    await armories.deleteOne({ "email": email });
 }
 async function getSpyLog(ObjectId) {
-    const result = await client.db("gamedb").collection("intrusions").findOne({ "_id": ObjectId });
+    const result = await db.collection("intrusions").findOne({ "_id": ObjectId });
     if (result === null) {
         return false;
     } else {
@@ -226,7 +230,7 @@ async function getSpyLog(ObjectId) {
 }
 
 async function updateAllResources() {
-    await client.db("gamedb").collection("players").find().forEach(function (user) {
+    await players.find().forEach(function (user) {
         addResources(user.username);
     });
 };
@@ -293,13 +297,7 @@ function incomeCalc(type, levels) {
 }
 
 async function checkDb(timeInMs = 60000, pipeline = []) {
-    console.log('hello1')
-
-    //console.log(getUserMap)
-
-
-
-    const collection = client.db("gamedb").collection("players");
+    const collection = players;
     const changeStream = collection.watch(pipeline);
 
     changeStream.on('change', (next) => {
@@ -329,22 +327,11 @@ function getUserMap() {
 }
 
 function removeFromMap(socketId) {
-    // console.log('deleting', socketId)
-    // console.log('current map')
-    // for (var i in userMap) {
-    //     console.log(i)
-    // }
-
     for (var i in userMap) {
         if (userMap[i] === socketId) {
             delete userMap[i]
         }
     }
-
-    // console.log('updated map')
-    // for (var i in userMap) {
-    //     console.log(i)
-    // }
 }
 
 
@@ -382,8 +369,31 @@ async function validateUserTrades(id) {
 }
 
 async function getRandomPlayer() {
-    const result = await client.db("gamedb").collection("players").aggregate([{ $sample: { size: 1 } }]).toArray();
+    const result = await players.aggregate([{ $sample: { size: 1 } }]).toArray();
     return result[0];
+}
+
+async function messagePlayer(id, type, message) {
+
+    io.to(userMap[id]).emit(type, message);
+
+}
+
+async function getAttackLog(ObjectId) {
+    const result = await db.collection("attacks").findOne({ "_id": ObjectId });
+    if (result === null) {
+        return false;
+    } else {
+        return result;
+    }
+}
+async function createAttackLog(data) {
+    result = await db.collection("attacks").insertOne(data);
+    return result.insertedId;
+}
+async function createSpyLog(data) {
+    result = await db.collection("intrusions").insertOne(data);
+    return result.insertedId;
 }
 
 
@@ -426,3 +436,7 @@ module.exports.addUserToMap = addUserToMap;
 module.exports.getUserMap = getUserMap;
 module.exports.removeFromMap = removeFromMap;
 module.exports.getRandomPlayer = getRandomPlayer;
+module.exports.messagePlayer = messagePlayer;
+module.exports.getAttackLog = getAttackLog;
+module.exports.createAttackLog = createAttackLog;
+module.exports.createSpyLog = createSpyLog;

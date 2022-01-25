@@ -29,14 +29,14 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 
 const { addTrade, buyTrade } = require("./modules/market.js");
-const { getAttackLog, calculateAttack, calculateDefense, attackFunc, calcSpyAttack, calcSpyDefense, spyFunc } = require("./modules/attack.js");
+const { calculateAttack, calculateDefense, attackFunc, calcSpyAttack, calcSpyDefense, spyFunc } = require("./modules/attack.js");
 const { trainTroops } = require("./modules/troops.js");
 const { getUserByEmail, getUserByUsername, getUserById, deleteUser, getAllTrades, getTrade, deleteTrade, getUserMessages, getMessageById, addMessage, prepareMessagesOrLogs,
     getInvolvedAttackLogs, userAllowedToTrade, checkIfAlreadyTradingResource, getArmyByEmail, getArmoryByEmail, deleteArmy, deleteArmory, getInvolvedSpyLogs,
-    getSpyLog, connectDb, updateAllResources, incomeCalc, checkDb, addUserToMap, getUserMap, removeFromMap, getRandomPlayer } = require("./modules/database.js");
+    getSpyLog, connectDb, updateAllResources, incomeCalc, checkDb, addUserToMap, getUserMap, removeFromMap, getRandomPlayer, messagePlayer, getAttackLog } = require("./modules/database.js");
 const { fullUpgradeBuildingFunc, craftArmor, repairWallHealth, repairWallHealthPartially, convertNegativeToZero, calculateTotalBuildingUpgradeCost, upgradeResourceField,
     getResourceFieldData, validateRequiredProductionLevel } = require("./modules/buildings.js");
-const { removeResources, checkIfCanAfford, validateUserTrades, getAllIncomes, getResourceBoost } = require("./modules/resources.js");
+const { removeResources, checkIfCanAfford, getAllIncomes, getResourceBoost } = require("./modules/resources.js");
 
 app.use(
     auth({
@@ -94,6 +94,7 @@ app.get("/", (req, res) => {
     }
 });
 
+//TODO check/prevent negative values? 
 app.get("/vale", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(req.oidc.user.email);
     const army = await getArmyByEmail(req.oidc.user.email);
@@ -183,8 +184,7 @@ app.get("/profile/:username", requiresAuth(), urlencodedParser, [
         const profileUser = await getUserByUsername(req.params.username);
 
         if (profileUser === false) {
-            const userMap = getUserMap();
-            io.to(userMap[currentUser._id]).emit("error", "No user by that name!");
+            messagePlayer(currentUser._id, "error", "No player by that name!")
         } else {
             if (req.oidc.user.email === profileUser.email) {
                 res.render('pages/settings', { profileUser });
@@ -225,8 +225,7 @@ app.post("/market/sell", requiresAuth(), urlencodedParser, [
         if (result) {
             res.redirect("/market");
         } else {
-            const userMap = getUserMap();
-            io.to(userMap[user._id]).emit("error", "We can't afford that!");
+            messagePlayer(user._id, "error", "You can't afford that!")
         }
     }
 });
@@ -255,8 +254,7 @@ app.get("/messages/inbox", requiresAuth(), async (req, res) => {
     if (messages) {
         res.redirect('/messages/inbox/page/1')
     } else {
-        const userMap = getUserMap();
-        io.to(userMap[user._id]).emit("error", "No messages yet!");
+        messagePlayer(user._id, "error", "No messages yet!")
     }
 });
 
@@ -322,8 +320,7 @@ app.post("/messages/send", requiresAuth(), urlencodedParser, [
     const sender = await getUserByEmail(req.oidc.user.email);
     const receiver = await getUserByUsername(req.body.recipient);
     if (!receiver) {
-        const userMap = getUserMap();
-        io.to(userMap[sender._id]).emit("error", "No user by that name!");
+        messagePlayer(sender._id, "error", "No player by that name!")
     } else if (errors.isEmpty() && receiver) {
 
         const message = req.body.message;
@@ -356,8 +353,7 @@ app.post("/market/buy/:id", requiresAuth(), urlencodedParser, [
         const buyer = await getUserByEmail(req.oidc.user.email);
         const result = await buyTrade(buyer, req.params.id);
         if (!result) {
-            const userMap = getUserMap();
-            io.to(userMap[buyer._id]).emit("error", "You can't afford that!");
+            messagePlayer(buyer._id, "error", "You can't afford that!")
         }
         res.redirect('/market')
     } else {
@@ -375,8 +371,7 @@ app.get("/mailbox/log", requiresAuth(), async (req, res) => {
     if (result) {
         res.redirect('/mailbox/log/page/1')
     } else {
-        const userMap = getUserMap();
-        io.to(userMap[user._id]).emit("error", "You haven't attacked anyone yet!");
+        messagePlayer(user._id, "error", "You haven't attacked anyone yet!")
     }
 });
 
@@ -387,8 +382,7 @@ app.get("/mailbox/spyLog", requiresAuth(), async (req, res) => {
     if (result) {
         res.redirect('/mailbox/spyLog/page/1')
     } else {
-        const userMap = getUserMap();
-        io.to(userMap[user._id]).emit("error", "You haven't spied on anyone yet!");
+        messagePlayer(user._id, "error", "You haven't spied on anyone yet!")
     }
 });
 
@@ -545,8 +539,7 @@ app.post("/town/spyGuild/train", requiresAuth(), urlencodedParser, [
     if (errors.isEmpty() && requiredValidationResult) {
         const result = await trainTroops(user.username, trainees);
         if (!result) {
-            const userMap = getUserMap();
-            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+            messagePlayer(user._id, "error", "You can't afford that!")
         } else {
             res.redirect('/town/spyGuild');
         }
@@ -575,8 +568,7 @@ app.post("/town/spyGuild/craft", requiresAuth(), urlencodedParser, [
     if (errors.isEmpty() && requiredValidationResult) {
         const result = await craftArmor(user, craftingOrder);
         if (!result) {
-            const userMap = getUserMap();
-            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+            messagePlayer(user._id, "error", "You can't afford that!")
         } else {
             res.redirect('/town/spyGuild');
         }
@@ -619,8 +611,7 @@ app.post("/town/:building/upgrade", requiresAuth(), urlencodedParser, [
         const user = await getUserByEmail(req.oidc.user.email);
         const result = await fullUpgradeBuildingFunc(user, type);
         if (!result) {
-            const userMap = getUserMap(); //flytta operation till database.js
-            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+            messagePlayer(user._id, "error", "You can't afford that!")
         } else {
             res.redirect(`/town/${req.params.building}`);
         }
@@ -645,8 +636,7 @@ app.post("/town/wall/repair", requiresAuth(), async (req, res) => {
             repairWallHealth(user); //await?
             res.redirect(`/town/wall`);
         } else {
-            const userMap = getUserMap();
-            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+            messagePlayer(user._id, "error", "You can't afford that!")
         }
     } else {
         console.log("Already at max HP");
@@ -665,8 +655,7 @@ app.post("/town/wall/repairPartial", requiresAuth(), async (req, res) => {
             res.redirect(`/town/wall`);
         } else {
             console.log("Can't afford to repair wall");
-            const userMap = getUserMap();
-            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+            messagePlayer(user._id, "error", "You can't afford that!")
         }
     } else {
         console.log("Already at max HP");
@@ -707,8 +696,7 @@ app.post("/town/workshop/train", requiresAuth(), urlencodedParser, [
     if (errors.isEmpty() && requiredValidationResult) {
         const result = await trainTroops(user.username, trainees);
         if (!result) {
-            const userMap = getUserMap();
-            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+            messagePlayer(user._id, "error", "You can't afford that!")
         } else {
             res.redirect('/town/workshop');
         }
@@ -758,8 +746,7 @@ app.post("/town/blacksmith/craft", requiresAuth(), urlencodedParser, [
     if (errors.isEmpty() && requiredValidationResult) {
         const result = await craftArmor(user, craftingOrder);
         if (!result) {
-            const userMap = getUserMap();
-            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+            messagePlayer(user._id, "error", "You can't afford that!")
         } else {
             res.redirect('/town/blacksmith');
         }
@@ -791,8 +778,7 @@ app.post("/town/stables/train", requiresAuth(), urlencodedParser, [
     if (errors.isEmpty() && requiredValidationResult) {
         const result = await trainTroops(user.username, trainees);
         if (!result) {
-            const userMap = getUserMap();
-            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+            messagePlayer(user._id, "error", "You can't afford that!")
         } else {
             res.redirect('/town/stables');
         }
@@ -827,8 +813,7 @@ app.post("/town/barracks/train", requiresAuth(), urlencodedParser, [
     if (errors.isEmpty() && requiredValidationResult) {
         const result = await trainTroops(user.username, trainees);
         if (!result) {
-            const userMap = getUserMap();
-            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+            messagePlayer(user._id, "error", "You can't afford that!")
         } else {
             res.redirect('/town/barracks');
         }
@@ -848,8 +833,7 @@ app.post("/profile/:username/attack", requiresAuth(), urlencodedParser, [
     if (defender === false) {
         res.status(400).render('pages/400');
     } else if (attackValue === 0) {
-        const userMap = getUserMap();
-        io.to(userMap[attacker._id]).emit("error", "We have no army!");
+        messagePlayer(attacker._id, "error", "We have no army!")
     } else if (errors.isEmpty() && attacker !== defender) {
         console.log(attacker.username + " tries to attack " + defender.username);
         const result = await attackFunc(attacker, defender);
@@ -910,8 +894,7 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
         const user = await getUserByEmail(req.oidc.user.email);
         const result = await upgradeResourceField(user, type, resourceId);
         if (!result) {
-            const userMap = getUserMap();
-            io.to(userMap[user._id]).emit("error", "You can't afford that!");
+            messagePlayer(user._id, "error", "You can't afford that!")
         } else {
             res.redirect(`/land/${type}/${resourceId}`);
         }
@@ -919,8 +902,6 @@ app.post("/land/:type/:number/upgrade", requiresAuth(), urlencodedParser, [
         res.status(400).render('pages/400');
     }
 });
-
-
 
 app.get("/api/getPowers", requiresAuth(), async (req, res) => {
     const user = await getUserByEmail(req.oidc.user.email);

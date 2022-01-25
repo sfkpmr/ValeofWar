@@ -2,9 +2,6 @@ const { incomeCalc, getIncome, getAllIncomes } = require("../modules/resources.j
 
 const user = { farms: [1, 2, 3, 0], lumberCamps: [1, 2, 3, 0], quarries: [1, 2, 3, 0], ironMines: [1, 2, 3], goldMines: [1, 2], trainingfieldLevel: 5, stablesLevel: 2 };
 
-test("incomeCalc", () => {
-    expect(incomeCalc("lumber", 8)).toBe(48)
-})
 test("getIncome", () => {
     expect(getIncome(user, "getGrainIncome")).toBe(42)
 })

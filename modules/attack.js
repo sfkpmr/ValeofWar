@@ -1,4 +1,4 @@
-const { setDatabaseValue, getArmyByEmail, getArmoryByEmail, setTroopsValue } = require("../modules/database.js");
+const { setDatabaseValue, getArmyByEmail, getArmoryByEmail, setTroopsValue, getAttackLog, createAttackLog, createSpyLog } = require("../modules/database.js");
 const { stealResources, loseResources } = require("../modules/resources.js");
 const { lowerWallHealth } = require("../modules/buildings.js");
 const { ObjectId } = require('mongodb');
@@ -35,22 +35,6 @@ const spyglass = { lumber: 15, iron: 50, gold: 25, attack: 25, defense: 10, leve
 const poison = { grain: 100, gold: 100, attack: 50, levelRequirement: 10 };
 
 attackObject = {
-    getAttackLog: async function (client, ObjectId) {
-        const result = await client.db("gamedb").collection("attacks").findOne({ "_id": ObjectId });
-        if (result === null) {
-            return false;
-        } else {
-            return result;
-        }
-    },
-    createAttackLog: async function (client, data) {
-        result = await client.db("gamedb").collection("attacks").insertOne(data);
-        return result.insertedId;
-    },
-    createSpyLog: async function (client, data) {
-        result = await client.db("gamedb").collection("intrusions").insertOne(data);
-        return result.insertedId;
-    },
     calculateAttack: function (army, armory) {
 
         const archers = army.archers;
@@ -225,7 +209,7 @@ attackObject = {
         return Math.round(totalDamage * wallBonus);
     },
 
-    armyLosses: async function (client, army, divider) {
+    armyLosses: async function (army, divider) {
 
         const archers = army.archers;
         const spearmen = army.spearmen;
@@ -417,7 +401,7 @@ attackObject = {
             "crossbowmen": newCrossbowmen, "ballistas": newBallistas, "twoHandedSwordsmen": newTwoHandedSwordsmen, "longbowmen": newLongbowmen, "horseArchers": newHorseArchers, "trebuchets": newTrebuchets, "halberdiers": newHalberdiers
         };
 
-        await setTroopsValue(client, army.username, data);
+        await setTroopsValue(army.username, data);
 
         return battleLosses;
     },
@@ -478,11 +462,11 @@ attackObject = {
         }
         return value;
     },
-    attackFunc: async function (client, attacker, defender) {
-        const attackingArmy = await getArmyByEmail(client, attacker.email)
-        const defendingArmy = await getArmyByEmail(client, defender.email)
-        const attackingArmory = await getArmoryByEmail(client, attacker.email)
-        const defendingArmory = await getArmoryByEmail(client, defender.email)
+    attackFunc: async function (attacker, defender) {
+        const attackingArmy = await getArmyByEmail(attacker.email)
+        const defendingArmy = await getArmyByEmail(defender.email)
+        const attackingArmory = await getArmoryByEmail(attacker.email)
+        const defendingArmory = await getArmoryByEmail(defender.email)
         const attackDamage = attackObject.calculateAttack(attackingArmy, attackingArmory);
         const defenseDamage = attackObject.calculateDefense(defender, defendingArmy, defendingArmory);
 
@@ -501,21 +485,21 @@ attackObject = {
         const grainLoot = Math.round((defender.grain / resourceDivider) * wallBonus);
         const ironLoot = Math.round((defender.iron / resourceDivider) * wallBonus);
 
-        stealResources(client, attacker.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
-        loseResources(client, defender.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
+        stealResources(attacker.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
+        loseResources(defender.username, goldLoot, lumberLoot, stoneLoot, ironLoot, grainLoot);
 
-        const attackerLosses = await attackObject.armyLosses(client, attackingArmy, attackTroopDivider);
-        const defenderLosses = await attackObject.armyLosses(client, defendingArmy, defenseTroopDivider);
+        const attackerLosses = await attackObject.armyLosses(attackingArmy, attackTroopDivider);
+        const defenderLosses = await attackObject.armyLosses(defendingArmy, defenseTroopDivider);
 
         const wallDamage = Math.floor(Math.random() * 5);
-        await lowerWallHealth(client, defender, wallDamage);
+        await lowerWallHealth(defender, wallDamage);
         const data = {
             "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "defender": defender.username, "attackDamage": attackDamage, "defenseDamage": defenseDamage, "attackerLosses": attackerLosses, "defenderLosses": defenderLosses, "goldLoot": goldLoot,
             "grainLoot": grainLoot, "lumberLoot": lumberLoot, "stoneLoot": stoneLoot, "ironLoot": ironLoot, "wallDamage": wallDamage
         };
 
         //TODO return immediately
-        const result = await attackObject.createAttackLog(client, data);
+        const result = await createAttackLog(data);
 
         return result;
 
@@ -574,12 +558,12 @@ attackObject = {
         return Math.round(damage = damage * spyGuildBonus);
 
     },
-    spyFunc: async function (client, attacker, defender) {
+    spyFunc: async function (attacker, defender) {
 
-        const attackingArmy = await getArmyByEmail(client, attacker.email);
-        const defendingArmy = await getArmyByEmail(client, defender.email);
-        const attackingArmory = await getArmoryByEmail(client, attacker.email);
-        const defendingArmory = await getArmoryByEmail(client, defender.email);
+        const attackingArmy = await getArmyByEmail(attacker.email);
+        const defendingArmy = await getArmyByEmail(defender.email);
+        const attackingArmory = await getArmoryByEmail(attacker.email);
+        const defendingArmory = await getArmoryByEmail(defender.email);
         const defenderArmyDefense = attackObject.calculateDefense(defender, defendingArmy, defendingArmory);
 
         const attackingSpyValue = attackObject.calcSpyAttack(attacker, attackingArmy, attackingArmory);
@@ -606,13 +590,13 @@ attackObject = {
         }
 
         const data = {
-            "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "listedAttacker": attackerName, "defender": defender.username, 
-            "defenses": Math.round(defenderArmyDefense * certaintyModifier), "defenderGrain": Math.round(defender.grain * certaintyModifier), 
+            "_id": new ObjectId(), "time": new Date(), "attacker": attacker.username, "listedAttacker": attackerName, "defender": defender.username,
+            "defenses": Math.round(defenderArmyDefense * certaintyModifier), "defenderGrain": Math.round(defender.grain * certaintyModifier),
             "defenderLumber": Math.round(defender.lumber * certaintyModifier), "defenderStone": Math.round(defender.stone * certaintyModifier),
             "defenderIron": Math.round(defender.iron * certaintyModifier), "defenderGold": Math.round(defender.gold * certaintyModifier), "levelOfCertainty": levelOfCertainty
         };
 
-        return await attackObject.createSpyLog(client, data);
+        return await createSpyLog(data);
 
     }
 };

@@ -1,8 +1,6 @@
 const { setDatabaseValue, getUserByUsername, incDatabaseValue, getUserById, hasTrades, getUserTrades, deleteTrade, addMessage, incomeCalc } = require("../modules/database.js");
 
-const baseGrainIncome = 7, baseLumberIncome = 6, baseStoneIncome = 3, baseIronIncome = 2, baseGoldIncome = 1;
-
-
+const baseGrainIncome = 7, baseLumberIncome = 6, baseStoneIncome = 3, baseIronIncome = 2, baseGoldIncome = 1;//get metoder och spara allt på ett ställe
 
 async function removeResources(username, gold, lumber, stone, iron, grain, recruits, horses) {
     const user = await getUserByUsername(username);
@@ -18,7 +16,7 @@ async function removeResources(username, gold, lumber, stone, iron, grain, recru
 
 
     await setDatabaseValue(username, updatedUser);
-    //await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
+    //await players.updateOne({ username: username }, { $set: updatedUser });
 }
 
 async function checkIfCanAfford(username, goldCost, lumberCost, stoneCost, ironCost, grainCost, recruitCost, horseCost) {
@@ -33,8 +31,8 @@ async function checkIfCanAfford(username, goldCost, lumberCost, stoneCost, ironC
     return false;
 }
 
-async function stealResources(client, username, gold, lumber, stone, iron, grain) {
-    const user = await getUserByUsername(client, username);
+async function stealResources(username, gold, lumber, stone, iron, grain) {
+    const user = await getUserByUsername(username);
 
     const newGold = Math.round(user.gold + gold);
     const newLumber = Math.round(user.lumber + lumber);
@@ -44,12 +42,13 @@ async function stealResources(client, username, gold, lumber, stone, iron, grain
 
     const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
 
-    await client.db("gamedb").collection("players").updateOne({ "username": username }, { $set: updatedUser });//flytta till db module
+    await setDatabaseValue(username, updatedUser)
+    //await players.updateOne({ "username": username }, { $set: updatedUser });//flytta till db module
     //return something to check against with unit test? return true/false? return new value?
 }
 
-async function loseResources(client, username, gold, lumber, stone, iron, grain) {
-    const user = await getUserByUsername(client, username);
+async function loseResources(username, gold, lumber, stone, iron, grain) {
+    const user = await getUserByUsername(username);
 
     const newGold = user.gold - gold;
     const newLumber = user.lumber - lumber;
@@ -58,7 +57,8 @@ async function loseResources(client, username, gold, lumber, stone, iron, grain)
     const newGrain = user.grain - grain;
 
     const updatedUser = { grain: newGrain, lumber: newLumber, stone: newStone, gold: newGold, iron: newIron };
-    await client.db("gamedb").collection("players").updateOne({ username: username }, { $set: updatedUser });
+    //await players.updateOne({ username: username }, { $set: updatedUser });
+    await setDatabaseValue(username, updatedUser)
 }
 
 function getIncome(user, requestedIncome) {
