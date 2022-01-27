@@ -15,6 +15,7 @@ require("dotenv").config();
 const { auth, requiresAuth } = require('express-openid-connect');
 const ejs = require('ejs');
 const e = require("express");
+app.use('/static', express.static('static'));
 app.set('view engine', 'ejs');
 var compression = require('compression');
 // Use Gzip compression
@@ -111,7 +112,6 @@ async function main() {
     }
 }
 
-app.use('/static', express.static('static'));
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
