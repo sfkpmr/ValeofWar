@@ -12,20 +12,20 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "auth0": "^2.40.0",
-    "compression": "^1.7.4",
-    "dotenv": "^16.0.0",
-    "ejs": "^3.1.6",
-    "express": "^4.17.3",
-    "express-openid-connect": "^2.7.2",
-    "express-validator": "^6.14.0",
-    "https": "^1.0.0",
-    "mongodb": "^4.4.1",
-    "socket.io": "^4.4.1"
+    "auth0": "~2.40.0",
+    "compression": "~1.7.4",
+    "dotenv": "~16.0.0",
+    "ejs": "~3.1.6",
+    "express": "~4.17.3",
+    "express-openid-connect": "~2.7.2",
+    "express-validator": "~6.14.0",
+    "https": "~1.0.0",
+    "mongodb": "~4.4.1",
+    "socket.io": "~4.4.1"
   },
   "devDependencies": {
-    "@shelf/jest-mongodb": "^2.2.1",
-    "jest": "^27.5.1",
-    "nodemon": "^2.0.15"
+    "@shelf/jest-mongodb": "~2.2.1",
+    "jest": "~27.5.1",
+    "nodemon": "~2.0.15"
   }
 }
