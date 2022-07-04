@@ -24,7 +24,7 @@
     "socket.io": "~4.4.1"
   },
   "devDependencies": {
-    "@shelf/jest-mongodb": "~3.0.1",
+    "@shelf/jest-mongodb": "~3.0.2",
     "jest": "~28.1.1"
   }
 }
